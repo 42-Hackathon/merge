@@ -7,7 +7,6 @@ import {
 import './index.css';
 import Root from './routes/root';
 import Index from './routes/index';
-import About from './routes/about';
 
 const router = createBrowserRouter([
   {
@@ -18,10 +17,7 @@ const router = createBrowserRouter([
         index: true,
         element: <Index />,
       },
-      {
-        path: "about",
-        element: <About />,
-      },
+      // ..
     ],
   },
 ]);
