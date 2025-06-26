@@ -1,17 +1,28 @@
-export type ContentType = 'file' | 'directory' | 'sticky-note' | 'canvas' | 'link' | 'image';
+export type ContentType = 'text' | 'image' | 'link' | 'video' | 'file' | 'directory' | 'sticky-note' | 'canvas';
 
 export interface ContentItem {
   id: string;
-  name: string;
-  title?: string;
+  title: string;
+  content: string;
   type: ContentType;
-  parentId: string | null;
-  content?: string;
-  children?: ContentItem[];
-  url?: string;
+  stage: string;
+  tags: string[];
+  folderId: string;
+  createdAt: string;
+  updatedAt: string;
   metadata?: {
-    width?: number;
-    height?: number;
-    description?: string;
+    author?: string;
+    dimensions?: { width: number; height: number };
+    fileSize?: number;
+    url?: string;
+    duration?: number;
+    resolution?: string;
   };
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  color: string;
+  itemCount: number;
 } 
