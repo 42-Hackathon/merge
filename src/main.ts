@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, screen } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 
@@ -10,10 +10,31 @@ if (started) {
 }
 
 const createWindow = () => {
+  // 1. 메인 디스플레이의 정보를 가져와.
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+
+  // Eagle과 유사한 시네마틱 비율 (1.85:1)을 목표로 설정
+  const targetAspectRatio = 1.85;
+
+  let newWidth: number;
+  let newHeight: number;
+
+  // 화면 비율에 따라 창 크기 계산 방식을 결정
+  if ((width / height) > targetAspectRatio) {
+    // 화면이 목표 비율보다 넓으면, 높이를 기준으로 너비를 계산
+    newHeight = Math.round(height * 0.85);
+    newWidth = Math.round(newHeight * targetAspectRatio);
+  } else {
+    // 화면이 목표 비율보다 좁으면, 너비를 기준으로 높이를 계산
+    newWidth = Math.round(width * 0.85);
+    newHeight = Math.round(newWidth / targetAspectRatio);
+  }
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: newWidth,
+    height: newHeight,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },

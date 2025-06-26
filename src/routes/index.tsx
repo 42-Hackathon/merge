@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/header";
 import { EnhancedSidebar } from "@/components/layout/enhanced-sidebar";
@@ -34,7 +34,7 @@ export default function Index() {
 
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(100);
+  const [zoomLevelForDisplay, setZoomLevelForDisplay] = useState(100);
   const [cursorPosition, setCursorPosition] = useState({ lineNumber: 1, column: 1 });
   const [isCollabActive, setIsCollabActive] = useState(false);
 
@@ -45,12 +45,22 @@ export default function Index() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [memoMode, setMemoMode] = useState<'memo' | 'chat'>('memo');
 
+  useEffect(() => {
+    // webFrame zoom factor is 1 for 100%, 1.5 for 150% etc.
+    const currentZoom = window.electron.getZoomFactor() * 100;
+    setZoomLevelForDisplay(Math.round(currentZoom));
+  }, []);
+
   const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 5, 200));
+    const newZoomFactor = Math.min(window.electron.getZoomFactor() + 0.05, 2);
+    window.electron.setZoomFactor(newZoomFactor);
+    setZoomLevelForDisplay(Math.round(newZoomFactor * 100));
   };
 
   const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 5, 50));
+    const newZoomFactor = Math.max(window.electron.getZoomFactor() - 0.05, 0.5);
+    window.electron.setZoomFactor(newZoomFactor);
+    setZoomLevelForDisplay(Math.round(newZoomFactor * 100));
   };
 
   const handleCollabToggle = () => {
@@ -77,7 +87,7 @@ export default function Index() {
                 electronAPI.showStickyNote();
             }
           }}
-          zoomLevel={zoomLevel}
+          zoomLevel={zoomLevelForDisplay}
           openTabs={openTabs}
           activeTabId={activeTabId}
           onTabChange={handleTabChange}
@@ -96,7 +106,7 @@ export default function Index() {
             onToggleCollapse={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
               isCollabActive={isCollabActive}
               onCollabToggle={handleCollabToggle}
-              zoomLevel={zoomLevel}
+              zoomLevel={zoomLevelForDisplay}
               onZoomIn={handleZoomIn}
               onZoomOut={handleZoomOut}
               cursorPosition={cursorPosition}
@@ -116,7 +126,7 @@ export default function Index() {
             onItemSelect={handleItemSelect}
               selectedItems={[]}
             folderName={getFolderName(selectedFolder)}
-              zoomLevel={zoomLevel}
+              zoomLevel={zoomLevelForDisplay}
           />
           )}
 
@@ -126,7 +136,6 @@ export default function Index() {
               onClose={() => setIsRightSidebarOpen(false)}
               mode={memoMode}
               onModeChange={setMemoMode}
-              zoomLevel={zoomLevel}
               onCursorChange={(p) => setCursorPosition({lineNumber: p.line, column: p.column})}
             />
           ) : (
