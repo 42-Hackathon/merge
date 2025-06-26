@@ -1,16 +1,25 @@
 import { useState, useRef } from "react";
-import Editor, { OnMount } from "@monaco-editor/react";
-import { useTheme } from "next-themes";
+import { OnMount } from "@monaco-editor/react";
+import Editor from "@monaco-editor/react"; // Re-enable editor
 import { 
   FileText,
   PanelRightClose,
   MessageCircle,
   Image,
   Link as LinkIcon,
-  X
+  X,
+  Plus,
+  GripVertical
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ContentItem } from "@/types/content";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from "@/components/ui/select";
 
 interface EnhancedMemoSidebarProps {
   isOpen: boolean;
@@ -48,9 +57,8 @@ export function EnhancedMemoSidebar({
   
   const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
-  const { resolvedTheme } = useTheme();
 
-  const handleEditorMount: OnMount = (editor, monaco) => {
+  const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
     
     editor.onDidChangeCursorPosition((e) => {
@@ -306,6 +314,9 @@ export function EnhancedMemoSidebar({
     }
   };
 
+  // A simple helper to avoid type errors on possibly undefined strings
+  const ensureString = (value: string | undefined): string => value || "";
+
   if (!isOpen) {
     return null;
   }
@@ -366,12 +377,21 @@ export function EnhancedMemoSidebar({
               {/* Editor Area - 박스 제거 */}
               <div className="flex-1 overflow-hidden relative p-3">
                 <Editor
-                  language={editorLanguage}
-                  value={editorContent}
-                  onChange={(value) => setEditorContent(value || "")}
-                  options={editorOptions}
-                  onMount={handleEditorMount}
-                  theme={resolvedTheme === 'dark' ? 'vs-dark' : 'light'}
+                  height="calc(100% - 200px)"
+                  language="markdown"
+                  theme="vs-dark"
+                  defaultValue="// 여기에 메모를 작성하세요..."
+                  onMount={handleEditorDidMount}
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    wordWrap: 'on',
+                    lineNumbers: 'off',
+                    glyphMargin: false,
+                    folding: false,
+                    lineDecorationsWidth: 0,
+                    lineNumbersMinChars: 0,
+                  }}
                 />
               </div>
               
