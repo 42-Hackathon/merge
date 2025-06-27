@@ -254,8 +254,8 @@ export function EnhancedSidebar({
               <Button variant="ghost" size="icon" onClick={onCollabToggle} className={`text-white/60 hover:text-white hover:bg-white/10 h-6 w-6 ${isCollabActive ? 'text-blue-400' : ''}`} title="Collaboration Mode">
                 <Users className="h-4 w-4" />
               </Button>
-            </div>
-
+                </div>
+                
             <div className="flex items-center space-x-2">
               <Button variant="ghost" size="icon" onClick={onZoomOut} className="text-white/60 hover:text-white hover:bg-white/10 h-6 w-6" title="Zoom Out">
                 <ZoomOut className="h-4 w-4" />

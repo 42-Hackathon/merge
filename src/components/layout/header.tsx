@@ -61,7 +61,7 @@ export function Header({
                 className="font-semibold text-zinc-800 dark:text-zinc-200"
                 style={{ fontSize: `${scale(14)}px`}}
               >
-                FLux
+                Flux
               </span>
             </div>
           </div>

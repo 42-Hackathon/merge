@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Flux Collector",
+  "description": "웹 콘텐츠를 Flux 애플리케이션으로 손쉽게 수집합니다.",
+  "version": "0.1.0",
+  "action": {
+    "default_icon": {
+      "16": "assets/icons/icon16.jpeg",
+      "32": "assets/icons/icon32.jpeg",
+      "48": "assets/icons/icon48.jpeg",
+      "128": "assets/icons/icon128.jpeg"
+    },
+    "default_title": "현재 페이지 수집"
+  },
+  "icons": {
+    "16": "assets/icons/icon16.jpeg",
+    "32": "assets/icons/icon32.jpeg",
+    "48": "assets/icons/icon48.jpeg",
+    "128": "assets/icons/icon128.jpeg"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}
+ 

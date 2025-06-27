@@ -10,11 +10,13 @@ export interface ContentItem {
   folderId: string;
   createdAt: string;
   updatedAt: string;
+  summary?: string;
   metadata?: {
     author?: string;
     dimensions?: { width: number; height: number };
     fileSize?: number;
     url?: string;
+    imageUrl?: string;
     duration?: number;
     resolution?: string;
   };
