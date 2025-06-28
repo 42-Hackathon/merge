@@ -1,475 +1,757 @@
-import { useState, useRef } from "react";
-import { OnMount } from "@monaco-editor/react";
-import Editor from "@monaco-editor/react"; // Re-enable editor
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { 
-  FileText,
-  PanelRightClose,
-  MessageCircle,
-  Image,
-  Link as LinkIcon,
-  X,
-  Plus,
-  GripVertical
+  FileText, PanelRightClose, MessageCircle, Image, Link as LinkIcon, X, Hash, Type, Sparkles, ChevronUp, Zap, GripVertical, Save, Check, AlertCircle, Plus, Trash2, Edit3, List, Calendar, Clock, Bot, Film, Music, Camera, Clipboard
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
 import { ContentItem } from "@/types/content";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem
-} from "@/components/ui/select";
+import { AnimatePresence, motion } from "framer-motion";
+import { TiptapEditor, TiptapEditorHandle } from "./tiptap-editor";
+import { v4 as uuidv4 } from 'uuid';
+import { Separator } from "../ui/separator";
+import { toast } from "sonner";
+
+type ContentType = 'text' | 'image' | 'link' | 'video' | 'audio' | 'clipboard' | 'screenshot' | 'other';
+
+const SIDEBAR_WIDTH_STORAGE_KEY = 'enhanced-memo-sidebar-width';
+const DEFAULT_SIDEBAR_WIDTH = 400;
+const MIN_SIDEBAR_WIDTH = 320;
+const MAX_VISIBLE_PILLS = 5;
 
 interface EnhancedMemoSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'memo' | 'chat';
-  onModeChange: (mode: 'memo' | 'chat') => void;
-  zoomLevel: number;
-  onCursorChange: (position: { line: number; column: number }) => void;
+  mode: 'memo' | 'chat' | 'view';
+  onModeChange: (mode: 'memo' | 'chat' | 'view') => void;
+  width?: number;
+  onWidthChange?: (width: number) => void;
+  maxWidth?: number;
 }
 
-interface ContentPill {
+export interface ContentPill {
   id: string;
-  type: 'text' | 'image' | 'link';
+  type: ContentType;
   title: string;
   content: string;
-  metadata?: {
-    url?: string;
-    domain?: string;
-    favicon?: string;
-  };
+  metadata?: { url?: string; domain?: string; favicon?: string; };
+}
+
+interface SavedMemo {
+  id: string;
+  title: string;
+  content: string; // This will now be HTML
+  language: 'html';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export function EnhancedMemoSidebar({ 
-  isOpen, 
-  onClose, 
-  mode, 
-  onModeChange,
-  zoomLevel,
-  onCursorChange
+  isOpen, onClose, mode, onModeChange,
+  width: controlledWidth, onWidthChange: setControlledWidth, maxWidth = 1200
 }: EnhancedMemoSidebarProps) {
-  const [editorContent, setEditorContent] = useState("# 새 메모\n\n여기에 내용을 작성하세요...");
-  const [editorLanguage, setEditorLanguage] = useState("markdown");
+  const [internalWidth, setInternalWidth] = useState(() => {
+    if (typeof window === 'undefined') return DEFAULT_SIDEBAR_WIDTH;
+    const savedWidth = localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY);
+    return savedWidth ? Math.max(MIN_SIDEBAR_WIDTH, parseInt(savedWidth, 10)) : DEFAULT_SIDEBAR_WIDTH;
+  });
+
+  const width = controlledWidth ?? internalWidth;
+  const setWidth = setControlledWidth ?? setInternalWidth;
+
+  const [editorContent, setEditorContent] = useState("<p># 새 메모</p><p>여기에 내용을 작성하세요...</p>");
   const [isDragging, setIsDragging] = useState(false);
   const [contentPills, setContentPills] = useState<ContentPill[]>([]);
+  const [showMemoList, setShowMemoList] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [savedMemos, setSavedMemos] = useState<SavedMemo[]>([]);
+  const [currentMemoId, setCurrentMemoId] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
+  const [isPillsScrollable, setIsPillsScrollable] = useState(false);
+  const [isPillListVisible, setIsPillListVisible] = useState(false);
+  const [isPillOverflowing, setIsPillOverflowing] = useState(false);
+  const [isEditorDragOver, setIsEditorDragOver] = useState(false);
+  const [isPillBarDragOver, setIsPillBarDragOver] = useState(false);
   
-  const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
+  const tiptapEditorRef = useRef<TiptapEditorHandle>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
+  const pillsContainerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const pillListPopupRef = useRef<HTMLDivElement>(null);
+  const pillOverflowButtonRef = useRef<HTMLDivElement>(null);
+  const { resolvedTheme } = useTheme();
 
-  const handleEditorDidMount: OnMount = (editor, monaco) => {
-    editorRef.current = editor;
-    
-    editor.onDidChangeCursorPosition((e) => {
-      onCursorChange({
-        line: e.position.lineNumber,
-        column: e.position.column,
-      });
-    });
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
 
-    const editorDomNode = editor.getDomNode();
-    if (editorDomNode) {
-      editorDomNode.addEventListener('dragover', (e) => {
-        e.preventDefault(); // Allow drop
-      });
-
-      editorDomNode.addEventListener('drop', (e) => {
-        e.preventDefault();
-        
-        const data = e.dataTransfer?.getData('application/content-item');
-        if (!data) return;
-
-        try {
-          const item: ContentItem = JSON.parse(data);
-          const target = editor.getTargetAtClientPoint(e.clientX, e.clientY);
-          
-          if (target?.position) {
-            const position = target.position;
-            const pillText = `[[${item.title}]]`;
-            
-            editor.executeEdits('dnd-insert', [{
-              range: new monaco.Range(
-                position.lineNumber,
-                position.column,
-                position.lineNumber,
-                position.column
-              ),
-              text: pillText,
-              forceMoveMarkers: true,
-            }]);
-          }
-        } catch (error) {
-          console.error("Failed to parse dropped item:", error);
+    const checkOverflow = () => {
+        const isOverflowing = scrollContainer.scrollWidth > scrollContainer.clientWidth;
+        if (isOverflowing !== isPillOverflowing) {
+          setIsPillOverflowing(isOverflowing);
         }
-      });
-    }
-  };
+    };
+    
+    const resizeObserver = new ResizeObserver(checkOverflow);
+    resizeObserver.observe(scrollContainer);
+    
+    const timeoutId = setTimeout(checkOverflow, 100);
 
-  // Monaco Editor 설정
-  const editorOptions = {
-    minimap: { enabled: false },
-    fontSize: 13 * (zoomLevel / 100),
-    lineHeight: 20 * (zoomLevel / 100),
-    padding: { top: 16, bottom: 16 },
-    scrollBeyondLastLine: false,
-    wordWrap: 'on' as const,
-    automaticLayout: true,
-    scrollbar: {
-      vertical: 'hidden' as const,
-      horizontal: 'auto' as const
-    },
-    overviewRulerLanes: 0,
-    hideCursorInOverviewRuler: true,
-    overviewRulerBorder: false,
-    renderLineHighlight: 'none' as const,
-    selectionHighlight: false,
-    occurrencesHighlight: 'off' as const,
-  };
+    return () => {
+      clearTimeout(timeoutId);
+      resizeObserver.disconnect();
+    };
+  }, [contentPills, width, isPillOverflowing]);
 
-  // 드래그 앤 드롭 처리
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!dropZoneRef.current?.contains(e.relatedTarget as Node)) {
-      setIsDragging(false);
-    }
-  };
-
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    try {
-      // ContentItem 드래그 처리
-      const contentItemData = e.dataTransfer.getData('application/content-item');
-      if (contentItemData) {
-        const contentItem: ContentItem = JSON.parse(contentItemData);
-        await handleContentItemDrop(contentItem);
-        return;
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        pillListPopupRef.current &&
+        !pillListPopupRef.current.contains(event.target as Node) &&
+        pillOverflowButtonRef.current &&
+        !pillOverflowButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsPillListVisible(false);
       }
-
-      // 텍스트 데이터 처리
-      const textData = e.dataTransfer.getData('text/plain');
-      
-      // URL 처리
-      if (textData && (textData.startsWith('http://') || textData.startsWith('https://'))) {
-        await handleUrlDrop(textData);
-        return;
-      }
-
-      // 일반 텍스트 처리
-      if (textData) {
-        addContentPill({
-          id: Date.now().toString(),
-          type: 'text',
-          title: textData.slice(0, 30) + (textData.length > 30 ? '...' : ''),
-          content: textData
-        });
-      }
-
-      // 파일 처리
-      const files = Array.from(e.dataTransfer.files);
-      if (files.length > 0) {
-        await handleFilesDrop(files);
-      }
-    } catch {
-      console.error('Drop handling failed');
-    }
-  };
-
-  // ContentItem 드롭 처리
-  const handleContentItemDrop = async (item: ContentItem) => {
-    const pill: ContentPill = {
-      id: Date.now().toString(),
-      type: item.type === 'link' ? 'link' : item.type === 'image' ? 'image' : 'text',
-      title: item.title,
-      content: item.content,
-      metadata: item.type === 'link' ? {
-        url: item.metadata?.url || item.content,
-        domain: item.metadata?.url ? new URL(item.metadata.url).hostname : undefined
-      } : undefined
     };
 
-    addContentPill(pill);
-  };
-
-  // URL 드롭 처리
-  const handleUrlDrop = async (url: string) => {
-    try {
-      const domain = new URL(url).hostname;
-      const pill: ContentPill = {
-        id: Date.now().toString(),
-        type: 'link',
-        title: `Link from ${domain}`,
-        content: url,
-        metadata: {
-          url,
-          domain,
-          favicon: `https://www.google.com/s2/favicons?domain=${domain}&sz=16`
-        }
-      };
-      
-      addContentPill(pill);
-    } catch {
-      // URL 파싱 실패시 일반 텍스트로 처리
-      addContentPill({
-        id: Date.now().toString(),
-        type: 'text',
-        title: url.slice(0, 30) + '...',
-        content: url
-      });
+    if (isPillListVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
     }
-  };
 
-  // 파일 드롭 처리
-  const handleFilesDrop = async (files: File[]) => {
-    for (const file of files) {
-      if (file.type.startsWith('image/')) {
-        const imageUrl = URL.createObjectURL(file);
-        addContentPill({
-          id: Date.now().toString(),
-          type: 'image',
-          title: file.name,
-          content: imageUrl
-        });
-      } else {
-        addContentPill({
-          id: Date.now().toString(),
-          type: 'text',
-          title: file.name,
-          content: `File: ${file.name} (${file.type})`
-        });
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isPillListVisible]);
+
+  const extractTitle = useCallback((htmlContent: string): string => {
+    if (!htmlContent?.trim()) return '제목 없음';
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    
+    let firstLine = '';
+    const treeWalker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null);
+    while (treeWalker.nextNode()) {
+      const textNode = treeWalker.currentNode as Text;
+      const text = textNode.textContent?.trim();
+      if (text) {
+        firstLine = text;
+        break;
       }
     }
+    
+    if (!firstLine) return '제목 없음';
+    return firstLine.length > 50 ? firstLine.substring(0, 50) + '...' : firstLine;
+  }, []);
+
+  const saveMemo = useCallback((isManualSave = true) => {
+    if (saveStatus === 'saving') return;
+    if (isManualSave) setSaveStatus('saving');
+
+    const title = extractTitle(editorContent) || '제목 없음';
+      const now = new Date().toISOString();
+      
+    let newMemos: SavedMemo[];
+    let newMemoId = currentMemoId;
+      
+      if (currentMemoId) {
+      newMemos = savedMemos.map(memo =>
+        memo.id === currentMemoId
+          ? { ...memo, title, content: editorContent, updatedAt: now }
+          : memo
+      );
+      } else {
+      const newMemo: SavedMemo = {
+        id: uuidv4(),
+          title,
+          content: editorContent,
+          createdAt: now,
+        updatedAt: now,
+        language: 'html'
+      };
+      newMemos = [...savedMemos, newMemo];
+      newMemoId = newMemo.id;
+    }
+
+    setSavedMemos(newMemos);
+    setCurrentMemoId(newMemoId);
+
+    if (isManualSave) {
+      toast("메모 저장됨", {
+        description: `"${title}"(이)가 저장되었습니다.`,
+      });
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 2000);
+      }
+  }, [editorContent, currentMemoId, savedMemos, saveStatus, extractTitle]);
+  
+  const loadMemo = useCallback((memoId: string) => {
+    const memoToLoad = savedMemos.find(m => m.id === memoId);
+    if (memoToLoad) {
+      setEditorContent(memoToLoad.content);
+      setCurrentMemoId(memoToLoad.id);
+      setSaveStatus('idle');
+      setShowMemoList(false);
+    }
+  }, [savedMemos]);
+  
+  const createNewMemo = useCallback(() => {
+    tiptapEditorRef.current?.editor?.commands.setContent("<p># 새 메모</p><p>여기에 내용을 작성하세요...</p>");
+    setCurrentMemoId(null);
+    setSaveStatus('idle');
+    setShowMemoList(false);
+    setContentPills([]);
+  }, []);
+  
+  const deleteMemo = (memoIdToDelete: string) => {
+    setSavedMemos(prev => prev.filter(m => m.id !== memoIdToDelete));
+    if (currentMemoId === memoIdToDelete) {
+        createNewMemo();
+      }
+    toast("메모 삭제됨", {
+      description: "선택한 메모가 삭제되었습니다.",
+    });
   };
 
-  // 콘텐츠 pill 추가
+  const PillIcon = ({ type }: { type: ContentType }) => {
+    switch (type) {
+      case 'image': return <Image className="h-4 w-4" />;
+      case 'link': return <LinkIcon className="h-4 w-4" />;
+      case 'video': return <Film className="h-4 w-4" />;
+      case 'audio': return <Music className="h-4 w-4" />;
+      case 'clipboard': return <Clipboard className="h-4 w-4" />;
+      case 'screenshot': return <Camera className="h-4 w-4" />;
+      case 'text':
+      default:
+        return <FileText className="h-4 w-4" />;
+    }
+  };
+
+  const getPillStyleClass = (type: ContentType) => {
+    switch (type) {
+      case 'link':
+        return `border-blue-500/80 text-blue-300`;
+      case 'image':
+        return `border-purple-500/80 text-purple-300`;
+      case 'video':
+        return `border-red-500/80 text-red-300`;
+      case 'audio':
+        return `border-orange-500/80 text-orange-300`;
+      case 'clipboard':
+        return `border-yellow-500/80 text-yellow-300`;
+      case 'screenshot':
+        return `border-cyan-500/80 text-cyan-300`;
+      case 'text':
+        return `border-green-500/80 text-green-300`;
+      case 'other':
+      default:
+        return `border-gray-500/80 text-gray-300`;
+    }
+  };
+
   const addContentPill = (pill: ContentPill) => {
     setContentPills(prev => [...prev, pill]);
   };
 
-  // 콘텐츠 pill 제거
-  const removeContentPill = (id: string) => {
-    setContentPills(prev => prev.filter(pill => pill.id !== id));
+  const insertPillIntoEditor = (pill: ContentPill, position?: number) => {
+    const editor = tiptapEditorRef.current?.editor;
+    if (!editor) return;
+
+    let transaction = editor.chain();
+    if (position !== undefined) {
+      const docSize = editor.state.doc.content.size;
+      const safePosition = Math.max(0, Math.min(position, docSize));
+      transaction = transaction.setTextSelection(safePosition);
+    }
+    transaction.setPill(pill).focus().run();
   };
 
-  // pill을 에디터에 삽입
-  const insertPillIntoEditor = (pill: ContentPill) => {
-    let insertText = "";
-
-    switch (pill.type) {
-      case 'text':
-        insertText = `${pill.content}\n\n`;
-        break;
-      case 'link':
-        insertText = `[${pill.title}](${pill.content})\n\n`;
-        break;
-      case 'image':
-        insertText = `![${pill.title}](${pill.content})\n\n`;
-        break;
+  const handlePathDrop = (filePath: string, position?: number) => {
+    let cleanPath = filePath.trim();
+    if (cleanPath.startsWith('file://')) {
+        try {
+            cleanPath = new URL(cleanPath).pathname;            
+        } catch(e) {
+            console.error("Failed to parse file URI:", cleanPath, e);
+            return false;
+        }
     }
 
-    if (editorRef.current) {
-      const editor = editorRef.current;
-      const position = editor.getPosition();
-      if (!position) return;
+    if (!(window as any).electron?.fs.existsSync(cleanPath)) {
+      return false; 
+    }
 
-      const range = {
-        startLineNumber: position.lineNumber,
-        startColumn: position.column,
-        endLineNumber: position.lineNumber,
-        endColumn: position.column
+    const ext = (window as any).electron.path.extname(cleanPath).toLowerCase();
+    const filename = (window as any).electron.path.basename(cleanPath);
+
+    let fileType: ContentType = 'other';
+    if (['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'].includes(ext)) {
+      fileType = 'image';
+    } else if (['.mp4', '.mov', '.avi', '.webm'].includes(ext)) {
+      fileType = 'video';
+    } else if (['.mp3', '.wav', '.ogg', '.m4a'].includes(ext)) {
+      fileType = 'audio';
+    } else if (['.txt', '.md', '.pdf', '.doc', '.docx'].includes(ext)) {
+      fileType = 'text';
+    }
+    
+    const newPill: ContentPill = {
+      id: uuidv4(),
+      type: fileType,
+      title: filename,
+      content: `file://${cleanPath}`,
+    };
+
+    addContentPill(newPill);
+    if (position !== undefined) {
+      insertPillIntoEditor(newPill, position);
+    }
+    return true;
+  };
+
+  const handleTextDrop = async (textData: string, position?: number) => {
+    try {
+      const urlObject = new URL(textData);
+      const newPill: ContentPill = {
+        id: uuidv4(),
+        type: 'link',
+        title: textData,
+        content: textData,
+        metadata: { url: textData, domain: urlObject.hostname },
       };
+      addContentPill(newPill);
       
-      editor.executeEdits('insert-content', [{
-        range,
-        text: insertText
-      }]);
-      
-      editor.focus();
-    } else {
-      setEditorContent(prev => prev + insertText);
+      if (position !== undefined) {
+        insertPillIntoEditor(newPill, position);
+      }
+    } catch (error) {
+      if (position !== undefined) {
+        const editor = tiptapEditorRef.current?.editor;
+        if (editor) {
+          editor.chain().focus().insertContentAt(position, textData).run();
+        }
+      } else {
+        const newPill: ContentPill = {
+          id: uuidv4(),
+          type: 'text',
+          title: textData.length > 40 ? `${textData.substring(0, 37)}...` : textData,
+          content: textData,
+        };
+        addContentPill(newPill);
+      }
+    }
+  };
+  
+  const handleFilesDrop = async (files: File[], position?: number) => {
+    for (const file of files) {
+        let fileType: ContentType = 'other';
+        if (file.type.startsWith('image/')) {
+          fileType = 'image';
+        } else if (file.type.startsWith('video/')) {
+          fileType = 'video';
+        } else if (file.type.startsWith('audio/')) {
+          fileType = 'audio';
+        } else if (file.type === 'application/pdf' || file.type.startsWith('text/')) {
+          fileType = 'text';
+        }
+
+        const newPill: ContentPill = {
+            id: uuidv4(),
+            type: fileType,
+            title: file.name,
+            content: `file:${(file as any).path || file.name}`,
+        };
+        addContentPill(newPill);
+
+        if (position !== undefined) {
+            insertPillIntoEditor(newPill, position);
+        }
     }
   };
 
-  // pill 아이콘 가져오기
-  const PillIcon = ({ type }: { type: string }) => {
-    switch (type) {
-      case 'text':
-        return <FileText className="h-3.5 w-3.5" />;
-      case 'image':
-        return <Image className="h-3.5 w-3.5" />;
-      case 'link':
-        return <LinkIcon className="h-3.5 w-3.5" />;
-      default:
-        return <FileText className="h-3.5 w-3.5" />;
+  const handleEditorDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsEditorDragOver(false);
+
+    const editor = tiptapEditorRef.current?.editor;
+    if (!editor || !e.dataTransfer) return;
+
+    const position = editor.view.posAtCoords({ left: e.clientX, top: e.clientY })?.pos ?? editor.state.doc.content.size;
+    
+    // 1. Handle content items dragged from within the app
+    const contentItemData = e.dataTransfer.getData('application/content-item');
+    if (contentItemData) {
+        try {
+            const item = JSON.parse(contentItemData);
+            const newPill: ContentPill = {
+                id: item.id || uuidv4(),
+                type: item.type,
+                title: item.title,
+                content: item.content,
+                metadata: item.metadata
+            };
+            addContentPill(newPill);
+            insertPillIntoEditor(newPill, position);
+        return;
+        } catch (err) { console.error("Error parsing content-item data:", err) }
+    }
+
+    // 2. Handle pills being dragged from the bar
+    const pillData = e.dataTransfer.getData('application/x-content-pill');
+    if (pillData) {
+        try {
+            const pill = JSON.parse(pillData);
+            insertPillIntoEditor(pill, position);
+            return;
+        } catch (err) { console.error("Error parsing pill data:", err) }
+    }
+
+    // 3. Handle actual files from OS
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+        handleFilesDrop(files, position);
+        return;
+      }
+
+    // 4. Handle file paths from Electron (fallback)
+    const plainText = e.dataTransfer.getData('text/plain');
+    if (plainText && handlePathDrop(plainText, position)) {
+        return;
+      }
+
+    // 5. Handle URLs or plain text as the last resort
+    const url = e.dataTransfer.getData('text/uri-list');
+    if (url) {
+        handleTextDrop(url, position);
+        return;
+      }
+    if (plainText) {
+        handleTextDrop(plainText, position);
     }
   };
 
-  // A simple helper to avoid type errors on possibly undefined strings
-  const ensureString = (value: string | undefined): string => value || "";
+  const handlePillBarDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    setIsPillBarDragOver(false);
 
-  if (!isOpen) {
-    return null;
-  }
+    if (!e.dataTransfer) return;
+
+    const contentItemData = e.dataTransfer.getData('application/content-item');
+    if (contentItemData) {
+        try {
+            const item = JSON.parse(contentItemData);
+             const newPill: ContentPill = {
+                id: item.id || uuidv4(),
+                type: item.type,
+              title: item.title,
+              content: item.content,
+                metadata: item.metadata
+            };
+            addContentPill(newPill);
+          return;
+        } catch (err) { console.error("Error parsing content-item data:", err) }
+    }
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+        handleFilesDrop(files);
+      return;
+    }
+    const plainText = e.dataTransfer.getData('text/plain');
+    if (plainText && (window as any).electron && handlePathDrop(plainText)) {
+      return;
+    }
+    const url = e.dataTransfer.getData('text/uri-list');
+    if (url) {
+        handleTextDrop(url);
+      return;
+    }
+    if (plainText) {
+        handleTextDrop(plainText);
+    }
+   };
+
+  const handlePillDragStart = (e: React.DragEvent, pill: ContentPill) => {
+     e.dataTransfer.setData('application/x-content-pill', JSON.stringify(pill));
+   };
+  
+  const handleEditorDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsEditorDragOver(true);
+  };
+
+  const handleEditorDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Check if the mouse is leaving the drop zone entirely
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    setIsEditorDragOver(false);
+  };
+
+  const handlePillBarDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsPillBarDragOver(true);
+  };
+
+  const handlePillBarDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+    setIsPillBarDragOver(false);
+  };
+
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!sidebarRef.current) return;
+    e.preventDefault();
+    document.body.style.cursor = 'col-resize';
+    setIsResizing(true);
+    const startX = e.clientX;
+    const startWidth = width;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const newWidth = startWidth - (moveEvent.clientX - startX);
+      if (newWidth >= MIN_SIDEBAR_WIDTH && newWidth <= maxWidth) {
+        setWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      document.body.style.cursor = '';
+      setIsResizing(false);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      
+      const finalWidth = sidebarRef.current?.getBoundingClientRect().width;
+      if (finalWidth) {
+          localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(finalWidth));
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  }, [width, setWidth, maxWidth]);
+
+  if (!isOpen) return null;
+
+  const renderSaveStatus = () => {
+    switch (saveStatus) {
+      case 'saving': return <span className="text-xs text-yellow-400">저장 중...</span>;
+      case 'saved': return <span className="text-xs text-green-400">저장됨!</span>;
+      default: return null;
+    }
+  };
 
   return (
     <div
-      className="h-full flex flex-col border-l border-white/[0.15] w-72 outline-none shadow-none"
+      ref={sidebarRef}
+      style={{ width: `${width}px` }}
+      className="relative h-full flex flex-col bg-white/10 backdrop-blur-2xl border-l border-white/20 shadow-2xl"
     >
-      <div className="flex-1 flex flex-col relative overflow-hidden">
-        {/* Apple Liquid Glass Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-400/[0.15] via-cyan-300/[0.08] to-blue-600/[0.12]" />
-        <div className="absolute inset-0 backdrop-blur-3xl" />
-        <div className="absolute inset-0 bg-white/[0.03]" />
-          
-        {/* Subtle Glass Reflections */}
-        <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/[0.08] to-transparent" />
-        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gradient-to-tl from-blue-300/[0.05] to-transparent" />
-          
-        <div className="relative z-10 flex-1 flex flex-col">
-            {/* Header */}
-          <div className="relative flex items-center justify-between px-3 py-1.5 border-b border-white/[0.15]">
-            {/* Collapse button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="text-white/80 hover:text-white hover:bg-white/[0.15] h-6 w-6"
-              title="사이드바 닫기"
-            >
-              <PanelRightClose className="h-4 w-4" />
-            </Button>
-            
-            {/* Mode Switch */}
-            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
-                <Button
-                variant={mode === 'memo' ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => onModeChange('memo')}
-                className="h-7 px-3 text-xs"
-                >
-                <FileText className="h-3.5 w-3.5 mr-1.5" />
-                  메모
-                </Button>
-                <Button
-                variant={mode === 'chat' ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => onModeChange('chat')}
-                className="h-7 px-3 text-xs"
-                >
-                <MessageCircle className="h-3.5 w-3.5 mr-1.5" />
-                  AI
-                </Button>
-            </div>
+      <div
+        onMouseDown={handleResizeMouseDown}
+        className="absolute top-0 -left-1 h-full w-2 cursor-col-resize z-20"
+      />
+      {isResizing && <div className="absolute top-0 left-0 h-full w-full bg-blue-500/20 z-10 select-none" />}
+
+      {/* Header */}
+      {showMemoList ? (
+        <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-white/10 h-14">
+            <h3 className="font-semibold text-lg ml-2">저장된 메모</h3>
+            <div className="bg-white/10 text-white/80 text-xs font-medium px-2 py-1 rounded-full">
+                {savedMemos.length}개
           </div>
-
-          {mode === 'memo' && (
-            <div className="flex-1 flex flex-col overflow-hidden">
-              {/* Editor Area - 박스 제거 */}
-              <div className="flex-1 overflow-hidden relative p-3">
-                <Editor
-                  height="calc(100% - 200px)"
-                  language="markdown"
-                  theme="vs-dark"
-                  defaultValue="// 여기에 메모를 작성하세요..."
-                  onMount={handleEditorDidMount}
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    wordWrap: 'on',
-                    lineNumbers: 'off',
-                    glyphMargin: false,
-                    folding: false,
-                    lineDecorationsWidth: 0,
-                    lineNumbersMinChars: 0,
-                  }}
-                />
+            </div>
+      ) : (
+        <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-white/10 h-14">
+            <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={() => onModeChange(mode === 'memo' ? 'chat' : 'memo')}>
+                    <MessageCircle className="h-5 w-5" />
+                </Button>
+                <span className="font-semibold">메모</span>
+        </div>
+            <Button variant="ghost" size="icon" onClick={onClose}>
+                <PanelRightClose className="h-5 w-5" />
+                </Button>
               </div>
-              
-              {/* 구분선과 파일 형식 버튼 */}
-              <div className="flex-shrink-0 border-t border-white/[0.15] px-3 py-2">
-                <div className="flex items-center justify-end">
-                  {/* 파일 형식 전환 버튼 */}
-                  <div className="flex items-center bg-black/30 border border-white/20 rounded-md backdrop-blur-lg p-0.5">
-                    <Button
-                      onClick={() => setEditorLanguage('markdown')}
-                      variant={editorLanguage === 'markdown' ? "secondary" : "ghost"}
-                      className={`h-5 px-2 text-xs transition-all duration-200 ${
-                        editorLanguage === 'markdown' ? 'bg-white/[0.2] text-white shadow-md' : 'text-white/70 hover:text-white'
-                      }`}
-                    >
-                      .md
-                    </Button>
-                    <Button
-                      onClick={() => setEditorLanguage('plaintext')}
-                      variant={editorLanguage === 'plaintext' ? "secondary" : "ghost"}
-                      className={`h-5 px-2 text-xs transition-all duration-200 ${
-                        editorLanguage === 'plaintext' ? 'bg-white/[0.2] text-white shadow-md' : 'text-white/70 hover:text-white'
-                      }`}
-                    >
-                      .txt
-                    </Button>
-                  </div>
-                </div>
-              </div>
+      )}
 
-              {/* Content Pills Drop Zone */}
-              <div
-                ref={dropZoneRef}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`flex-shrink-0 p-3 transition-colors duration-200 relative ${
-                  isDragging ? "bg-white/10" : ""
-                }`}
-              >
-                    <div className="flex flex-wrap gap-2">
-                  {contentPills.map(pill => (
-                    <div key={pill.id} className="group relative">
-                      <div
-                        className="flex items-center bg-white/10 text-white/90 text-xs rounded-full pl-2 pr-2 py-1 backdrop-blur-xl border border-white/20 cursor-pointer hover:bg-white/20"
-                            onClick={() => insertPillIntoEditor(pill)}
-                          >
-                        <PillIcon type={pill.type} />
-                        <span className="truncate max-w-[120px] mx-1">{pill.title}</span>
+      {/* Main Content */}
+      {showMemoList ? (
+        <div className="flex-1 overflow-y-auto p-2">
+          {savedMemos.length > 0 ? (
+            <ScrollArea className="h-full">
+              <ul className="space-y-1 p-1">
+                {savedMemos.slice().reverse().map((memo) => (
+                  <li key={memo.id} onClick={() => loadMemo(memo.id)} className="relative group p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer">
+                    <p className="font-medium truncate text-sm mb-2">{memo.title}</p>
+                    <div className="flex items-center gap-4 text-xs text-white/50">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span>{new Date(memo.updatedAt).toLocaleDateString('ko-KR')}</span>
                       </div>
-                      <button 
-                        onClick={() => removeContentPill(pill.id)}
-                        className="absolute -top-1 -right-1 bg-red-500 rounded-full h-4 w-4 flex items-center justify-center text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-2.5 w-2.5" />
-                      </button>
-                                  </div>
-                  ))}
-                  {contentPills.length === 0 && (
-                     <p className="text-white/50 text-xs text-center w-full py-2">
-                      콘텐츠를 이곳으로 드래그 앤 드롭하세요.
-                    </p>
-                                )}
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>{new Date(memo.updatedAt).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                               </div>
-                            </div>
-          )}
-          
-          {mode === 'chat' && (
-            <div className="flex-1 flex flex-col p-3 space-y-3 overflow-hidden">
-               {/* AI Chat UI */}
-               <div className="flex-1 rounded-lg text-white/80 text-center flex items-center justify-center">
-                AI 채팅 기능이 여기에 표시됩니다.
-               </div>
-            </div>
-          )}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-all text-white/60 hover:bg-red-900/50 hover:text-white" 
+                      onClick={(e) => { e.stopPropagation(); deleteMemo(memo.id); }}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+                      </ScrollArea>
+          ) : (
+            <div className="text-center text-white/50 pt-16 flex flex-col items-center">
+              <FileText size={48} className="mb-4 text-white/20"/>
+              <p className="font-semibold">저장된 메모가 없습니다</p>
+              <p className="text-sm text-white/40">새 메모를 작성하고 저장해보세요.</p>
+                  </div>
+                )}
         </div>
-      </div>
-    </div>
+      ) : (
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 flex flex-col relative overflow-hidden" onDragOver={handleEditorDragOver} onDragLeave={handleEditorDragLeave} onDrop={handleEditorDrop}>
+            <TiptapEditor
+                ref={tiptapEditorRef}
+                content={editorContent}
+                onContentChange={setEditorContent}
+            />
+            {isEditorDragOver && (
+                <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-400 rounded-lg flex items-center justify-center pointer-events-none z-10 m-2">
+                    <span className="text-white font-semibold text-sm">여기에 드롭하여 콘텐츠 추가</span>
+                  </div>
+                )}
+          </div>
+          <div 
+              className={`flex-shrink-0 p-3 relative flex items-center transition-colors duration-200 min-h-[3.5rem] ${isPillBarDragOver ? 'bg-blue-500/20' : ''}`}
+              onDragOver={handlePillBarDragOver} onDragLeave={handlePillBarDragLeave} onDrop={handlePillBarDrop}>
+              <div 
+                ref={scrollContainerRef}
+                className="flex items-center gap-2 overflow-x-auto hide-scrollbar"
+                style={{
+                  maskImage: isPillOverflowing 
+                    ? 'linear-gradient(to right, black calc(100% - 48px), transparent 100%)'
+                    : 'none',
+                  WebkitMaskImage: isPillOverflowing 
+                    ? 'linear-gradient(to right, black calc(100% - 48px), transparent 100%)'
+                    : 'none',
+                }}
+              >
+                <div ref={pillsContainerRef} className="flex items-center gap-2 w-max pr-4">
+                        {contentPills.map(pill => (
+                          <div key={pill.id} className="group relative flex-shrink-0">
+                            <div 
+                              draggable
+                        onDragStart={(e) => handlePillDragStart(e, pill)}
+                              className={`flex items-center text-xs rounded-full pl-2 pr-2 py-1 backdrop-blur-xl border cursor-grab active:cursor-grabbing transition-all duration-200 ${getPillStyleClass(pill.type)}`} 
+                              onClick={() => insertPillIntoEditor(pill)} 
+                              title={pill.title}
+                            >
+                              <PillIcon type={pill.type} />
+                              <span className="truncate flex-1 mx-1.5">{pill.title}</span>
+                            </div>
+                      <button onClick={() => setContentPills(pills => pills.filter(p => p.id !== pill.id))} className="absolute top-1/2 -translate-y-1/2 right-1.5 bg-gray-700 hover:bg-red-500 border border-gray-600 rounded-full h-4 w-4 flex items-center justify-center text-white text-[10px] opacity-0 group-hover:opacity-100 transition-all" title="Remove pill"><X className="h-2.5 w-2.5" /></button>
+                          </div>
+                        ))}
+                  {contentPills.length === 0 && (
+                    <div className="text-xs text-white/40 px-2">콘텐츠를 여기에 드래그하여 추가하세요.</div>
+                  )}
+                      </div>
+                            </div>
+              
+              {isPillOverflowing && (
+                <div 
+                  ref={pillOverflowButtonRef}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center text-xs font-semibold rounded-full h-6 w-6 bg-gray-800/80 backdrop-blur-sm border border-gray-600/90 text-gray-300 cursor-pointer hover:bg-gray-700/90"
+                  onClick={() => setIsPillListVisible(prev => !prev)}
+                >
+                  +{contentPills.length}
+                </div>
+              )}
+              
+              <AnimatePresence>
+                {isPillListVisible && (
+                  <motion.div
+                    ref={pillListPopupRef}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute bottom-full right-3 mb-2 w-80 p-2 bg-black/40 backdrop-blur-xl border border-white/20 rounded-lg shadow-2xl z-30"
+                  >
+                    <div className="flex justify-between items-center mb-2 px-1 pt-1">
+                      <h4 className="font-semibold text-sm text-white/90">
+                        콘텐츠 <span className="text-white/50 ml-1">{contentPills.length}</span>
+                      </h4>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-transparent hover:bg-white/10" onClick={() => setIsPillListVisible(false)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <ScrollArea className="max-h-60 pr-2">
+                      <div className="space-y-1.5">
+                                {contentPills.map(pill => (
+                          <li key={pill.id} className="group relative flex items-center p-1 rounded-lg hover:bg-white/5 transition-colors">
+                            <div
+                              className={`w-full flex items-center text-xs px-2 py-1.5 rounded-lg border border-transparent cursor-pointer ${getPillStyleClass(pill.type)}`}
+                              onClick={() => { insertPillIntoEditor(pill); setIsPillListVisible(false); }}
+                              title={pill.title}
+                            >
+                              <div className={`p-1 rounded-md bg-white/5 mr-2 ${getPillStyleClass(pill.type)}`}>
+                                      <PillIcon type={pill.type} />
+                                    </div>
+                              <span className="truncate">{pill.title}</span>
+                                  </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-all text-white/60 hover:bg-red-900/50 hover:text-white"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setContentPills(pills => pills.filter(p => p.id !== pill.id));
+                                }}
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </li>
+                                ))}
+                              </div>
+                            </ScrollArea>
+                  </motion.div>
+                      )}
+              </AnimatePresence>
+                    </div>
+                  </div>
+                )}
+
+      {/* Footer */}
+      <div className="flex-shrink-0 flex items-center justify-between p-2 border-t border-white/10 h-12">
+                      <div className="flex items-center gap-1">
+          <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={() => setShowMemoList(!showMemoList)}>
+            <List className="h-5 w-5" />
+          </Button>
+          <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={createNewMemo}>
+            <Plus className="h-5 w-5" />
+          </Button>
+          <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={() => saveMemo()}>
+            <Save className="h-5 w-5" />
+                      </Button>
+                    </div>
+        <div className="flex items-center gap-2 pr-2">
+          {renderSaveStatus()}
+          <Separator orientation="vertical" className="h-5" />
+          <span className="text-xs font-mono"># MD</span>
+                            </div>
+                            </div>
+                        </div>
   );
 }

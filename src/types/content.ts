@@ -1,25 +1,29 @@
-export type ContentType = 'text' | 'image' | 'link' | 'video' | 'file' | 'directory' | 'sticky-note' | 'canvas';
+export type ContentType =
+  | "text"
+  | "image"
+  | "link"
+  | "file"
+  | "video"
+  | "audio";
 
 export interface ContentItem {
   id: string;
   title: string;
   content: string;
   type: ContentType;
-  stage: string;
+  stage: "review" | "refine" | "consolidate";
   tags: string[];
-  folderId: string;
+  folderId?: string;
   createdAt: string;
   updatedAt: string;
-  summary?: string;
   metadata?: {
-    author?: string;
-    dimensions?: { width: number; height: number };
-    fileSize?: number;
     url?: string;
-    imageUrl?: string;
-    duration?: number;
-    resolution?: string;
+    fileSize?: number;
+    dimensions?: { width: number; height: number };
+    author?: string;
+    views?: number;
   };
+  source?: string;
 }
 
 export interface Folder {
@@ -27,4 +31,19 @@ export interface Folder {
   name: string;
   color: string;
   itemCount: number;
-} 
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+  count: number;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: 'owner' | 'editor' | 'viewer';
+}

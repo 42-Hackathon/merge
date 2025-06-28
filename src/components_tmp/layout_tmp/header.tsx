@@ -61,7 +61,7 @@ export function Header({
                 className="font-semibold text-zinc-800 dark:text-zinc-200"
                 style={{ fontSize: `${scale(14)}px`}}
               >
-                FLux
+                Flux
               </span>
             </div>
           </div>
@@ -100,7 +100,7 @@ export function Header({
                 >
                   <X style={{width: `${scale(10)}px`, height: `${scale(10)}px`}} />
                 </Button>
-              </div>
+            </div>
             ))}
           </div>
         </div>
@@ -160,44 +160,44 @@ export function Header({
           
           {/* Window Controls */}
           <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="xs"
+          <Button
+            variant="ghost"
+            size="xs"
               className="text-zinc-600 dark:text-zinc-400 hover:bg-black/10 dark:hover:bg-white/10 backdrop-blur-xl transition-all duration-200 flex items-center justify-center rounded-r-none"
               style={{
                 height: `${scale(28)}px`,
                 width: `${scale(32)}px`,
               }}
-              title="최소화"
-            >
+            title="최소화"
+          >
               <Minus style={{ width: `${scale(12)}px`, height: `${scale(12)}px` }} />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="xs"
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="xs"
               className="text-zinc-600 dark:text-zinc-400 hover:bg-black/10 dark:hover:bg-white/10 backdrop-blur-xl transition-all duration-200 flex items-center justify-center rounded-none border-x border-black/10 dark:border-white/10"
               style={{
                 height: `${scale(28)}px`,
                 width: `${scale(32)}px`,
               }}
-              title="최대화"
-            >
+            title="최대화"
+          >
               <Square style={{ width: `${scale(10)}px`, height: `${scale(10)}px` }} />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="xs"
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="xs"
               className="text-zinc-600 dark:text-zinc-400 hover:bg-red-500/80 dark:hover:bg-red-500/50 hover:text-white dark:hover:text-white backdrop-blur-xl transition-all duration-200 flex items-center justify-center rounded-l-none"
               style={{
                 height: `${scale(28)}px`,
                 width: `${scale(32)}px`,
               }}
-              title="닫기"
-            >
+            title="닫기"
+          >
               <X style={{ width: `${scale(12)}px`, height: `${scale(12)}px` }} />
-            </Button>
+          </Button>
           </div>
         </div>
       </div>

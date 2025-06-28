@@ -44,7 +44,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
-
+/* 
 :root {
 --radius: 0.625rem;
 --background: oklch(1 0 0);
@@ -79,7 +79,7 @@
 --sidebar-border: oklch(0.922 0 0);
 --sidebar-ring: oklch(0.708 0 0);
 
-/* Scrollbar and Selection variables */
+// Scrollbar and Selection variables
 --scrollbar-thumb: oklch(0.556 0 0 / 0.3);
 --scrollbar-thumb-hover: oklch(0.556 0 0 / 0.5);
 --selection-bg: oklch(0.205 0 0 / 0.4);
@@ -118,7 +118,7 @@
 --sidebar-border: oklch(1 0 0 / 10%);
 --sidebar-ring: oklch(0.556 0 0);
 
-/* Scrollbar and Selection variables */
+// Scrollbar and Selection variables 
 --scrollbar-thumb: oklch(0.708 0 0 / 0.3);
 --scrollbar-thumb-hover: oklch(0.708 0 0 / 0.5);
 --selection-bg: oklch(0.922 0 0 / 0.4);
@@ -133,7 +133,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Custom Scrollbar Styles */
+  // Custom Scrollbar Styles
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -152,12 +152,302 @@
     background-color: var(--scrollbar-thumb-hover);
   }
 
-  /* Custom Selection Styles */
+  // Custom Selection Styles 
   ::selection {
     background-color: var(--selection-bg);
     color: var(--primary-foreground);
   }
 }
+*/
+
+@layer base {
+  :root {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color-scheme: dark;
+    
+    /* Dark theme variables */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.0%;
+    --radius: 0.5rem;
+    
+    /* Chart colors */
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.0%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ------------------------------------------------------------ */
+
+/* 자연스러운 스크롤바 스타일링 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.4);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.6);
+}
+
+/* 슬래시 메뉴 전용 스크롤바 - 세로만 표시 */
+.slash-menu-scroll {
+  overflow-x: hidden !important; /* 가로 스크롤 완전 제거 */
+  overflow-y: auto;
+}
+
+.slash-menu-scroll::-webkit-scrollbar {
+  width: 4px;
+  height: 0px; /* 가로 스크롤바 높이 0으로 설정 */
+}
+
+.slash-menu-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 2px;
+}
+
+.slash-menu-scroll::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.3);
+  border-radius: 2px;
+  transition: background 0.2s ease;
+}
+
+.slash-menu-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.5);
+}
+
+/* 가로 스크롤바 완전 숨김 */
+.slash-menu-scroll::-webkit-scrollbar:horizontal {
+  display: none;
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+/* Focus ring improvements */
+.focus-visible\:ring-2:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Glass morphism utilities */
+.glass-effect {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Animation improvements */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Text utilities */
+.text-gradient {
+  background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Button improvements */
+.btn-glass {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Card improvements */
+.card-glass {
+  backdrop-filter: blur(24px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Input improvements */
+.input-glass {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.input-glass:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.input-glass::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Sidebar improvements */
+.sidebar-glass {
+  backdrop-filter: blur(32px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Status bar improvements */
+.status-glass {
+  backdrop-filter: blur(24px);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Floating elements */
+.floating-element {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .glass-effect {
+    backdrop-filter: blur(16px);
+  }
+  
+  .sidebar-glass {
+    backdrop-filter: blur(20px);
+  }
+}
+
+/* Dark theme specific improvements */
+.dark-gradient-bg {
+  background: linear-gradient(
+    135deg,
+    #0f172a 0%,
+    #1e293b 25%,
+    #334155 50%,
+    #475569 75%,
+    #64748b 100%
+  );
+}
+
+.dark-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.dark-text-primary {
+  color: #f8fafc;
+}
+
+.dark-text-secondary {
+  color: #cbd5e1;
+}
+
+.dark-text-muted {
+  color: #94a3b8;
+}
+
+/* ------------------------------------------------------------ */
 
 /* Custom Animations & Utilities from 42_hackathon */
 @keyframes float {
@@ -203,12 +493,59 @@
   }
 }
 
-.monaco-editor, .monaco-editor-background {
-  background-color: transparent !important;
+/* Custom Animations */
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.3s ease-out;
 }
-.monaco-editor .margin {
-  background-color: transparent !important;
+
+.animate-slide-in-right {
+  animation: slideInFromRight 0.3s ease-out;
 }
-.monaco-editor .view-lines {
-  background-color: transparent !important;
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Tiptap Editor Styles */
+.ProseMirror ::selection {
+  background-color: hsla(var(--primary), 0.3);
+  color: hsl(var(--foreground));
+}
+
+/* First paragraph color */
+.ProseMirror p:first-child {
+  color: #a3bef8;
+  font-weight: 500;
+}
+
+/* Cursor right vertical line removal */
+.horizontal-fade {
+  -webkit-mask-image: linear-gradient(to right, white 90%, transparent 100%);
+  mask-image: linear-gradient(to right, white 90%, transparent 100%);
+}
+
+/* For hiding Monaco Editor content pill placeholders */
+.content-pill-placeholder {
+  color: transparent !important;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  padding: 0 3px;
+}
+
+/* Custom Tiptap Editor Styles */
+.tiptap:focus {
+  outline: none;
+}
+
+/* Hide scrollbar for webkit-based browsers */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.hide-scrollbar {
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none;  /* For Internet Explorer and Edge */
 }
