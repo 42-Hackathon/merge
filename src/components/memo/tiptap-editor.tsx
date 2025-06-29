@@ -80,11 +80,19 @@ export const TiptapEditor = forwardRef<TiptapEditorHandle, TiptapEditorProps>(
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
                 onDrop={onDrop}
+                id="tiptap-container"
             >
                 {editor && (
                     <BubbleMenu
                         editor={editor}
-                        tippyOptions={{ duration: 100 }}
+                        tippyOptions={{
+                            duration: 100,
+                            appendTo: () =>
+                                document.getElementById('tiptap-container') || document.body,
+                            boundary: 'viewport',
+                            placement: 'top',
+                            flipBehavior: ['top', 'bottom', 'left', 'right'],
+                        }}
                         shouldShow={({ state }) => {
                             const { selection } = state;
 

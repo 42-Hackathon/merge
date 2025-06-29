@@ -59,17 +59,12 @@ contextBridge.exposeInMainWorld('electron', {
         return webFrame.getZoomFactor();
     },
     openStickyNote: () => {
-        ipcRenderer.send('open-sticky-note');
+        ipcRenderer.invoke('show-sticky-note');
     },
-    togglePin: () => {
-        ipcRenderer.send('pin-toggle');
-    },
-    closeWindow: () => {
-        ipcRenderer.send('close-window');
-    },
-    setOpacity: (opacity: number) => {
-        ipcRenderer.send('set-opacity', opacity);
-    },
+    // Window controls for sticky note
+    setOpacity: (opacity: number) => ipcRenderer.invoke('sticky-note:set-opacity', opacity),
+    togglePin: () => ipcRenderer.invoke('sticky-note:toggle-pin'),
+    closeWindow: () => ipcRenderer.invoke('sticky-note:close'),
 });
 
 // Expose a limited API for the sticky note window

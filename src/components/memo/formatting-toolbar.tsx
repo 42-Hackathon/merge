@@ -133,7 +133,12 @@ export function FormattingToolbar({ editor }: FormattingToolbarProps) {
                     <motion.div
                         initial={{ opacity: 0, y: 5, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        className="absolute top-full mt-2 p-2 bg-muted rounded-lg shadow-xl z-10 w-48"
+                        className="absolute top-full mt-2 right-0 p-2 bg-muted rounded-lg shadow-xl z-50 w-48 max-w-[calc(100vw-1rem)]"
+                        style={{
+                            transform: 'translateX(calc(-100% + 32px))',
+                            maxHeight: 'calc(100vh - 100px)',
+                            overflowY: 'auto',
+                        }}
                     >
                         <Tabs defaultValue="text" className="w-full">
                             <TabsList className="grid w-full grid-cols-2 h-8 bg-background/30">
