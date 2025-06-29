@@ -8,6 +8,7 @@ export interface ContentItem {
     stage: 'review' | 'refine' | 'consolidate';
     tags: string[];
     folderId?: string;
+    path?: string;
     createdAt: string;
     updatedAt: string;
     metadata?: {

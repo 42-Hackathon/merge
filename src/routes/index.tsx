@@ -12,14 +12,16 @@ import { PanelRightOpen } from "lucide-react";
 import { mockContentItems } from "@/data/mock-data";
 import { ContentItem } from "@/types/content";
 import { AnimatePresence } from "framer-motion";
+import { useTabStore } from "@/hooks/useTabStore";
+import { FileViewer } from "@/components/content/file-viewer";
+import { TabBar } from "@/components/layout/TabBar";
 
 export default function Index() {
-  const [items, setItems] = useState<ContentItem[]>(mockContentItems);
+  const [items] = useState<ContentItem[]>(mockContentItems);
   const [viewMode, setViewMode] = useState<'masonry' | 'grid' | 'list' | 'justified'>('masonry');
   const [selectedFolder, setSelectedFolder] = useState('all');
   
-  const [openTabs, setOpenTabs] = useState<ContentItem[]>([]);
-  const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  const { tabs, activeTabId, openTab, closeTab, setActiveTab } = useTabStore();
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
   const [rightSidebarWidth, setRightSidebarWidth] = useState(288);
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
@@ -84,11 +86,16 @@ export default function Index() {
   }, []);
 
   const handleItemSelect = useCallback((item: ContentItem) => {
-    if (!openTabs.find(tab => tab.id === item.id)) {
-      setOpenTabs(prevTabs => [...prevTabs, item]);
-    }
-    setActiveTabId(item.id);
-  }, [openTabs]);
+    // Convert ContentItem to FileNode format for useTabStore
+    const fileNode: FileNode = {
+      id: item.id,
+      name: item.title,
+      path: item.path || item.id, // Use path if available, otherwise fallback to id
+      icon: undefined as any, // Will be set by the store
+      count: 0, // Default value
+    };
+    openTab(fileNode);
+  }, [openTab]);
 
   useEffect(() => {
     const handleOpenFromPill = (event: Event) => {
@@ -123,26 +130,8 @@ export default function Index() {
     };
   }, [items, handleItemSelect]);
 
-  const handleCloseTab = (tabId: string) => {
-    const newTabs = openTabs.filter(tab => tab.id !== tabId);
-    setOpenTabs(newTabs);
-
-    if (activeTabId === tabId) {
-      if (newTabs.length > 0) {
-        setActiveTabId(newTabs[newTabs.length - 1].id);
-      } else {
-        setActiveTabId(null);
-      }
-    }
-  };
-
   const handleFolderSelect = (folderId: string) => {
     setSelectedFolder(folderId);
-    if (folderId === 'all') {
-      setItems(mockContentItems);
-    } else {
-      setItems(items.filter(item => item.folderId === folderId));
-    }
   };
 
   const getFolderName = (folderId: string) => {
@@ -190,9 +179,6 @@ export default function Index() {
   
   // 좌측 사이드바 가시성 제어 - 70px 이하로 좁아지면 숨김
   const isLeftSidebarOpen = sidebarWidth.get() > 70;
-  
-  // 디버깅: 현재 사이드바 너비 확인
-  console.log('Sidebar width:', sidebarWidth.get(), 'Open:', isLeftSidebarOpen);
 
   return (
     <div 
@@ -212,19 +198,12 @@ export default function Index() {
             }
           }}
           zoomLevel={zoomLevel}
-          openTabs={openTabs}
-          activeTabId={activeTabId}
-          onTabChange={setActiveTabId}
-          onTabClose={handleCloseTab}
         />
         
-        <div className="flex-1 flex">
-          <div style={{ 
-            opacity: isLeftSidebarOpen ? 1 : 0,
-            pointerEvents: isLeftSidebarOpen ? 'auto' : 'none',
-            transition: 'opacity 0.2s ease'
-          }}>
+        <div className="flex-1 flex overflow-hidden">
+          {isLeftSidebarOpen && (
             <EnhancedSidebar 
+              className="flex-shrink-0"
               width={sidebarWidth}
               onResizeMouseDown={handleResizeMouseDown}
               onResetWidth={handleResetWidth}
@@ -239,19 +218,18 @@ export default function Index() {
               onZoomOut={handleZoomOut}
               cursorPosition={cursorPosition}
             />
-          </div>
+          )}
           
-          {/* Main Content Area - 오른쪽 사이드바 너비만큼 줄어듦 */}
-          <div 
-            className="flex-1 transition-all duration-200"
-            style={{ 
-              marginRight: isRightSidebarOpen ? rightSidebarWidth : 0 
-            }}
-          >
-            {activeTabId ? (
-              <div className="flex-1 p-4">
-                <h1 className="text-2xl font-bold">{openTabs.find(t => t.id === activeTabId)?.title}</h1>
-                <p className="mt-4 whitespace-pre-wrap">{openTabs.find(t => t.id === activeTabId)?.content}</p>
+          <div className="flex-1 min-w-0 flex flex-col">
+            <TabBar
+              openTabs={tabs}
+              activeTabId={activeTabId}
+              onTabChange={setActiveTab}
+              onTabClose={closeTab}
+            />
+            {tabs.length > 0 ? (
+              <div className="flex-1 p-4 overflow-y-auto">
+                <FileViewer />
               </div>
             ) : (
               <DraggableContentGrid

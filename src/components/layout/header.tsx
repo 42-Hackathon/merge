@@ -7,29 +7,19 @@ import {
   Minus,
   Square,
   X,
-  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ContentItem } from "@/types/content";
 
 interface HeaderProps {
   onSearchToggle: () => void;
   onStickyNoteToggle: () => void;
   zoomLevel: number;
-  openTabs: ContentItem[];
-  activeTabId: string | null;
-  onTabChange: (tabId: string) => void;
-  onTabClose: (tabId: string) => void;
 }
 
 export function Header({ 
   onSearchToggle, 
   onStickyNoteToggle,
   zoomLevel,
-  openTabs,
-  activeTabId,
-  onTabChange,
-  onTabClose,
 }: HeaderProps) {
   const scale = (base: number) => base * (zoomLevel / 100);
 
@@ -64,44 +54,6 @@ export function Header({
                 FLux
               </span>
             </div>
-          </div>
-          
-          {/* Tabs */}
-          <div className="flex-1 flex items-end h-full">
-            {openTabs.map(tab => (
-              <div
-                key={tab.id}
-                onClick={() => onTabChange(tab.id)}
-                className={`flex items-center border-r border-black/10 dark:border-white/10 cursor-pointer h-full transition-colors duration-200
-                  ${activeTabId === tab.id 
-                    ? 'bg-white/50 dark:bg-black/20' 
-                    : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/5'
-                  }`}
-                style={{
-                  padding: `0 ${scale(12)}px`,
-                }}
-              >
-                <div className="flex items-center" style={{gap: `${scale(6)}px`}}>
-                  <FileText className="text-zinc-500 dark:text-zinc-400" style={{width: `${scale(14)}px`, height: `${scale(14)}px`}} />
-                  <span className="truncate text-zinc-800 dark:text-zinc-200" style={{fontSize: `${scale(12)}px`}}>{tab.title}</span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation(); // 탭 클릭 이벤트 전파 방지
-                    onTabClose(tab.id);
-                  }}
-                  className="ml-2 rounded-md hover:bg-black/10 dark:hover:bg-white/20 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
-                  style={{
-                    width: `${scale(18)}px`,
-                    height: `${scale(18)}px`,
-                  }}
-                >
-                  <X style={{width: `${scale(10)}px`, height: `${scale(10)}px`}} />
-                </Button>
-              </div>
-            ))}
           </div>
         </div>
 

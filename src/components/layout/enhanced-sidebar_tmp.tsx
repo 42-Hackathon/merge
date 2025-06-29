@@ -12,6 +12,7 @@ import {
   Video,
   Clipboard,
   Camera,
+  GripVertical,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -31,7 +32,7 @@ import type {
 import { FolderItemComponent } from './sidebar/FolderItem';
 import { SidebarHeader } from './sidebar/SidebarHeader';
 import { SidebarFooter } from './sidebar/SidebarFooter';
-import { useTabStore } from '../../hooks/useTabStore';
+import { useTabStore } from '@/hooks/useTabStore';
 
 function findItemById(items: FileNode[], id: string): FileNode | null {
     for (const item of items) {
@@ -217,6 +218,7 @@ export function EnhancedSidebar({
     const [linkedFolders, setLinkedFolders] = useState<FileNode[]>([]);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['categories']));
     const [renamingItemId, setRenamingItemId] = useState<string | null>(null);
+  const [isHoveringResize, setIsHoveringResize] = useState(false);
 
     const isCategoriesExpanded = useMemo(
         () => expandedFolders.has('categories'),
@@ -564,15 +566,41 @@ export function EnhancedSidebar({
                     onZoomOut={onZoomOut}
                     cursorPosition={cursorPosition}
                 />
-
-                <motion.div
-                    onPan={handleResizePan}
-                    onDoubleClick={onResetWidth}
-                    className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize z-20 group"
-                    style={{ display: isCollapsed ? 'none' : 'block' }}
-                >
-                    <div className="w-full h-full transition-colors duration-200 group-hover:bg-blue-500/50" />
-                </motion.div>
+      
+      {/* Enhanced Resizer Handle */}
+      {!isCollapsed && (
+                    <motion.div
+                        onPan={handleResizePan}
+          onDoubleClick={onResetWidth}
+          onMouseEnter={() => setIsHoveringResize(true)}
+          onMouseLeave={() => setIsHoveringResize(false)}
+          className={`absolute top-0 right-0 w-2 h-full cursor-col-resize z-20 group flex items-center justify-center transition-all duration-200 ${
+                            isHoveringResize ? 'bg-blue-500/20' : 'hover:bg-blue-500/10'
+          }`}
+          title="드래그하여 크기 조절, 더블클릭으로 초기화"
+        >
+          {/* Visual Resize Indicator */}
+          <div className={`w-0.5 h-8 rounded-full transition-all duration-200 ${
+                            isHoveringResize ? 'bg-blue-400/80' : 'bg-white/30'
+          }`} />
+          
+          {/* Grip Icon on Hover */}
+          <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${
+                            isHoveringResize ? 'opacity-100' : 'opacity-0'
+          }`}>
+            <GripVertical className={`h-4 w-4 transition-colors duration-200 ${
+                                isHoveringResize ? 'text-blue-400' : 'text-white/60'
+            }`} />
+          </div>
+          
+          {/* Resize Tooltip */}
+                        {isHoveringResize && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+              드래그하여 크기 조절
+            </div>
+          )}
+                    </motion.div>
+      )}
     </motion.div>
         </DndProvider>
   );
