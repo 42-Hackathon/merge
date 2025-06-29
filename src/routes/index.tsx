@@ -187,6 +187,12 @@ export default function Index() {
   
   // 오른쪽 사이드바 최대 너비 계산 (전체 화면 - 왼쪽 사이드바 - 최소 콘텐츠 영역)
   const maxRightSidebarWidth = window.innerWidth - leftSidebarWidth - 300; // 최소 300px 콘텐츠 영역 보장
+  
+  // 좌측 사이드바 가시성 제어 - 70px 이하로 좁아지면 숨김
+  const isLeftSidebarOpen = sidebarWidth.get() > 70;
+  
+  // 디버깅: 현재 사이드바 너비 확인
+  console.log('Sidebar width:', sidebarWidth.get(), 'Open:', isLeftSidebarOpen);
 
   return (
     <div 
@@ -213,21 +219,27 @@ export default function Index() {
         />
         
         <div className="flex-1 flex">
-          <EnhancedSidebar 
-            width={sidebarWidth}
-            onResizeMouseDown={handleResizeMouseDown}
-            onResetWidth={handleResetWidth}
-            selectedFolder={selectedFolder}
-            onFolderSelect={handleFolderSelect}
-            isCollapsed={isLeftSidebarCollapsed}
-            onToggleCollapse={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
-            isCollabActive={isCollabActive}
-            onCollabToggle={handleCollabToggle}
-            zoomLevel={zoomLevel}
-            onZoomIn={handleZoomIn}
-            onZoomOut={handleZoomOut}
-            cursorPosition={cursorPosition}
-          />
+          <div style={{ 
+            opacity: isLeftSidebarOpen ? 1 : 0,
+            pointerEvents: isLeftSidebarOpen ? 'auto' : 'none',
+            transition: 'opacity 0.2s ease'
+          }}>
+            <EnhancedSidebar 
+              width={sidebarWidth}
+              onResizeMouseDown={handleResizeMouseDown}
+              onResetWidth={handleResetWidth}
+              selectedFolder={selectedFolder}
+              onFolderSelect={handleFolderSelect}
+              isCollapsed={isLeftSidebarCollapsed}
+              onToggleCollapse={() => setIsLeftSidebarCollapsed(!isLeftSidebarCollapsed)}
+              isCollabActive={isCollabActive}
+              onCollabToggle={handleCollabToggle}
+              zoomLevel={zoomLevel}
+              onZoomIn={handleZoomIn}
+              onZoomOut={handleZoomOut}
+              cursorPosition={cursorPosition}
+            />
+          </div>
           
           {/* Main Content Area - 오른쪽 사이드바 너비만큼 줄어듦 */}
           <div 
