@@ -566,42 +566,42 @@ export function EnhancedSidebar({
                     onZoomOut={onZoomOut}
                     cursorPosition={cursorPosition}
                 />
-
-                {/* Enhanced Resizer Handle */}
-                {!isCollapsed && (
+      
+      {/* Enhanced Resizer Handle */}
+      {!isCollapsed && (
                     <motion.div
                         onPan={handleResizePan}
-                        onDoubleClick={onResetWidth}
-                        onMouseEnter={() => setIsHoveringResize(true)}
-                        onMouseLeave={() => setIsHoveringResize(false)}
-                        className={`absolute top-0 right-0 w-2 h-full cursor-col-resize z-20 group flex items-center justify-center transition-all duration-200 ${
+          onDoubleClick={onResetWidth}
+          onMouseEnter={() => setIsHoveringResize(true)}
+          onMouseLeave={() => setIsHoveringResize(false)}
+          className={`absolute top-0 right-0 w-2 h-full cursor-col-resize z-20 group flex items-center justify-center transition-all duration-200 ${
                             isHoveringResize ? 'bg-blue-500/20' : 'hover:bg-blue-500/10'
-                        }`}
-                        title="드래그하여 크기 조절, 더블클릭으로 초기화"
-                    >
-                        {/* Visual Resize Indicator */}
-                        <div className={`w-0.5 h-8 rounded-full transition-all duration-200 ${
+          }`}
+          title="드래그하여 크기 조절, 더블클릭으로 초기화"
+        >
+          {/* Visual Resize Indicator */}
+          <div className={`w-0.5 h-8 rounded-full transition-all duration-200 ${
                             isHoveringResize ? 'bg-blue-400/80' : 'bg-white/30'
-                        }`} />
-                        
-                        {/* Grip Icon on Hover */}
-                        <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${
+          }`} />
+          
+          {/* Grip Icon on Hover */}
+          <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ${
                             isHoveringResize ? 'opacity-100' : 'opacity-0'
-                        }`}>
-                            <GripVertical className={`h-4 w-4 transition-colors duration-200 ${
+          }`}>
+            <GripVertical className={`h-4 w-4 transition-colors duration-200 ${
                                 isHoveringResize ? 'text-blue-400' : 'text-white/60'
-                            }`} />
-                        </div>
-                        
-                        {/* Resize Tooltip */}
+            }`} />
+          </div>
+          
+          {/* Resize Tooltip */}
                         {isHoveringResize && (
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
-                                드래그하여 크기 조절
-                            </div>
-                        )}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none">
+              드래그하여 크기 조절
+            </div>
+          )}
                     </motion.div>
-                )}
-            </motion.div>
+      )}
+    </motion.div>
         </DndProvider>
-    );
+  );
 }
