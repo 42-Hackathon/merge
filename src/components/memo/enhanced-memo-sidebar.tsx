@@ -22,8 +22,8 @@ const MAX_VISIBLE_PILLS = 5;
 interface EnhancedMemoSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'memo' | 'chat' | 'view';
-  onModeChange: (mode: 'memo' | 'chat' | 'view') => void;
+  mode: 'memo' | 'chat' | 'view' | 'ai';
+  onModeChange: (mode: 'memo' | 'chat' | 'view' | 'ai') => void;
   width?: number;
   onWidthChange?: (width: number) => void;
   maxWidth?: number;
@@ -562,18 +562,41 @@ export function EnhancedMemoSidebar({
       {/* Header */}
       {showMemoList ? (
         <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-white/10 h-14">
-            <h3 className="font-semibold text-lg ml-2">저장된 메모</h3>
+            <h3 className="font-semibold text-lg ml-2">
+                {mode === 'ai' ? 'AI 대화' : '저장된 메모'}
+            </h3>
             <div className="bg-white/10 text-white/80 text-xs font-medium px-2 py-1 rounded-full">
                 {savedMemos.length}개
           </div>
             </div>
       ) : (
         <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-white/10 h-14">
-            <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => onModeChange(mode === 'memo' ? 'chat' : 'memo')}>
-                    <MessageCircle className="h-5 w-5" />
-                </Button>
-                <span className="font-semibold">메모</span>
+            <div className="flex items-center gap-3">
+                {/* 메모/AI 스위치 */}
+                <div className="flex items-center bg-white/10 rounded-lg p-1">
+                    <button
+                        onClick={() => onModeChange('memo')}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all ${
+                            mode === 'memo' 
+                                ? 'bg-white/20 text-white font-medium' 
+                                : 'text-white/70 hover:text-white/90 hover:bg-white/5'
+                        }`}
+                    >
+                        <MessageCircle className="h-4 w-4" />
+                        메모
+                    </button>
+                    <button
+                        onClick={() => onModeChange('ai')}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all ${
+                            mode === 'ai' 
+                                ? 'bg-white/20 text-white font-medium' 
+                                : 'text-white/70 hover:text-white/90 hover:bg-white/5'
+                        }`}
+                    >
+                        <Sparkles className="h-4 w-4" />
+                        AI
+                    </button>
+                </div>
         </div>
             <Button variant="ghost" size="icon" onClick={onClose}>
                 <PanelRightClose className="h-5 w-5" />
@@ -749,7 +772,9 @@ export function EnhancedMemoSidebar({
         <div className="flex items-center gap-2 pr-2">
           {renderSaveStatus()}
           <Separator orientation="vertical" className="h-5" />
-          <span className="text-xs font-mono"># MD</span>
+          <span className="text-xs font-mono">
+            {mode === 'ai' ? '# AI' : '# MD'}
+          </span>
                             </div>
                             </div>
                         </div>
