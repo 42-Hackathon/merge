@@ -14,7 +14,7 @@ import started from 'electron-squirrel-startup';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
-  app.quit();
+    app.quit();
 }
 
 app.disableHardwareAcceleration();
@@ -25,52 +25,54 @@ let mainWindow: BrowserWindow | null;
 let stickyNoteWindow: BrowserWindow | null;
 
 function createWindow() {
-  // 1. 메인 디스플레이의 정보를 가져와.
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { width, height } = primaryDisplay.workAreaSize;
+    // 1. 메인 디스플레이의 정보를 가져와.
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width, height } = primaryDisplay.workAreaSize;
 
-  // Eagle과 유사한 시네마틱 비율 (1.85:1)을 목표로 설정
-  const targetAspectRatio = 1.85;
+    // Eagle과 유사한 시네마틱 비율 (1.85:1)을 목표로 설정
+    const targetAspectRatio = 1.85;
 
-  let newWidth: number;
-  let newHeight: number;
+    let newWidth: number;
+    let newHeight: number;
 
-  // 화면 비율에 따라 창 크기 계산 방식을 결정
-  if ((width / height) > targetAspectRatio) {
-    // 화면이 목표 비율보다 넓으면, 높이를 기준으로 너비를 계산
-    newHeight = Math.round(height * 0.85);
-    newWidth = Math.round(newHeight * targetAspectRatio);
-  } else {
-    // 화면이 목표 비율보다 좁으면, 너비를 기준으로 높이를 계산
-    newWidth = Math.round(width * 0.85);
-    newHeight = Math.round(newWidth / targetAspectRatio);
-  }
+    // 화면 비율에 따라 창 크기 계산 방식을 결정
+    if (width / height > targetAspectRatio) {
+        // 화면이 목표 비율보다 넓으면, 높이를 기준으로 너비를 계산
+        newHeight = Math.round(height * 0.85);
+        newWidth = Math.round(newHeight * targetAspectRatio);
+    } else {
+        // 화면이 목표 비율보다 좁으면, 너비를 기준으로 높이를 계산
+        newWidth = Math.round(width * 0.85);
+        newHeight = Math.round(newWidth / targetAspectRatio);
+    }
 
-  // Create the browser window.
+    // Create the browser window.
     mainWindow = new BrowserWindow({
-    width: newWidth,
-    height: newHeight,
+        width: newWidth,
+        height: newHeight,
         minWidth: 1200,
         minHeight: 700,
-    webPreferences: {
+        webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js'),
-    },
+            preload: path.join(__dirname, 'preload.js'),
+        },
         titleBarStyle: 'hiddenInset',
         vibrancy: 'ultra-dark',
         transparent: true,
         frame: false,
         show: false,
-  });
+    });
 
-  // and load the index.html of the app.
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+    // and load the index.html of the app.
+    if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+        mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
         mainWindow.webContents.openDevTools();
-  } else {
-    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
-  }
+    } else {
+        mainWindow.loadFile(
+            path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
+        );
+    }
 
     mainWindow.once('ready-to-show', () => {
         mainWindow?.show();
@@ -158,9 +160,9 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
 
 app.on('will-quit', () => {
@@ -214,52 +216,58 @@ const itemExists = async (itemPath: string): Promise<boolean> => {
     }
 };
 
-ipcMain.handle('fs:create-folder', async (event, { parentDir, folderName }: { parentDir: string; folderName: string }) => {
-    const newFolderPath = path.join(parentDir, folderName);
-    try {
-        if (await itemExists(newFolderPath)) {
-            return { success: false, error: 'An item with the same name already exists.' };
+ipcMain.handle(
+    'fs:create-folder',
+    async (event, { parentDir, folderName }: { parentDir: string; folderName: string }) => {
+        const newFolderPath = path.join(parentDir, folderName);
+        try {
+            if (await itemExists(newFolderPath)) {
+                return { success: false, error: 'An item with the same name already exists.' };
+            }
+            await fs.promises.mkdir(newFolderPath);
+            return {
+                success: true,
+                newItem: {
+                    id: newFolderPath,
+                    name: folderName,
+                    children: [],
+                },
+            };
+        } catch (creationError: any) {
+            console.error(
+                `[fs:create-folder] Failed to create folder '${folderName}' in '${parentDir}':`,
+                creationError
+            );
+            return { success: false, error: creationError.message };
         }
-        await fs.promises.mkdir(newFolderPath);
-        return {
-            success: true,
-            newItem: {
-                id: newFolderPath,
-                name: folderName,
-                children: [],
-            },
-        };
-    } catch (creationError: any) {
-        console.error(
-            `[fs:create-folder] Failed to create folder '${folderName}' in '${parentDir}':`,
-            creationError
-        );
-        return { success: false, error: creationError.message };
     }
-});
+);
 
-ipcMain.handle('fs:create-file', async (event, { parentDir, fileName }: { parentDir: string; fileName: string }) => {
-    const newFilePath = path.join(parentDir, fileName);
-    try {
-        if (await itemExists(newFilePath)) {
-            return { success: false, error: 'An item with the same name already exists.' };
+ipcMain.handle(
+    'fs:create-file',
+    async (event, { parentDir, fileName }: { parentDir: string; fileName: string }) => {
+        const newFilePath = path.join(parentDir, fileName);
+        try {
+            if (await itemExists(newFilePath)) {
+                return { success: false, error: 'An item with the same name already exists.' };
+            }
+            await fs.promises.writeFile(newFilePath, ''); // Create empty file
+            return {
+                success: true,
+                newItem: {
+                    id: newFilePath,
+                    name: fileName,
+                },
+            };
+        } catch (creationError: any) {
+            console.error(
+                `[fs:create-file] Failed to create file '${fileName}' in '${parentDir}':`,
+                creationError
+            );
+            return { success: false, error: creationError.message };
         }
-        await fs.promises.writeFile(newFilePath, ''); // Create empty file
-        return {
-            success: true,
-            newItem: {
-                id: newFilePath,
-                name: fileName,
-            },
-        };
-    } catch (creationError: any) {
-        console.error(
-            `[fs:create-file] Failed to create file '${fileName}' in '${parentDir}':`,
-            creationError
-        );
-        return { success: false, error: creationError.message };
     }
-});
+);
 
 const SUPPORTED_TEXT_EXTENSIONS = [
     '.md',
@@ -339,48 +347,57 @@ ipcMain.handle('fs:read-file', async (event, filePath: string) => {
     }
 });
 
-ipcMain.handle('fs:move-item', async (event, { sourcePath, destinationPath }: { sourcePath: string; destinationPath: string }) => {
-    try {
-        if (!sourcePath || !destinationPath) {
-            return { success: false, error: 'Invalid arguments for moving.' };
-        }
-        const sourceName = path.basename(sourcePath);
-        const newPath = path.join(destinationPath, sourceName);
+ipcMain.handle(
+    'fs:move-item',
+    async (
+        event,
+        { sourcePath, destinationPath }: { sourcePath: string; destinationPath: string }
+    ) => {
+        try {
+            if (!sourcePath || !destinationPath) {
+                return { success: false, error: 'Invalid arguments for moving.' };
+            }
+            const sourceName = path.basename(sourcePath);
+            const newPath = path.join(destinationPath, sourceName);
 
-        if (await itemExists(newPath)) {
-            return {
-                success: false,
-                error: 'A file with the same name already exists in the destination.',
-            };
-        }
+            if (await itemExists(newPath)) {
+                return {
+                    success: false,
+                    error: 'A file with the same name already exists in the destination.',
+                };
+            }
 
-        await fs.promises.rename(sourcePath, newPath);
-        return { success: true };
-    } catch (error: any) {
-        console.error(`Failed to move item from ${sourcePath} to ${destinationPath}:`, error);
-        return { success: false, error: error.message };
+            await fs.promises.rename(sourcePath, newPath);
+            return { success: true };
+        } catch (error: any) {
+            console.error(`Failed to move item from ${sourcePath} to ${destinationPath}:`, error);
+            return { success: false, error: error.message };
+        }
     }
-});
+);
 
-ipcMain.handle('fs:rename-item', async (event, { itemPath, newName }: { itemPath: string; newName: string }) => {
-    try {
-        if (!itemPath || !newName) {
-            return { success: false, error: 'Invalid arguments for renaming.' };
+ipcMain.handle(
+    'fs:rename-item',
+    async (event, { itemPath, newName }: { itemPath: string; newName: string }) => {
+        try {
+            if (!itemPath || !newName) {
+                return { success: false, error: 'Invalid arguments for renaming.' };
+            }
+            const parentDir = path.dirname(itemPath);
+            const newPath = path.join(parentDir, newName);
+
+            if (await itemExists(newPath)) {
+                return { success: false, error: 'A file with the same name already exists.' };
+            }
+
+            await fs.promises.rename(itemPath, newPath);
+            return { success: true, path: newPath };
+        } catch (error: any) {
+            console.error(`[fs:rename-item] Error:`, error);
+            return { success: false, error: 'Failed to rename item.' };
         }
-        const parentDir = path.dirname(itemPath);
-        const newPath = path.join(parentDir, newName);
-
-        if (await itemExists(newPath)) {
-            return { success: false, error: 'A file with the same name already exists.' };
-        }
-
-        await fs.promises.rename(itemPath, newPath);
-        return { success: true, path: newPath };
-    } catch (error: any) {
-        console.error(`[fs:rename-item] Error:`, error);
-        return { success: false, error: 'Failed to rename item.' };
     }
-});
+);
 
 ipcMain.handle('fs:delete-item', async (event, itemPath: string) => {
     try {
@@ -593,3 +610,57 @@ if (process.platform === 'darwin') {
 
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
+
+// feat/stickymemo에서 추가된 IPC 핸들러들
+const createStickyNoteWindow = () => {
+    const stickyNoteWindow = new BrowserWindow({
+        width: 300,
+        height: 300,
+        frame: false,
+        alwaysOnTop: true,
+        resizable: true,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+        // liquid glass effect
+        transparent: true,
+        vibrancy: 'sidebar',
+    });
+
+    if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+        stickyNoteWindow.loadURL(`${MAIN_WINDOW_VITE_DEV_SERVER_URL}/sticky-note.html`);
+    } else {
+        stickyNoteWindow.loadFile(
+            path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/sticky-note.html`)
+        );
+    }
+
+    // Open the DevTools.
+    stickyNoteWindow.webContents.openDevTools();
+};
+
+ipcMain.on('open-sticky-note', createStickyNoteWindow);
+
+ipcMain.on('pin-toggle', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win) {
+        const isAlwaysOnTop = win.isAlwaysOnTop();
+        win.setAlwaysOnTop(!isAlwaysOnTop);
+    }
+});
+
+ipcMain.on('close-window', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win) {
+        win.close();
+    }
+});
+
+ipcMain.on('set-opacity', (event, opacity: number) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win) {
+        win.setOpacity(opacity);
+    }
+});

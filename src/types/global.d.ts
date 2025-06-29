@@ -49,6 +49,22 @@ declare global {
                 basename: (path: string) => string;
             };
         };
+        electron?: {
+            setZoomFactor: (factor: number) => void;
+            getZoomFactor: () => number;
+            openStickyNote: () => void;
+            togglePin: () => void;
+            closeWindow: () => void;
+            setOpacity: (opacity: number) => void;
+        };
+        stickyNoteAPI?: {
+            close: () => Promise<void>;
+            minimize: () => Promise<void>;
+            saveNote: (content: string) => Promise<void>;
+            loadNote: () => Promise<string>;
+            addToCollection: (content: string) => Promise<void>;
+            quickCapture: () => Promise<void>;
+        };
     }
 
     interface FileNode {

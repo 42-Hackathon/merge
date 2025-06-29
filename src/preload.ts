@@ -16,7 +16,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     createFile: (parentDir: string, fileName: string) =>
         ipcRenderer.invoke('fs:create-file', { parentDir, fileName }),
     readFile: (filePath: string) => ipcRenderer.invoke('fs:read-file', filePath),
-    renameItem: (itemPath: string, newName: string) => 
+    renameItem: (itemPath: string, newName: string) =>
         ipcRenderer.invoke('fs:rename-item', { itemPath, newName }),
     deleteItem: (itemPath: string) => ipcRenderer.invoke('fs:delete-item', itemPath),
     moveItem: (sourcePath: string, destinationPath: string) =>
@@ -46,6 +46,30 @@ contextBridge.exposeInMainWorld('electronAPI', {
         }
     },
     removeAllListeners: (channel: string) => ipcRenderer.removeAllListeners(channel),
+});
+
+// feat/stickymemo에서 추가된 electron API
+const { webFrame } = require('electron');
+
+contextBridge.exposeInMainWorld('electron', {
+    setZoomFactor: (factor: number) => {
+        webFrame.setZoomFactor(factor);
+    },
+    getZoomFactor: () => {
+        return webFrame.getZoomFactor();
+    },
+    openStickyNote: () => {
+        ipcRenderer.send('open-sticky-note');
+    },
+    togglePin: () => {
+        ipcRenderer.send('pin-toggle');
+    },
+    closeWindow: () => {
+        ipcRenderer.send('close-window');
+    },
+    setOpacity: (opacity: number) => {
+        ipcRenderer.send('set-opacity', opacity);
+    },
 });
 
 // Expose a limited API for the sticky note window

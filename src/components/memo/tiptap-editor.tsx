@@ -16,108 +16,97 @@ import Strike from '@tiptap/extension-strike';
 import Code from '@tiptap/extension-code';
 
 export interface TiptapEditorHandle {
-  editor: Editor | null;
+    editor: Editor | null;
 }
 
 interface TiptapEditorProps {
-  content: string;
-  onContentChange: (content: string) => void;
-  onDragOver?: React.DragEventHandler<HTMLDivElement>;
-  onDragLeave?: React.DragEventHandler<HTMLDivElement>;
-  onDrop?: React.DragEventHandler<HTMLDivElement>;
+    content: string;
+    onContentChange: (content: string) => void;
+    onDragOver?: React.DragEventHandler<HTMLDivElement>;
+    onDragLeave?: React.DragEventHandler<HTMLDivElement>;
+    onDrop?: React.DragEventHandler<HTMLDivElement>;
 }
 
-export const TiptapEditor = forwardRef<TiptapEditorHandle, TiptapEditorProps>(({ 
-    content, 
-    onContentChange,
-    onDragOver,
-    onDragLeave,
-    onDrop,
-}, ref) => {
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
-        // Manually control formatting options to avoid conflicts
-        bold: false,
-        italic: false,
-        strike: false,
-        code: false,
-      }),
-      // Re-add them as individual extensions
-      Bold,
-      Italic,
-      Strike,
-      Code,
-      Underline,
-      TextStyle,
-      Color,
-      Highlight.configure({ multicolor: true }),
-      Placeholder.configure({
-        placeholder: ({ node }) => {
-          if (node.type.name === 'heading') {
-            return '제목...';
-          }
-          return '여기에 내용을 작성하세요...';
-        },
-      }),
-      Pill,
-      SlashCommandExtension,
-    ],
-    content: content,
-    onUpdate: ({ editor }) => {
-      onContentChange(editor.getHTML());
-    },
-    editorProps: {
-      attributes: {
-        spellcheck: 'false',
-      },
-    },
-  });
+export const TiptapEditor = forwardRef<TiptapEditorHandle, TiptapEditorProps>(
+    ({ content, onContentChange, onDragOver, onDragLeave, onDrop }, ref) => {
+        const editor = useEditor({
+            extensions: [
+                StarterKit.configure({
+                    heading: { levels: [1, 2, 3] },
+                    // Manually control formatting options to avoid conflicts
+                    bold: false,
+                    italic: false,
+                    strike: false,
+                    code: false,
+                }),
+                // Re-add them as individual extensions
+                Bold,
+                Italic,
+                Strike,
+                Code,
+                Underline,
+                TextStyle,
+                Color,
+                Highlight.configure({ multicolor: true }),
+                Placeholder.configure({
+                    placeholder: ({ node }) => {
+                        if (node.type.name === 'heading') {
+                            return '제목...';
+                        }
+                        return '여기에 내용을 작성하세요...';
+                    },
+                }),
+                Pill,
+                SlashCommandExtension,
+            ],
+            content: content,
+            onUpdate: ({ editor }) => {
+                onContentChange(editor.getHTML());
+            },
+            editorProps: {
+                attributes: {
+                    spellcheck: 'false',
+                },
+            },
+        });
 
-  useImperativeHandle(ref, () => ({
-    editor,
-  }));
+        useImperativeHandle(ref, () => ({
+            editor,
+        }));
 
-  return (
-    <div 
-      className="relative flex-1 flex flex-col h-full"
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
-    >
-        {editor && (
-            <BubbleMenu
-              editor={editor}
-              tippyOptions={{ duration: 100 }}
-              shouldShow={({ state }) => {
-                const { selection } = state;
-                
-                // 1. Don't show for NodeSelections (e.g. when a Pill is clicked)
-                if (selection instanceof NodeSelection) {
-                  return false;
-                }
-                
-                // 2. Don't show for empty selections
-                if (selection.empty) {
-                  return false;
-                }
-
-                // 3. Don't show on the first line (title)
-                const { from } = selection;
-                const firstNode = state.doc.content.firstChild;
-                if (firstNode && from <= firstNode.nodeSize) {
-                    return false;
-                }
-                
-                // All checks passed, it's a valid text selection.
-                return true;
-              }}
+        return (
+            <div
+                className="relative flex-1 flex flex-col h-full"
+                onDragOver={onDragOver}
+                onDragLeave={onDragLeave}
+                onDrop={onDrop}
             >
-                <FormattingToolbar editor={editor} />
-            </BubbleMenu>
-        )}
-        <EditorContent editor={editor} className="flex-1 overflow-y-auto p-4 h-full" />
-    </div>
-  );
-}); 
+                {editor && (
+                    <BubbleMenu
+                        editor={editor}
+                        tippyOptions={{ duration: 100 }}
+                        shouldShow={({ state }) => {
+                            const { selection } = state;
+
+                            // 1. Don't show for NodeSelections (e.g. when a Pill is clicked)
+                            if (selection instanceof NodeSelection) {
+                                return false;
+                            }
+
+                            // 2. Don't show for empty selections
+                            if (selection.empty) {
+                                return false;
+                            }
+
+                            // All checks passed, it's a valid text selection.
+                            return true;
+                        }}
+                    >
+                        <FormattingToolbar editor={editor} />
+                    </BubbleMenu>
+                )}
+                <EditorContent editor={editor} className="flex-1 overflow-y-auto p-4 h-full" />
+            </div>
+        );
+    }
+);
