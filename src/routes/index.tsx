@@ -1,23 +1,22 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, useMotionValue, animate } from 'framer-motion';
-import { Header } from '@/components/layout/header';
-import { EnhancedSidebar } from '@/components/layout/enhanced-sidebar';
-import { DraggableContentGrid } from '@/components/content/draggable-content-grid';
-import { EnhancedMemoSidebar } from '@/components/memo/enhanced-memo-sidebar';
-import { SearchModal } from '@/components/search/search-modal';
-import { MonacoWorkspace } from '@/components/editor/monaco-workspace';
-import { StatusBar } from '@/components/ui/status-bar';
-import { Button } from '@/components/ui/button';
+import { Header } from '../components/layout/header';
+import { EnhancedSidebar } from '../components/layout/enhanced-sidebar';
+import { DraggableContentGrid } from '../components/content/draggable-content-grid';
+import { EnhancedMemoSidebar } from '../components/memo/enhanced-memo-sidebar';
+import { SearchModal } from '../components/search/search-modal';
+import { MonacoWorkspace } from '../components/editor/monaco-workspace';
+import { StatusBar } from '../components/ui/status-bar';
+import { Button } from '../components/ui/button';
 import { PanelRightOpen } from 'lucide-react';
-import { mockContentItems } from '@/data/mock-data';
-import { ContentItem } from '@/types/content';
+import { mockContentItems } from '../data/mock-data';
+import { ContentItem } from '../types/content';
 import { AnimatePresence } from 'framer-motion';
-import { useTabStore } from '@/hooks/useTabStore';
-import { FileViewer } from '@/components/content/file-viewer';
-import { TabBar } from '@/components/layout/TabBar';
-
+import { useTabStore } from '../hooks/useTabStore';
+import { FileViewer } from '../components/content/file-viewer';
+import { TabBar } from '../components/layout/TabBar';
 export default function Index() {
-    const [items] = useState<ContentItem[]>(mockContentItems);
+    const [items, setItems] = useState<ContentItem[]>(mockContentItems);
     const [viewMode, setViewMode] = useState<'masonry' | 'grid' | 'list' | 'justified'>('masonry');
     const [selectedFolder, setSelectedFolder] = useState('all');
 
@@ -26,51 +25,15 @@ export default function Index() {
     const [rightSidebarWidth, setRightSidebarWidth] = useState(288);
     const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
     const [zoomLevel, setZoomLevel] = useState(100);
-    const [cursorPosition, setCursorPosition] = useState({ lineNumber: 1, column: 1 });
+    const [cursorPosition] = useState({ lineNumber: 1, column: 1 });
     const [isCollabActive, setIsCollabActive] = useState(false);
 
     const sidebarWidth = useMotionValue(288);
-    const [isResizing, setIsResizing] = useState(false);
 
     // Modal states
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [rightSidebarMode, setRightSidebarMode] = useState<'memo' | 'chat' | 'view'>('memo');
-
-    const handleResizeMouseDown = useCallback(
-        (e: React.MouseEvent) => {
-            e.preventDefault();
-            setIsResizing(true);
-
-            const startX = e.clientX;
-            const startWidth = sidebarWidth.get();
-
-            const handleMouseMove = (e: MouseEvent) => {
-                const deltaX = e.clientX - startX;
-                const newWidth = startWidth + deltaX;
-                const minWidth = 240;
-                const maxWidth = 500;
-
-                if (newWidth >= minWidth && newWidth <= maxWidth) {
-                    sidebarWidth.set(newWidth);
-                }
-            };
-
-            const handleMouseUp = () => {
-                setIsResizing(false);
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-                document.body.style.cursor = '';
-                document.body.style.userSelect = '';
-            };
-
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-            document.body.style.cursor = 'col-resize';
-            document.body.style.userSelect = 'none';
-        },
-        [sidebarWidth]
-    );
 
     const handleResetWidth = useCallback(() => {
         animate(sidebarWidth, 288, {
@@ -79,6 +42,11 @@ export default function Index() {
             damping: 30,
         });
     }, [sidebarWidth]);
+
+    // 디버깅: 탭 상태 로그
+    useEffect(() => {
+        console.log('🔍 상태:', { tabsLength: tabs.length, activeTabId });
+    }, [tabs.length, activeTabId]);
 
     // Cleanup on unmount
     useEffect(() => {
@@ -90,13 +58,61 @@ export default function Index() {
 
     const handleItemSelect = useCallback(
         (item: ContentItem) => {
-            // Convert ContentItem to FileNode format for useTabStore
+            console.log('🎯 파일 선택됨:', item);
+
+            // 파일 타입별로 적절하게 처리
+            if (item.type === 'link') {
+                // 링크는 외부 브라우저에서 열기
+                if (item.path && (item.path.startsWith('http') || item.path.startsWith('https'))) {
+                    window.open(item.path, '_blank');
+                } else {
+                    alert('유효하지 않은 링크입니다.');
+                }
+                return;
+            }
+
+            if (item.type === 'image') {
+                // 이미지는 전용 뷰어로 열기 (일단 탭으로)
+                const fileNode: FileNode = {
+                    id: item.id,
+                    name: item.title,
+                    path: item.metadata?.originalPath || item.path || item.id,
+                    type: 'image',
+                };
+                openTab(fileNode);
+                return;
+            }
+
+            if (item.type === 'video') {
+                // 비디오 파일
+                const fileNode: FileNode = {
+                    id: item.id,
+                    name: item.title,
+                    path: item.metadata?.originalPath || item.path || item.id,
+                    type: 'unsupported', // 현재 FileNode 타입에 video가 없음
+                };
+                openTab(fileNode);
+                return;
+            }
+
+            if (item.type === 'text' && item.metadata?.originalPath) {
+                // 실제 텍스트 파일 (드래그앤드롭으로 추가된 파일)
+                const fileNode: FileNode = {
+                    id: item.id,
+                    name: item.title,
+                    path: item.metadata.originalPath,
+                    type: 'text',
+                };
+                openTab(fileNode);
+                return;
+            }
+
+            // 기본적으로 모든 콘텐츠는 탭으로 열기 시도
             const fileNode: FileNode = {
                 id: item.id,
                 name: item.title,
-                path: item.path || item.id, // Use path if available, otherwise fallback to id
-                icon: undefined as any, // Will be set by the store
-                count: 0, // Default value
+                path: item.metadata?.originalPath || item.path || item.id,
+                type: item.type === 'text' ? 'text' : 'unsupported',
             };
             openTab(fileNode);
         },
@@ -138,6 +154,9 @@ export default function Index() {
 
     const handleFolderSelect = (folderId: string) => {
         setSelectedFolder(folderId);
+        // 카테고리 선택 시 activeTabId를 null로 설정하여 콘텐츠 그리드 표시
+        setActiveTab(''); // 빈 문자열로 설정하여 탭 비활성화
+        console.log('🔍 카테고리 선택:', folderId, '탭 비활성화');
     };
 
     const getFolderName = (folderId: string) => {
@@ -176,6 +195,108 @@ export default function Index() {
     const handleCollabToggle = () => {
         setIsCollabActive((prev) => !prev);
     };
+
+    // 파일 타입 감지 함수
+    const getFileType = (fileName: string): ContentItem['type'] => {
+        const ext = fileName.split('.').pop()?.toLowerCase() || '';
+
+        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'bmp', 'ico'];
+        const videoExts = ['mp4', 'avi', 'mov', 'mkv', 'webm', 'flv', 'wmv'];
+        const textExts = [
+            'txt',
+            'md',
+            'json',
+            'js',
+            'ts',
+            'jsx',
+            'tsx',
+            'css',
+            'html',
+            'xml',
+            'yaml',
+            'yml',
+        ];
+
+        if (imageExts.includes(ext)) return 'image';
+        if (videoExts.includes(ext)) return 'video';
+        if (textExts.includes(ext)) return 'text';
+        return 'file';
+    };
+
+    // 파일을 ContentItem으로 변환 (경로 참조 방식)
+    const convertFileToContentItem = async (
+        file: File & { path?: string }
+    ): Promise<ContentItem> => {
+        const fileType = getFileType(file.name);
+        let content = '';
+
+        // 작은 텍스트 파일은 미리보기로 일부 내용 읽기
+        if (fileType === 'text' && file.size < 50 * 1024) {
+            // 50KB 미만만 미리보기
+            try {
+                const fullContent = await file.text();
+                content =
+                    fullContent.length > 200 ? fullContent.substring(0, 200) + '...' : fullContent;
+            } catch {
+                content = `텍스트 파일 미리보기를 읽을 수 없습니다.`;
+            }
+        } else {
+            content = `${fileType} 파일 - 크기: ${(file.size / 1024).toFixed(1)}KB`;
+        }
+
+        return {
+            id: `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            title: file.name,
+            content,
+            type: fileType,
+            stage: 'review',
+            tags: [fileType, 'imported'],
+            folderId:
+                fileType === 'image'
+                    ? 'images'
+                    : fileType === 'video'
+                    ? 'videos'
+                    : fileType === 'text'
+                    ? 'text'
+                    : 'files',
+            path: file.path || file.name, // 실제 파일 경로 저장
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            metadata: {
+                fileSize: file.size,
+                originalPath: file.path || file.webkitRelativePath || file.name,
+                ...(fileType === 'image' && { dimensions: { width: 0, height: 0 } }),
+            },
+        };
+    };
+
+    // 파일 드롭 핸들러
+    const handleFileDrop = useCallback(async (files: FileList) => {
+        console.log('🎯 파일 드롭 감지됨!', files.length, '개 파일');
+
+        const newItems: ContentItem[] = [];
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            console.log('📄 파일 처리 중:', file.name, file.type, file.size);
+            try {
+                const contentItem = await convertFileToContentItem(file);
+                newItems.push(contentItem);
+                console.log('✅ 파일 변환 완료:', contentItem.title);
+            } catch {
+                console.error('❌ 파일 변환 실패:', file.name);
+            }
+        }
+
+        if (newItems.length > 0) {
+            setItems((prev) => {
+                const updated = [...prev, ...newItems];
+                console.log('📊 아이템 추가됨! 총 개수:', updated.length);
+                return updated;
+            });
+            alert(`${newItems.length}개 파일이 추가되었습니다!`);
+        }
+    }, []);
 
     const filteredItems = items.filter((item) => {
         if (selectedFolder === 'all') return true;
@@ -224,7 +345,6 @@ export default function Index() {
                         <EnhancedSidebar
                             className="flex-shrink-0"
                             width={sidebarWidth}
-                            onResizeMouseDown={handleResizeMouseDown}
                             onResetWidth={handleResetWidth}
                             selectedFolder={selectedFolder}
                             onFolderSelect={handleFolderSelect}
@@ -238,6 +358,8 @@ export default function Index() {
                             onZoomIn={handleZoomIn}
                             onZoomOut={handleZoomOut}
                             cursorPosition={cursorPosition}
+                            onFileDrop={handleFileDrop}
+                            items={items}
                         />
                     )}
 
@@ -248,21 +370,25 @@ export default function Index() {
                             onTabChange={setActiveTab}
                             onTabClose={closeTab}
                         />
-                        {tabs.length > 0 ? (
-                            <div className="flex-1 p-4 overflow-y-auto">
-                                <FileViewer />
-                            </div>
-                        ) : (
-                            <DraggableContentGrid
-                                items={filteredItems}
-                                viewMode={viewMode}
-                                onViewModeChange={setViewMode}
-                                onItemSelect={handleItemSelect}
-                                selectedItems={[]}
-                                folderName={getFolderName(selectedFolder)}
-                                zoomLevel={zoomLevel}
-                            />
-                        )}
+                        <div className="flex-1 overflow-hidden">
+                            {/* 초간단 로직: activeTabId가 있으면 파일뷰어, 없으면 콘텐츠그리드 */}
+                            {activeTabId ? (
+                                <div className="h-full p-4 overflow-y-auto">
+                                    <FileViewer />
+                                </div>
+                            ) : (
+                                <DraggableContentGrid
+                                    items={filteredItems}
+                                    viewMode={viewMode}
+                                    onViewModeChange={setViewMode}
+                                    onItemSelect={handleItemSelect}
+                                    selectedItems={[]}
+                                    folderName={getFolderName(selectedFolder)}
+                                    zoomLevel={zoomLevel}
+                                    onFileDrop={handleFileDrop}
+                                />
+                            )}
+                        </div>
                     </div>
 
                     {/* Right Sidebar - Fixed Position */}

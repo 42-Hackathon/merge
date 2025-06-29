@@ -2,6 +2,7 @@ import { MotionValue } from 'framer-motion';
 import { LucideProps } from 'lucide-react';
 import * as React from 'react';
 import type { ComponentProps, RefAttributes } from 'react';
+import type { ContentItem } from '../../../types/content';
 
 // react-dnd item type
 export const ItemTypes = {
@@ -44,6 +45,7 @@ export interface FolderItemComponentProps {
     onRemoveFromWorkspace?: (id: string) => void;
     expandedFolders: Set<string>;
     selectedFolder: string | undefined;
+    onFileDrop?: (files: FileList) => void;
 }
 
 export interface SidebarHeaderProps {
@@ -81,6 +83,8 @@ export interface EnhancedSidebarProps extends Omit<ComponentProps<'div'>, 'onSel
     onZoomIn: () => void;
     onZoomOut: () => void;
     cursorPosition: { lineNumber: number; column: number };
+    onFileDrop?: (files: FileList) => void;
+    items?: ContentItem[]; // 실제 콘텐츠 아이템들
 }
 
 export interface SidebarTreeProps {
@@ -93,6 +97,7 @@ export interface SidebarTreeProps {
     selectedFolder: string | undefined;
     renamingItemId: string | null;
     onToggleFolder: (id: string) => void;
+    onFileSelect: (file: FileNode) => void;
     onFolderSelect: (folderId: string) => void;
     onNewFileInFolder: (id: string) => void;
     onNewFolderInFolder: (id: string) => void;
@@ -103,4 +108,5 @@ export interface SidebarTreeProps {
     handleNewFolder: () => void;
     handleOpenFolder: () => void;
     onRemoveFromWorkspace: (id: string) => void;
+    onFileDrop?: (files: FileList) => void;
 }

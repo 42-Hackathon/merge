@@ -25,6 +25,7 @@ interface DraggableContentGridProps {
     selectedItems: string[];
     folderName?: string;
     zoomLevel?: number;
+    onFileDrop?: (files: FileList) => void;
 }
 
 export function DraggableContentGrid({
@@ -35,11 +36,13 @@ export function DraggableContentGrid({
     selectedItems,
     folderName = '모든 콘텐츠',
     zoomLevel = 100,
+    onFileDrop,
 }: DraggableContentGridProps) {
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const [draggedItem, setDraggedItem] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editorContent, setEditorContent] = useState('');
+    const [isDragOver, setIsDragOver] = useState(false);
 
     const scale = (base: number) => base * (zoomLevel / 100);
 
@@ -82,6 +85,67 @@ export function DraggableContentGrid({
         const draggedElement = e.target as HTMLElement;
         if (draggedElement) {
             draggedElement.style.opacity = '1';
+        }
+    };
+
+    // 파일 드래그 오버 핸들러
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // 파일 드롭 허용 명시
+        e.dataTransfer.dropEffect = 'copy';
+
+        // 외부 파일 드래그인지 확인
+        const hasFiles = e.dataTransfer.types.includes('Files');
+        const hasContentItem = e.dataTransfer.types.includes('application/content-item');
+
+        console.log('🎯 드래그 오버:', hasFiles, hasContentItem, e.dataTransfer.types);
+
+        // 파일 드래그일 때 드롭 존 활성화 (조건 완화)
+        if (hasFiles && !isDragOver) {
+            console.log('✅ 드롭 존 활성화');
+            setIsDragOver(true);
+        }
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // 컨테이너를 완전히 벗어났을 때만 isDragOver를 false로 설정
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX;
+        const y = e.clientY;
+        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+            setIsDragOver(false);
+        }
+    };
+
+    // 파일 드롭 핸들러
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(false);
+
+        console.log('💧 파일 드롭됨!');
+
+        // 외부 파일 드래그인지 확인
+        const hasFiles = e.dataTransfer.types.includes('Files');
+        const hasContentItem = e.dataTransfer.types.includes('application/content-item');
+
+        console.log(
+            '📋 드롭 이벤트:',
+            hasFiles,
+            hasContentItem,
+            e.dataTransfer.files.length,
+            e.dataTransfer.types
+        );
+
+        // 실제 파일이 있으면 처리 (조건 완화)
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && onFileDrop) {
+            console.log('🎯 파일 처리 시작:', files.length, '개');
+            onFileDrop(files);
         }
     };
 
@@ -231,7 +295,51 @@ export function DraggableContentGrid({
 
             {/* Content Grid */}
             <div className="flex-1 flex overflow-hidden">
-                <div className="flex-1 overflow-y-auto" style={{ padding: `${scale(16)}px` }}>
+                <div
+                    className={`flex-1 overflow-y-auto relative ${
+                        isDragOver
+                            ? 'bg-blue-50/50 dark:bg-blue-900/20 border-2 border-dashed border-blue-400'
+                            : ''
+                    }`}
+                    style={{ padding: `${scale(16)}px` }}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                >
+                    {/* 드래그 오버 상태 표시 */}
+                    {isDragOver && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="absolute inset-0 flex items-center justify-center z-50 bg-blue-50/80 dark:bg-blue-900/40 backdrop-blur-sm"
+                        >
+                            <div className="text-center">
+                                <div className="text-blue-600 dark:text-blue-400 mb-2">
+                                    <svg
+                                        width="48"
+                                        height="48"
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                    >
+                                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                                    </svg>
+                                </div>
+                                <p
+                                    className="text-blue-600 dark:text-blue-400 font-medium"
+                                    style={{ fontSize: `${scale(16)}px` }}
+                                >
+                                    파일을 여기에 드롭하세요
+                                </p>
+                                <p
+                                    className="text-blue-500 dark:text-blue-300 mt-1"
+                                    style={{ fontSize: `${scale(12)}px` }}
+                                >
+                                    자동으로 타입별로 분류됩니다
+                                </p>
+                            </div>
+                        </motion.div>
+                    )}
+
                     {items.length === 0 ? (
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -254,6 +362,12 @@ export function DraggableContentGrid({
                             </p>
                             <p style={{ fontSize: `${scale(12)}px` }}>
                                 여기에 바로 작성하거나 콘텐츠를 수집해보세요
+                            </p>
+                            <p
+                                style={{ fontSize: `${scale(12)}px` }}
+                                className="mt-2 text-blue-500 dark:text-blue-400"
+                            >
+                                💡 팁: 로컬 폴더의 파일들을 여기로 드래그 앤 드롭할 수 있습니다
                             </p>
 
                             {/* Inline Editor */}

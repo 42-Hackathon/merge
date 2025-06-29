@@ -98,32 +98,10 @@ export const FolderItemComponent = memo(
         onRemoveFromWorkspace,
         onFileSelect,
         onFolderSelect,
+        onFileDrop,
     }: FolderItemComponentProps) => {
         const ref = useRef<HTMLDivElement>(null);
-
-        const [{ isDragging }, drag] = useDrag({
-            type: ItemTypes.FOLDER_ITEM,
-            item: { id: item.id, path: item.path },
-            collect: (monitor: DragSourceMonitor) => ({ isDragging: !!monitor.isDragging() }),
-        });
-
-        const [{ isOver, canDrop }, drop] = useDrop<
-            { id: string; path: string },
-            void,
-            { isOver: boolean; canDrop: boolean }
-        >(() => ({
-            accept: ItemTypes.FOLDER_ITEM,
-            canDrop: (draggedItem) => draggedItem.id !== item.id,
-            drop: (draggedItem) => {
-                moveItem(draggedItem.id, item.id);
-            },
-            collect: (monitor) => ({
-                isOver: monitor.isOver(),
-                canDrop: monitor.canDrop(),
-            }),
-        }));
-
-        drag(drop(ref));
+        const [isFileDropping, setIsFileDropping] = useState(false);
 
         const isFolder = !!item.children;
         const isExpanded = expandedFolders.has(item.id);
@@ -142,7 +120,101 @@ export const FolderItemComponent = memo(
             'clipboard',
             'screenshots',
         ].includes(item.id);
+
+        // 카테고리 폴더는 파일 드롭만 지원, 폴더 드래그는 비활성화
+        const enableFolderDrag = !isCategoryFolder;
+
+        const [{ isDragging }, drag] = useDrag({
+            type: ItemTypes.FOLDER_ITEM,
+            item: { id: item.id, path: item.path },
+            collect: (monitor: DragSourceMonitor) => ({ isDragging: !!monitor.isDragging() }),
+            canDrag: enableFolderDrag, // 카테고리 폴더는 드래그 비활성화
+        });
+
+        const [{ isOver, canDrop }, drop] = useDrop<
+            { id: string; path: string },
+            void,
+            { isOver: boolean; canDrop: boolean }
+        >(() => ({
+            accept: ItemTypes.FOLDER_ITEM,
+            canDrop: (draggedItem) => enableFolderDrag && draggedItem.id !== item.id,
+            drop: (draggedItem) => {
+                if (enableFolderDrag) {
+                    moveItem(draggedItem.id, item.id);
+                }
+            },
+            collect: (monitor) => ({
+                isOver: monitor.isOver(),
+                canDrop: monitor.canDrop(),
+            }),
+        }));
+
+        // 카테고리 폴더가 아닐 때만 react-dnd 적용
+        if (enableFolderDrag) {
+            drag(drop(ref));
+        }
         const isCategoryParent = item.id === 'categories';
+
+        // 파일 드롭 핸들러 (카테고리 폴더에만 적용)
+        const handleFileDragOver = (e: React.DragEvent) => {
+            if (!isCategoryFolder || !onFileDrop) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // 파일 드롭 허용 명시
+            e.dataTransfer.dropEffect = 'copy';
+
+            const hasFiles = e.dataTransfer.types.includes('Files');
+            const hasContentItem = e.dataTransfer.types.includes('application/content-item');
+
+            console.log(
+                '📂 사이드바 드래그 오버:',
+                item.name,
+                hasFiles,
+                hasContentItem,
+                e.dataTransfer.types
+            );
+
+            if (hasFiles && !isFileDropping) {
+                console.log('✅ 사이드바 드롭 존 활성화:', item.name);
+                setIsFileDropping(true);
+            }
+        };
+
+        const handleFileDragLeave = (e: React.DragEvent) => {
+            if (!isCategoryFolder || !onFileDrop) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+            setIsFileDropping(false);
+        };
+
+        const handleFileDrop = (e: React.DragEvent) => {
+            if (!isCategoryFolder || !onFileDrop) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+            setIsFileDropping(false);
+
+            console.log('💧 사이드바에 파일 드롭됨!', item.name);
+
+            const hasFiles = e.dataTransfer.types.includes('Files');
+            const hasContentItem = e.dataTransfer.types.includes('application/content-item');
+
+            console.log(
+                '📋 사이드바 드롭 이벤트:',
+                hasFiles,
+                hasContentItem,
+                e.dataTransfer.files.length,
+                e.dataTransfer.types
+            );
+
+            if (e.dataTransfer.files.length > 0) {
+                console.log('🎯 사이드바에서 파일 처리:', e.dataTransfer.files.length, '개');
+                onFileDrop(e.dataTransfer.files);
+            }
+        };
 
         const handleClick = () => {
             if (isCategoryParent) {
@@ -211,10 +283,16 @@ export const FolderItemComponent = memo(
                                     className={cn(
                                         'w-full h-full justify-start text-white/80 hover:text-white hover:bg-white/[0.12]',
                                         isSelected && 'bg-white/[0.2] text-white',
-                                        isOver && canDrop && 'bg-blue-500/30'
+                                        isOver && canDrop && 'bg-blue-500/30',
+                                        isFileDropping &&
+                                            isCategoryFolder &&
+                                            'bg-green-500/30 ring-2 ring-green-400/50'
                                     )}
                                     style={{ paddingLeft: `${scale(8) + level * scale(12)}px` }}
                                     onClick={handleClick}
+                                    onDragOver={handleFileDragOver}
+                                    onDragLeave={handleFileDragLeave}
+                                    onDrop={handleFileDrop}
                                 >
                                     {itemContent}
                                 </Button>
@@ -286,6 +364,7 @@ export const FolderItemComponent = memo(
                                         expandedFolders={expandedFolders}
                                         selectedFolder={selectedFolder}
                                         onRemoveFromWorkspace={onRemoveFromWorkspace}
+                                        onFileDrop={onFileDrop}
                                     />
                                 ))}
                             </div>
