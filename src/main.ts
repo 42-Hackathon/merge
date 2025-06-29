@@ -235,6 +235,31 @@ ipcMain.handle('sticky-note:close', () => {
     }
 });
 
+// --- Main Window Controls ---
+ipcMain.handle('window:minimize', () => {
+    if (mainWindow) {
+        mainWindow.minimize();
+    }
+});
+
+ipcMain.handle('window:maximize', () => {
+    if (mainWindow) {
+        if (mainWindow.isMaximized()) {
+            mainWindow.unmaximize();
+        } else {
+            mainWindow.maximize();
+        }
+        return mainWindow.isMaximized();
+    }
+    return false;
+});
+
+ipcMain.handle('window:close', () => {
+    if (mainWindow) {
+        mainWindow.close();
+    }
+});
+
 // --- File System IPC Handlers ---
 
 const itemExists = async (itemPath: string): Promise<boolean> => {

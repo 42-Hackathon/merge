@@ -17,6 +17,11 @@ declare global {
             onImportContent: (callback: () => void) => void;
             removeAllListeners: (channel: string) => void;
 
+            // Window Controls
+            minimizeWindow: () => Promise<void>;
+            maximizeWindow: () => Promise<boolean>;
+            closeWindow: () => Promise<void>;
+
             // File System API
             readFile: (
                 filePath: string

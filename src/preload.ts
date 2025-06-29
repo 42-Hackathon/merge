@@ -32,6 +32,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     showStickyNote: () => ipcRenderer.invoke('show-sticky-note'),
     hideStickyNote: () => ipcRenderer.invoke('hide-sticky-note'),
 
+    // --- Window Controls ---
+    minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
+    maximizeWindow: () => ipcRenderer.invoke('window:maximize'),
+    closeWindow: () => ipcRenderer.invoke('window:close'),
+
     // --- Event Listeners ---
     on: (channel: string, callback: (...args: any[]) => void) => {
         const validChannels = ['clipboard-content', 'new-collection', 'import-content'];

@@ -24,6 +24,24 @@ export function Header({
 }: HeaderProps) {
     const scale = (base: number) => base * (zoomLevel / 100);
 
+    const handleMinimize = () => {
+        if (window.electronAPI?.minimizeWindow) {
+            window.electronAPI.minimizeWindow();
+        }
+    };
+
+    const handleMaximize = () => {
+        if (window.electronAPI?.maximizeWindow) {
+            window.electronAPI.maximizeWindow();
+        }
+    };
+
+    const handleClose = () => {
+        if (window.electronAPI?.closeWindow) {
+            window.electronAPI.closeWindow();
+        }
+    };
+
     return (
         <motion.div
             initial={{ y: -50, opacity: 0 }}
@@ -151,79 +169,92 @@ export function Header({
                 </div>
 
                 {/* Right - Enhanced Controls */}
-                <div className="flex items-center px-4" style={{ columnGap: `${scale(8)}px` }}>
-                    <Button
+                <div className="flex items-center px-4 gap-1">
+                    <button
                         onClick={onStickyNoteToggle}
-                        variant="ghost"
-                        size="xs"
-                        className="text-zinc-600 dark:text-zinc-400 hover:bg-black/10 dark:hover:bg-white/10 backdrop-blur-xl transition-all duration-200 rounded-md flex items-center justify-center"
+                        className="group relative flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
                         style={{
                             height: `${scale(28)}px`,
                             width: `${scale(28)}px`,
                         }}
                         title="스티키 노트"
                     >
-                        <StickyNote style={{ width: `${scale(14)}px`, height: `${scale(14)}px` }} />
-                    </Button>
+                        <div className="absolute inset-0 rounded-full bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 backdrop-blur-sm" />
+                        <StickyNote
+                            className="relative z-10 text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors duration-200"
+                            style={{ width: `${scale(14)}px`, height: `${scale(14)}px` }}
+                        />
+                    </button>
 
-                    <Button
-                        variant="ghost"
-                        size="xs"
-                        className="text-zinc-600 dark:text-zinc-400 hover:bg-black/10 dark:hover:bg-white/10 backdrop-blur-xl transition-all duration-200 rounded-md flex items-center justify-center"
+                    <button
+                        className="group relative flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
                         style={{
                             height: `${scale(28)}px`,
                             width: `${scale(28)}px`,
                         }}
                         title="설정"
                     >
-                        <Settings style={{ width: `${scale(14)}px`, height: `${scale(14)}px` }} />
-                    </Button>
+                        <div className="absolute inset-0 rounded-full bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 backdrop-blur-sm" />
+                        <Settings
+                            className="relative z-10 text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors duration-200"
+                            style={{ width: `${scale(14)}px`, height: `${scale(14)}px` }}
+                        />
+                    </button>
 
                     <div
-                        className="w-px bg-black/10 dark:bg-white/20"
+                        className="w-px bg-black/10 dark:bg-white/20 mx-2"
                         style={{ height: `${scale(20)}px` }}
                     />
 
-                    {/* Window Controls */}
-                    <div className="flex items-center">
-                        <Button
-                            variant="ghost"
-                            size="xs"
-                            className="text-zinc-600 dark:text-zinc-400 hover:bg-black/10 dark:hover:bg-white/10 backdrop-blur-xl transition-all duration-200 flex items-center justify-center rounded-r-none"
+                    {/* Window Controls - Liquid Glass Style */}
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={handleMinimize}
+                            className="group relative flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
                             style={{
                                 height: `${scale(28)}px`,
-                                width: `${scale(32)}px`,
+                                width: `${scale(28)}px`,
                             }}
                             title="최소화"
                         >
-                            <Minus style={{ width: `${scale(12)}px`, height: `${scale(12)}px` }} />
-                        </Button>
+                            <div className="absolute inset-0 rounded-full bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 backdrop-blur-sm" />
+                            <Minus
+                                className="relative z-10 text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors duration-200"
+                                style={{ width: `${scale(14)}px`, height: `${scale(14)}px` }}
+                            />
+                        </button>
 
-                        <Button
-                            variant="ghost"
-                            size="xs"
-                            className="text-zinc-600 dark:text-zinc-400 hover:bg-black/10 dark:hover:bg-white/10 backdrop-blur-xl transition-all duration-200 flex items-center justify-center rounded-none border-x border-black/10 dark:border-white/10"
+                        <button
+                            onClick={handleMaximize}
+                            className="group relative flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
                             style={{
                                 height: `${scale(28)}px`,
-                                width: `${scale(32)}px`,
+                                width: `${scale(28)}px`,
                             }}
                             title="최대화"
                         >
-                            <Square style={{ width: `${scale(10)}px`, height: `${scale(10)}px` }} />
-                        </Button>
+                            <div className="absolute inset-0 rounded-full bg-black/5 dark:bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 backdrop-blur-sm" />
+                            <Square
+                                className="relative z-10 text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors duration-200"
+                                style={{ width: `${scale(12)}px`, height: `${scale(12)}px` }}
+                            />
+                        </button>
 
-                        <Button
-                            variant="ghost"
-                            size="xs"
-                            className="text-zinc-600 dark:text-zinc-400 hover:bg-red-500/80 dark:hover:bg-red-500/50 hover:text-white dark:hover:text-white backdrop-blur-xl transition-all duration-200 flex items-center justify-center rounded-l-none"
+                        <button
+                            onClick={handleClose}
+                            className="group relative flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
                             style={{
                                 height: `${scale(28)}px`,
-                                width: `${scale(32)}px`,
+                                width: `${scale(28)}px`,
                             }}
                             title="닫기"
                         >
-                            <X style={{ width: `${scale(12)}px`, height: `${scale(12)}px` }} />
-                        </Button>
+                            <div className="absolute inset-0 rounded-full bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 backdrop-blur-sm" />
+                            <X
+                                className="relative z-10 text-zinc-700 dark:text-zinc-300 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors duration-200"
+                                style={{ width: `${scale(14)}px`, height: `${scale(14)}px` }}
+                            />
+                        </button>
                     </div>
                 </div>
             </div>
