@@ -1,27 +1,76 @@
+import 'react';
+
 export {};
 
 declare global {
-  interface Window {
-    electronAPI: {
-      fs: {
-        existsSync: (path: string) => boolean;
-      };
-      path: {
-        extname: (path: string) => string;
-        basename: (path: string) => string;
-      };
-      getClipboardContent: () => Promise<string>;
-      setClipboardContent: (content: string) => Promise<void>;
-      captureScreenshot: () => Promise<string | null>;
-      showStickyNote: () => Promise<void>;
-      hideStickyNote: () => Promise<void>;
-      onClipboardContent: (callback: (content: string) => void) => void;
-      onNewCollection: (callback: () => void) => void;
-      onImportContent: (callback: () => void) => void;
-      removeAllListeners: (channel: string) => void;
-    };
-    stickyNoteAPI: {
-      // ... existing stickyNoteAPI types
+    interface Window {
+        electronAPI?: {
+            initDataStructure: () => Promise<{ success: boolean; path?: string; error?: string }>;
+            openFolderDialog: () => Promise<LocalFolderData | undefined>;
+            getClipboardContent: () => Promise<string>;
+            setClipboardContent: (content: string) => Promise<void>;
+            captureScreenshot: () => Promise<string | null>;
+            showStickyNote: () => Promise<void>;
+            hideStickyNote: () => Promise<void>;
+            onClipboardContent: (callback: (content: string) => void) => void;
+            onNewCollection: (callback: () => void) => void;
+            onImportContent: (callback: () => void) => void;
+            removeAllListeners: (channel: string) => void;
+
+            // File System API
+            readFile: (
+                filePath: string
+            ) => Promise<{ success: boolean; data?: FileData; error?: string }>;
+            createFolder: (args: {
+                parentDir: string;
+                folderName: string;
+            }) => Promise<{ success: boolean; newItem?: FileNode; error?: string }>;
+            createFile: (args: {
+                parentDir: string;
+                fileName: string;
+            }) => Promise<{ success: boolean; newItem?: FileNode; error?: string }>;
+            moveItem: (args: {
+                sourcePath: string;
+                destinationPath: string;
+            }) => Promise<{ success: boolean; error?: string }>;
+            renameItem: (args: {
+                itemPath: string;
+                newName: string;
+            }) => Promise<{ success: boolean; path?: string; error?: string }>;
+            deleteItem: (itemPath: string) => Promise<{ success: boolean; error?: string }>;
+            getDirectoryTree: (rootPath: string) => Promise<FileNode | null>;
+
+            // 기존 merge에 있던 fs, path API도 유지
+            fs: {
+                existsSync: (path: string) => boolean;
+            };
+            path: {
+                extname: (path: string) => string;
+                basename: (path: string) => string;
+            };
+        };
     }
-  }
-} 
+
+    interface FileNode {
+        id: string; // full path
+        path: string; // The real, absolute path in the file system
+        name: string;
+        children?: FileNode[]; // Optional for files
+        type?: 'markdown' | 'text' | 'image' | 'unsupported' | 'pdf' | 'html';
+        icon?: string;
+        count?: number;
+        isExpanded?: boolean;
+        depth?: number;
+    }
+
+    interface LocalFolderData {
+        id: string;
+        name: string;
+        children: LocalFolderData[];
+    }
+
+    interface FileData {
+        content: string;
+        type: string;
+    }
+}
