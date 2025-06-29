@@ -2,16 +2,16 @@ import { useState, useMemo, useCallback } from 'react';
 import { motion, MotionValue, PanInfo } from 'framer-motion';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { 
-  Folder, 
-  FileText,
+import {
+    Folder,
+    FileText,
     FolderPlus,
     FolderDown,
     Link,
-  Image,
-  Video,
-  Clipboard,
-  Camera,
+    Image,
+    Video,
+    Clipboard,
+    Camera,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -32,6 +32,7 @@ import { FolderItemComponent } from './sidebar/FolderItem';
 import { SidebarHeader } from './sidebar/SidebarHeader';
 import { SidebarFooter } from './sidebar/SidebarFooter';
 import { useTabStore } from '../../hooks/useTabStore';
+import { mockContentItems } from '../../data/mock-data';
 
 function findItemById(items: FileNode[], id: string): FileNode | null {
     for (const item of items) {
@@ -73,6 +74,7 @@ interface SidebarTreeProps {
     renamingItemId: string | null;
     onToggleFolder: (id: string) => void;
     onFileSelect: (file: FileNode) => void;
+    onFolderSelect: (folderId: string) => void;
     onNewFileInFolder: (id: string) => void;
     onNewFolderInFolder: (id: string) => void;
     onDeleteFolder: (id: string) => void;
@@ -95,6 +97,7 @@ const SidebarTree = ({
     renamingItemId,
     onToggleFolder,
     onFileSelect,
+    onFolderSelect,
     onNewFileInFolder,
     onNewFolderInFolder,
     onDeleteFolder,
@@ -183,6 +186,7 @@ const SidebarTree = ({
                     scale={scale}
                     onToggleFolder={onToggleFolder}
                     onFileSelect={onFileSelect}
+                    onFolderSelect={onFolderSelect}
                     onNewFileInFolder={(id) => onNewFileInFolder(id)}
                     onNewFolderInFolder={(id) => onNewFolderInFolder(id)}
                     onDeleteFolder={(id) => onDeleteFolder(id)}
@@ -199,23 +203,24 @@ const SidebarTree = ({
     );
 };
 
-export function EnhancedSidebar({ 
+export function EnhancedSidebar({
     className,
     width: widthProp,
-  onResetWidth,
-  selectedFolder, 
+    onResetWidth,
+    selectedFolder,
+    onFolderSelect,
     isCollapsed,
-  onToggleCollapse,
-  isCollabActive,
-  onCollabToggle,
-  zoomLevel,
-  onZoomIn,
-  onZoomOut,
-  cursorPosition,
+    onToggleCollapse,
+    isCollabActive,
+    onCollabToggle,
+    zoomLevel,
+    onZoomIn,
+    onZoomOut,
+    cursorPosition,
 }: EnhancedSidebarProps) {
     const { openTab } = useTabStore();
     const [linkedFolders, setLinkedFolders] = useState<FileNode[]>([]);
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['categories']));
+    const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['categories']));
     const [renamingItemId, setRenamingItemId] = useState<string | null>(null);
 
     const isCategoriesExpanded = useMemo(
@@ -327,7 +332,7 @@ export function EnhancedSidebar({
                           )
                         : folders;
                     setLinkedFolders(await refreshAllFolders(postRenameFolders));
-    } else {
+                } else {
                     toast.error(`Rename failed: ${result.error}`);
                 }
             }
@@ -431,30 +436,56 @@ export function EnhancedSidebar({
         }
     }, [linkedFolders, convertDataToFolderItem]);
 
-    const categoriesFolder = useMemo(
-        (): FileNode => ({
+    const categoriesFolder = useMemo((): FileNode => {
+        const textCount = mockContentItems.filter(
+            (item) => item.type === 'text' && item.folderId !== 'memo'
+        ).length;
+        const linksCount = mockContentItems.filter((item) => item.type === 'link').length;
+        const imagesCount = mockContentItems.filter((item) => item.type === 'image').length;
+        const videosCount = mockContentItems.filter((item) => item.type === 'video').length;
+        const clipboardCount = mockContentItems.filter(
+            (item) => item.folderId === 'clipboard'
+        ).length;
+        const screenshotsCount = mockContentItems.filter(
+            (item) => item.folderId === 'screenshots'
+        ).length;
+        const memoCount = mockContentItems.filter((item) => item.folderId === 'memo').length;
+
+        return {
             id: 'categories',
             path: 'categories',
             name: '모든 콘텐츠',
             icon: Folder,
-            count: 6,
+            count: mockContentItems.length,
             children: [
-                { id: 'text', path: 'text', name: '텍스트 하이라이팅', icon: FileText, count: 0 },
-                { id: 'links', path: 'links', name: '링크', icon: Link, count: 0 },
-                { id: 'images', path: 'images', name: '이미지', icon: Image, count: 0 },
-                { id: 'videos', path: 'videos', name: '동영상', icon: Video, count: 0 },
-                { id: 'clipboard', path: 'clipboard', name: '클립보드', icon: Clipboard, count: 0 },
+                {
+                    id: 'text',
+                    path: 'text',
+                    name: '텍스트 하이라이팅',
+                    icon: FileText,
+                    count: textCount,
+                },
+                { id: 'links', path: 'links', name: '링크', icon: Link, count: linksCount },
+                { id: 'images', path: 'images', name: '이미지', icon: Image, count: imagesCount },
+                { id: 'videos', path: 'videos', name: '동영상', icon: Video, count: videosCount },
+                { id: 'memo', path: 'memo', name: '메모', icon: FileText, count: memoCount },
+                {
+                    id: 'clipboard',
+                    path: 'clipboard',
+                    name: '클립보드',
+                    icon: Clipboard,
+                    count: clipboardCount,
+                },
                 {
                     id: 'screenshots',
                     path: 'screenshots',
                     name: '스크린샷',
                     icon: Camera,
-                    count: 0,
+                    count: screenshotsCount,
                 },
             ],
-        }),
-        []
-    );
+        };
+    }, []);
 
     const expandableUserFolderIds = useMemo(
         () => getAllExpandableIds(linkedFolders),
@@ -501,23 +532,23 @@ export function EnhancedSidebar({
         if (newWidth >= minWidth && newWidth <= maxWidth) {
             width.set(newWidth);
         }
-  };
+    };
 
-  return (
+    return (
         <DndProvider backend={HTML5Backend}>
-    <motion.div
+            <motion.div
                 className={cn('h-full flex flex-col relative', className)}
                 style={{ width: widthProp }}
                 animate={{ width: isCollapsed ? 48 : (widthProp as MotionValue<number>).get() }}
                 transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 0.5 }}
-    >
-      <div className="flex-1 flex flex-col relative overflow-hidden border-r border-white/[0.15]">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-400/[0.15] via-cyan-300/[0.08] to-blue-600/[0.12]" />
-        <div className="absolute inset-0 backdrop-blur-3xl" />
-        <div className="absolute inset-0 bg-white/[0.03]" />
-        <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/[0.08] to-transparent" />
-        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gradient-to-tl from-blue-300/[0.05] to-transparent" />
-        
+            >
+                <div className="flex-1 flex flex-col relative overflow-hidden border-r border-white/[0.15]">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400/[0.15] via-cyan-300/[0.08] to-blue-600/[0.12]" />
+                    <div className="absolute inset-0 backdrop-blur-3xl" />
+                    <div className="absolute inset-0 bg-white/[0.03]" />
+                    <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/[0.08] to-transparent" />
+                    <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gradient-to-tl from-blue-300/[0.05] to-transparent" />
+
                     <div className="relative z-10 flex flex-col flex-1">
                         <SidebarHeader
                             isCollapsed={isCollapsed}
@@ -541,6 +572,7 @@ export function EnhancedSidebar({
                             renamingItemId={renamingItemId}
                             onToggleFolder={handleToggleFolder}
                             onFileSelect={openTab}
+                            onFolderSelect={onFolderSelect}
                             onNewFileInFolder={(id) => handleNewItem('file', id)}
                             onNewFolderInFolder={(id) => handleNewItem('folder', id)}
                             onDeleteFolder={handleDeleteFolder}
@@ -550,9 +582,9 @@ export function EnhancedSidebar({
                             handleNewFolder={() => handleNewItem('folder')}
                             handleOpenFolder={handleOpenFolder}
                             onRemoveFromWorkspace={handleRemoveFromWorkspace}
-                />
-              </div>
-            </div>
+                        />
+                    </div>
+                </div>
 
                 <SidebarFooter
                     isCollapsed={isCollapsed}
@@ -573,7 +605,7 @@ export function EnhancedSidebar({
                 >
                     <div className="w-full h-full transition-colors duration-200 group-hover:bg-blue-500/50" />
                 </motion.div>
-    </motion.div>
+            </motion.div>
         </DndProvider>
-  );
+    );
 }

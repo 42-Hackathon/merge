@@ -1,7 +1,7 @@
 import { MotionValue } from 'framer-motion';
 import { LucideProps } from 'lucide-react';
-import React, { RefAttributes } from 'react';
-import type { ComponentProps } from 'react';
+import * as React from 'react';
+import type { ComponentProps, RefAttributes } from 'react';
 
 // react-dnd item type
 export const ItemTypes = {
@@ -33,6 +33,7 @@ export interface FolderItemComponentProps {
     scale: (base: number) => number;
     onToggleFolder: (id: string) => void;
     onFileSelect: (file: FileNode) => void;
+    onFolderSelect?: (folderId: string) => void;
     onNewFileInFolder: (id: string) => void;
     onNewFolderInFolder: (id: string) => void;
     onDeleteFolder: (id: string) => void;
@@ -71,6 +72,7 @@ export interface EnhancedSidebarProps extends Omit<ComponentProps<'div'>, 'onSel
     width: number | MotionValue<number>;
     onResetWidth: () => void;
     selectedFolder: string;
+    onFolderSelect: (folderId: string) => void;
     isCollapsed: boolean;
     onToggleCollapse: () => void;
     isCollabActive: boolean;
@@ -91,6 +93,7 @@ export interface SidebarTreeProps {
     selectedFolder: string | undefined;
     renamingItemId: string | null;
     onToggleFolder: (id: string) => void;
+    onFolderSelect: (folderId: string) => void;
     onNewFileInFolder: (id: string) => void;
     onNewFolderInFolder: (id: string) => void;
     onDeleteFolder: (id: string) => void;

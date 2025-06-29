@@ -97,6 +97,7 @@ export const FolderItemComponent = memo(
         selectedFolder,
         onRemoveFromWorkspace,
         onFileSelect,
+        onFolderSelect,
     }: FolderItemComponentProps) => {
         const ref = useRef<HTMLDivElement>(null);
 
@@ -130,11 +131,45 @@ export const FolderItemComponent = memo(
         const Icon = item.icon || (isFolder ? Folder : FileText);
         const isRenaming = renamingItemId === item.id;
 
+        // 카테고리 폴더인지 확인
+        const isCategoryFolder = [
+            'categories',
+            'text',
+            'links',
+            'images',
+            'videos',
+            'memo',
+            'clipboard',
+            'screenshots',
+        ].includes(item.id);
+        const isCategoryParent = item.id === 'categories';
+
+        const handleClick = () => {
+            if (isCategoryParent) {
+                // 카테고리 부모 폴더는 필터링만 (토글 X)
+                if (onFolderSelect) {
+                    onFolderSelect('all'); // '모든 콘텐츠' 필터링
+                }
+            } else if (isCategoryFolder && onFolderSelect) {
+                // 카테고리 하위 폴더는 필터링
+                onFolderSelect(item.id);
+            } else if (isFolder) {
+                // 일반 폴더는 토글
+                onToggleFolder(item.id);
+            } else {
+                // 파일은 선택
+                onFileSelect(item);
+            }
+        };
+
         const itemContent = (
             <div className="flex items-center w-full pr-2">
                 <div
                     className="flex-shrink-0 flex items-center justify-center"
-                    style={{ width: `${scale(12)}px`, visibility: isFolder ? 'visible' : 'hidden' }}
+                    style={{
+                        width: `${scale(12)}px`,
+                        visibility: isFolder && !isCategoryParent ? 'visible' : 'hidden',
+                    }}
                 >
                     <motion.div
                         animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -179,9 +214,7 @@ export const FolderItemComponent = memo(
                                         isOver && canDrop && 'bg-blue-500/30'
                                     )}
                                     style={{ paddingLeft: `${scale(8) + level * scale(12)}px` }}
-                                    onClick={() =>
-                                        isFolder ? onToggleFolder(item.id) : onFileSelect(item)
-                                    }
+                                    onClick={handleClick}
                                 >
                                     {itemContent}
                                 </Button>
@@ -242,6 +275,7 @@ export const FolderItemComponent = memo(
                                         isCollapsed={isCollapsed}
                                         onToggleFolder={onToggleFolder}
                                         onFileSelect={onFileSelect}
+                                        onFolderSelect={onFolderSelect}
                                         onNewFileInFolder={onNewFileInFolder}
                                         onNewFolderInFolder={onNewFolderInFolder}
                                         onDeleteFolder={onDeleteFolder}
