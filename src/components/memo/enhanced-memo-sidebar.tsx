@@ -388,11 +388,20 @@ export function EnhancedMemoSidebar({
     if (contentItemData) {
         try {
             const item = JSON.parse(contentItemData);
+            
+            // 이미지 타입일 때는 metadata.url을 content로 사용
+            let pillContent = item.content;
+            if (item.type === 'image' && item.metadata?.url) {
+                pillContent = item.metadata.url;
+            } else if (item.type === 'link' && item.metadata?.url) {
+                pillContent = item.metadata.url;
+            }
+            
             const newPill: ContentPill = {
                 id: item.id || uuidv4(),
                 type: item.type,
                 title: item.title,
-                content: item.content,
+                content: pillContent,
                 metadata: item.metadata
             };
             addContentPill(newPill);
@@ -446,11 +455,20 @@ export function EnhancedMemoSidebar({
     if (contentItemData) {
         try {
             const item = JSON.parse(contentItemData);
+            
+            // 이미지 타입일 때는 metadata.url을 content로 사용
+            let pillContent = item.content;
+            if (item.type === 'image' && item.metadata?.url) {
+                pillContent = item.metadata.url;
+            } else if (item.type === 'link' && item.metadata?.url) {
+                pillContent = item.metadata.url;
+            }
+            
              const newPill: ContentPill = {
                 id: item.id || uuidv4(),
                 type: item.type,
               title: item.title,
-              content: item.content,
+              content: pillContent,
                 metadata: item.metadata
             };
             addContentPill(newPill);
@@ -695,7 +713,7 @@ export function EnhancedMemoSidebar({
                           <div key={pill.id} className="group relative flex-shrink-0">
                             <div 
                               draggable
-                        onDragStart={(e) => handlePillDragStart(e, pill)}
+                              onDragStart={(e) => handlePillDragStart(e, pill)}
                               className={`flex items-center text-xs rounded-full pl-2 pr-2 py-1 backdrop-blur-xl border cursor-grab active:cursor-grabbing transition-all duration-200 ${getPillStyleClass(pill.type)}`} 
                               onClick={() => insertPillIntoEditor(pill)} 
                               title={pill.title}
@@ -703,7 +721,32 @@ export function EnhancedMemoSidebar({
                               <PillIcon type={pill.type} />
                               <span className="truncate flex-1 mx-1.5">{pill.title}</span>
                             </div>
-                      <button onClick={() => setContentPills(pills => pills.filter(p => p.id !== pill.id))} className="absolute top-1/2 -translate-y-1/2 right-1.5 bg-gray-700 hover:bg-red-500 border border-gray-600 rounded-full h-4 w-4 flex items-center justify-center text-white text-[10px] opacity-0 group-hover:opacity-100 transition-all" title="Remove pill"><X className="h-2.5 w-2.5" /></button>
+                            
+                            {/* 이미지 호버 미리보기 */}
+                            {pill.type === 'image' && (
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                                <div className="bg-black/90 backdrop-blur-sm border border-white/20 rounded-lg p-2 shadow-2xl">
+                                  <img 
+                                    src={pill.content.startsWith('file://') ? pill.content : (pill.metadata?.url || pill.content)}
+                                    alt={pill.title}
+                                    className="max-w-[200px] max-h-[150px] object-contain rounded"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      target.style.display = 'none';
+                                      target.nextElementSibling?.setAttribute('style', 'display: block');
+                                    }}
+                                  />
+                                  <div className="hidden text-xs text-white/60 text-center mt-1">
+                                    이미지를 불러올 수 없음
+                                  </div>
+                                  <div className="text-xs text-white/80 text-center mt-1 truncate max-w-[200px]">
+                                    {pill.title}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <button onClick={() => setContentPills(pills => pills.filter(p => p.id !== pill.id))} className="absolute top-1/2 -translate-y-1/2 right-1.5 bg-gray-700 hover:bg-red-500 border border-gray-600 rounded-full h-4 w-4 flex items-center justify-center text-white text-[10px] opacity-0 group-hover:opacity-100 transition-all" title="Remove pill"><X className="h-2.5 w-2.5" /></button>
                           </div>
                         ))}
                   {contentPills.length === 0 && (
@@ -749,10 +792,35 @@ export function EnhancedMemoSidebar({
                               title={pill.title}
                             >
                               <div className={`p-1 rounded-md bg-white/5 mr-2 ${getPillStyleClass(pill.type)}`}>
-                                      <PillIcon type={pill.type} />
-                                    </div>
+                                <PillIcon type={pill.type} />
+                              </div>
                               <span className="truncate">{pill.title}</span>
+                            </div>
+                            
+                            {/* 이미지 호버 미리보기 (pill 목록용) */}
+                            {pill.type === 'image' && (
+                              <div className="absolute left-full top-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
+                                <div className="bg-black/90 backdrop-blur-sm border border-white/20 rounded-lg p-2 shadow-2xl">
+                                  <img 
+                                    src={pill.content.startsWith('file://') ? pill.content : (pill.metadata?.url || pill.content)}
+                                    alt={pill.title}
+                                    className="max-w-[200px] max-h-[150px] object-contain rounded"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      target.style.display = 'none';
+                                      target.nextElementSibling?.setAttribute('style', 'display: block');
+                                    }}
+                                  />
+                                  <div className="hidden text-xs text-white/60 text-center mt-1">
+                                    이미지를 불러올 수 없음
                                   </div>
+                                  <div className="text-xs text-white/80 text-center mt-1 truncate max-w-[200px]">
+                                    {pill.title}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            
                             <Button
                                 variant="ghost"
                                 size="icon"

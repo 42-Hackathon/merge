@@ -65,12 +65,26 @@ export const PillComponent: React.FC<NodeViewProps> = ({ node, selected }) => {
     };
 
     const isLocalFile = (path: string) => {
-        return path.startsWith('file://') || (!path.startsWith('http://') && !path.startsWith('https://'));
+        // 실제 파일 경로인지 확인 (경로 구분자와 파일 확장자 포함)
+        if (path.startsWith('file://')) return true;
+        
+        // URL이 아니고, 파일 경로 패턴에 맞는지 확인
+        if (path.startsWith('http://') || path.startsWith('https://')) return false;
+        
+        // 파일 경로 패턴: /, \, 또는 드라이브 문자(C:) 포함하고 파일 확장자가 있는 경우만
+        const hasPathSeparator = path.includes('/') || path.includes('\\') || /^[A-Za-z]:/.test(path);
+        const hasImageExtension = /\.(jpg|jpeg|png|gif|webp|svg|bmp|tiff?)$/i.test(path);
+        
+        return hasPathSeparator && hasImageExtension;
     };
 
     // 로컬 이미지 파일을 base64로 변환
     useEffect(() => {
-        if (type === 'image' && content && isLocalFile(content) && !localImageData && !isLoadingLocalImage) {
+        // 에러가 이미 발생했거나, 로딩 중이거나, 이미 데이터가 있으면 실행하지 않음
+        if (imageError || isLoadingLocalImage || localImageData) return;
+        
+        // 이미지 타입이고, content가 있고, 실제 로컬 파일 경로인 경우만 실행
+        if (type === 'image' && content && isLocalFile(content)) {
             setIsLoadingLocalImage(true);
             
             const loadLocalImage = async () => {
@@ -105,7 +119,7 @@ export const PillComponent: React.FC<NodeViewProps> = ({ node, selected }) => {
             
             loadLocalImage();
         }
-    }, [type, content, localImageData, isLoadingLocalImage]);
+    }, [type, content]); // imageError, localImageData, isLoadingLocalImage 제거
 
     const getImageSource = () => {
         if (type !== 'image' || !content) return null;
