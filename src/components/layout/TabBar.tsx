@@ -1,5 +1,4 @@
-import { FileText, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { FileText, X, Image, Video, File } from 'lucide-react';
 
 interface TabBarProps {
     openTabs: FileNode[];
@@ -8,48 +7,70 @@ interface TabBarProps {
     onTabClose: (tabId: string) => void;
 }
 
+const getFileIcon = (type?: string) => {
+    switch (type) {
+        case 'image':
+            return Image;
+        case 'video':
+            return Video;
+        case 'text':
+        case 'markdown':
+            return FileText;
+        default:
+            return File;
+    }
+};
+
 export function TabBar({ openTabs, activeTabId, onTabChange, onTabClose }: TabBarProps) {
     if (openTabs.length === 0) {
-        return null; // Don't render anything if there are no tabs
+        return null;
     }
 
     return (
-        <div className="flex items-center border-b bg-zinc-100/60 dark:bg-zinc-900/60 backdrop-blur-xl border-black/10 dark:border-white/10 overflow-x-auto">
+        <div className="flex items-center border-b border-white/[0.15] bg-transparent overflow-x-auto h-10">
             <div className="flex items-center h-full">
-                {openTabs.map((tab) => (
-                    <div
-                        key={tab.id}
-                        onClick={() => onTabChange(tab.id)}
-                        className={`flex-shrink-0 flex items-center border-r border-black/10 dark:border-white/10 cursor-pointer h-full transition-colors duration-200
-                          ${
-                              activeTabId === tab.id
-                                  ? 'bg-white/50 dark:bg-black/20'
-                                  : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/5'
-                          }`}
-                        style={{
-                            padding: `0 12px`,
-                            height: '36px',
-                        }}
-                    >
-                        <div className="flex items-center gap-1.5">
-                            <FileText className="text-zinc-500 dark:text-zinc-400 h-3.5 w-3.5" />
-                            <span className="truncate text-zinc-800 dark:text-zinc-200 text-xs max-w-[150px]">
-                                {tab.name}
-                            </span>
-                        </div>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onTabClose(tab.id);
+                {openTabs.map((tab) => {
+                    const Icon = getFileIcon(tab.type);
+                    const isActive = activeTabId === tab.id;
+
+                    return (
+                        <div
+                            key={tab.id}
+                            onClick={() => onTabChange(tab.id)}
+                            className={`
+                                flex items-center gap-2 border-r border-white/[0.1] cursor-pointer transition-colors duration-200 relative h-full
+                                ${
+                                    isActive
+                                        ? 'text-white bg-white/[0.2]'
+                                        : 'text-white/80 hover:text-white hover:bg-white/[0.12]'
+                                }
+                            `}
+                            style={{
+                                paddingLeft: '8px',
+                                paddingRight: '32px',
                             }}
-                            className="ml-2 rounded-md hover:bg-black/10 dark:hover:bg-white/20 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 h-5 w-5"
+                            title={tab.name}
                         >
-                            <X className="h-2.5 w-2.5" />
-                        </Button>
-                    </div>
-                ))}
+                            <Icon className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate text-xs max-w-[120px]">{tab.name}</span>
+
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onTabClose(tab.id);
+                                }}
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors duration-200"
+                                style={{
+                                    width: '16px',
+                                    height: '16px',
+                                }}
+                                title="탭 닫기"
+                            >
+                                <X className="h-3 w-3" />
+                            </button>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
