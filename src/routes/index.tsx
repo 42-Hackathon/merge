@@ -33,7 +33,7 @@ export default function Index() {
   // Modal states
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [rightSidebarMode, setRightSidebarMode] = useState<'memo' | 'chat' | 'view'>('memo');
+  const [rightSidebarMode, setRightSidebarMode] = useState<'memo' | 'chat' | 'view' | 'ai'>('memo');
 
   const handleResetWidth = useCallback(() => {
     animate(sidebarWidth, 288, { 
@@ -392,33 +392,24 @@ export default function Index() {
           </div>
                     </div>
 
-          {/* Right Sidebar - Fixed Position */}
+          {/* Right Sidebar - 데칼코마니 형태로 변경 */}
           {isRightSidebarOpen ? (
-            <div 
-              className="fixed right-0 top-0 h-full z-30 transition-all duration-200"
-              style={{ 
-                width: rightSidebarWidth,
-                top: '40px', // 헤더 높이만큼 아래로
-                                height: 'calc(100vh - 40px)', // 헤더 높이 제외
+            <EnhancedMemoSidebar 
+              isOpen={isRightSidebarOpen}
+              onClose={() => setIsRightSidebarOpen(false)}
+              mode={rightSidebarMode}
+              onModeChange={setRightSidebarMode}
+              width={rightSidebarWidth}
+              onWidthChange={(newWidth) => {
+                // 최대 너비 제한 적용
+                                const constrainedWidth = Math.min(
+                                    newWidth,
+                                    maxRightSidebarWidth
+                                );
+                setRightSidebarWidth(constrainedWidth);
               }}
-            >
-              <EnhancedMemoSidebar 
-                isOpen={isRightSidebarOpen}
-                onClose={() => setIsRightSidebarOpen(false)}
-                mode={rightSidebarMode}
-                onModeChange={setRightSidebarMode}
-                width={rightSidebarWidth}
-                onWidthChange={(newWidth) => {
-                  // 최대 너비 제한 적용
-                                    const constrainedWidth = Math.min(
-                                        newWidth,
-                                        maxRightSidebarWidth
-                                    );
-                  setRightSidebarWidth(constrainedWidth);
-                }}
-                maxWidth={maxRightSidebarWidth}
-              />
-            </div>
+              maxWidth={maxRightSidebarWidth}
+            />
           ) : (
             <motion.div
               initial={{ x: 20, opacity: 0 }}
