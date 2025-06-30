@@ -776,26 +776,28 @@ export function EnhancedMemoSidebar({
                 )}
 
       {/* Footer */}
-      <div className="flex-shrink-0 flex items-center justify-between p-2 border-t border-white/10 h-12">
-                      <div className="flex items-center gap-1">
-          <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={() => setShowMemoList(!showMemoList)}>
-            <List className="h-5 w-5" />
-          </Button>
-          <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={createNewMemo}>
-            <Plus className="h-5 w-5" />
-          </Button>
-          <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={() => saveMemo()}>
-            <Save className="h-5 w-5" />
-                      </Button>
-                    </div>
-        <div className="flex items-center gap-2 pr-2">
-          {renderSaveStatus()}
-          <Separator orientation="vertical" className="h-5" />
-          <span className="text-xs font-mono">
-            {mode === 'ai' ? '# AI' : '# MD'}
-          </span>
-                            </div>
-                            </div>
-                        </div>
+      {mode !== 'ai' && (
+        <div className="flex-shrink-0 flex items-center justify-between p-2 border-t border-white/10 h-12">
+                        <div className="flex items-center gap-1">
+            <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={() => setShowMemoList(!showMemoList)}>
+              <List className="h-5 w-5" />
+            </Button>
+            <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={createNewMemo}>
+              <Plus className="h-5 w-5" />
+            </Button>
+            <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={() => saveMemo()}>
+              <Save className="h-5 w-5" />
+                        </Button>
+                      </div>
+          <div className="flex items-center gap-2 pr-2">
+            {renderSaveStatus()}
+            <Separator orientation="vertical" className="h-5" />
+            <span className="text-xs font-mono">
+              # MD
+            </span>
+                              </div>
+                              </div>
+      )}
+                          </div>
   );
 }
