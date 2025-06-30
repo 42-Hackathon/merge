@@ -98,13 +98,9 @@ export function DraggableContentGrid({
 
         // 외부 파일 드래그인지 확인
         const hasFiles = e.dataTransfer.types.includes('Files');
-        const hasContentItem = e.dataTransfer.types.includes('application/content-item');
-
-        console.log('🎯 드래그 오버:', hasFiles, hasContentItem, e.dataTransfer.types);
 
         // 파일 드래그일 때 드롭 존 활성화 (조건 완화)
         if (hasFiles && !isDragOver) {
-            console.log('✅ 드롭 존 활성화');
             setIsDragOver(true);
         }
     };
@@ -127,24 +123,9 @@ export function DraggableContentGrid({
         e.stopPropagation();
         setIsDragOver(false);
 
-        console.log('💧 파일 드롭됨!');
-
-        // 외부 파일 드래그인지 확인
-        const hasFiles = e.dataTransfer.types.includes('Files');
-        const hasContentItem = e.dataTransfer.types.includes('application/content-item');
-
-        console.log(
-            '📋 드롭 이벤트:',
-            hasFiles,
-            hasContentItem,
-            e.dataTransfer.files.length,
-            e.dataTransfer.types
-        );
-
-        // 실제 파일이 있으면 처리 (조건 완화)
+        // 실제 파일이 있으면 처리
         const files = e.dataTransfer.files;
         if (files.length > 0 && onFileDrop) {
-            console.log('🎯 파일 처리 시작:', files.length, '개');
             onFileDrop(files);
         }
     };

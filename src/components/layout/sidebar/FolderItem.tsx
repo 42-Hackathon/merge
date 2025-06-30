@@ -166,18 +166,8 @@ export const FolderItemComponent = memo(
             e.dataTransfer.dropEffect = 'copy';
 
             const hasFiles = e.dataTransfer.types.includes('Files');
-            const hasContentItem = e.dataTransfer.types.includes('application/content-item');
-
-            console.log(
-                '📂 사이드바 드래그 오버:',
-                item.name,
-                hasFiles,
-                hasContentItem,
-                e.dataTransfer.types
-            );
 
             if (hasFiles && !isFileDropping) {
-                console.log('✅ 사이드바 드롭 존 활성화:', item.name);
                 setIsFileDropping(true);
             }
         };
@@ -197,21 +187,7 @@ export const FolderItemComponent = memo(
             e.stopPropagation();
             setIsFileDropping(false);
 
-            console.log('💧 사이드바에 파일 드롭됨!', item.name);
-
-            const hasFiles = e.dataTransfer.types.includes('Files');
-            const hasContentItem = e.dataTransfer.types.includes('application/content-item');
-
-            console.log(
-                '📋 사이드바 드롭 이벤트:',
-                hasFiles,
-                hasContentItem,
-                e.dataTransfer.files.length,
-                e.dataTransfer.types
-            );
-
             if (e.dataTransfer.files.length > 0) {
-                console.log('🎯 사이드바에서 파일 처리:', e.dataTransfer.files.length, '개');
                 onFileDrop(e.dataTransfer.files);
             }
         };

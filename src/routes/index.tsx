@@ -43,11 +43,6 @@ export default function Index() {
         });
     }, [sidebarWidth]);
 
-    // 디버깅: 탭 상태 로그
-    useEffect(() => {
-        console.log('🔍 상태:', { tabsLength: tabs.length, activeTabId });
-    }, [tabs.length, activeTabId]);
-
     // Cleanup on unmount
     useEffect(() => {
         return () => {
@@ -58,8 +53,6 @@ export default function Index() {
 
     const handleItemSelect = useCallback(
         (item: ContentItem) => {
-            console.log('🎯 파일 선택됨:', item);
-
             // 파일 타입별로 적절하게 처리
             if (item.type === 'link') {
                 // 링크는 외부 브라우저에서 열기
@@ -71,48 +64,22 @@ export default function Index() {
                 return;
             }
 
-            if (item.type === 'image') {
-                // 이미지는 전용 뷰어로 열기 (일단 탭으로)
-                const fileNode: FileNode = {
-                    id: item.id,
-                    name: item.title,
-                    path: item.metadata?.originalPath || item.path || item.id,
-                    type: 'image',
-                };
-                openTab(fileNode);
-                return;
-            }
-
-            if (item.type === 'video') {
-                // 비디오 파일
-                const fileNode: FileNode = {
-                    id: item.id,
-                    name: item.title,
-                    path: item.metadata?.originalPath || item.path || item.id,
-                    type: 'unsupported', // 현재 FileNode 타입에 video가 없음
-                };
-                openTab(fileNode);
-                return;
-            }
-
-            if (item.type === 'text' && item.metadata?.originalPath) {
-                // 실제 텍스트 파일 (드래그앤드롭으로 추가된 파일)
-                const fileNode: FileNode = {
-                    id: item.id,
-                    name: item.title,
-                    path: item.metadata.originalPath,
-                    type: 'text',
-                };
-                openTab(fileNode);
-                return;
-            }
-
-            // 기본적으로 모든 콘텐츠는 탭으로 열기 시도
+            // 모든 콘텐츠(목데이터 포함)를 파일뷰어에서 열기
             const fileNode: FileNode = {
                 id: item.id,
                 name: item.title,
                 path: item.metadata?.originalPath || item.path || item.id,
-                type: item.type === 'text' ? 'text' : 'unsupported',
+                type:
+                    item.type === 'text'
+                        ? 'text'
+                        : item.type === 'image'
+                        ? 'image'
+                        : item.type === 'video'
+                        ? 'unsupported'
+                        : 'unsupported',
+                // 목데이터인지 실제 파일인지 구분
+                isVirtual: !item.metadata?.originalPath,
+                contentItem: item, // 목데이터 정보 포함
             };
             openTab(fileNode);
         },
@@ -156,7 +123,6 @@ export default function Index() {
         setSelectedFolder(folderId);
         // 카테고리 선택 시 activeTabId를 null로 설정하여 콘텐츠 그리드 표시
         setActiveTab(''); // 빈 문자열로 설정하여 탭 비활성화
-        console.log('🔍 카테고리 선택:', folderId, '탭 비활성화');
     };
 
     const getFolderName = (folderId: string) => {
@@ -272,28 +238,20 @@ export default function Index() {
 
     // 파일 드롭 핸들러
     const handleFileDrop = useCallback(async (files: FileList) => {
-        console.log('🎯 파일 드롭 감지됨!', files.length, '개 파일');
-
         const newItems: ContentItem[] = [];
 
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            console.log('📄 파일 처리 중:', file.name, file.type, file.size);
             try {
                 const contentItem = await convertFileToContentItem(file);
                 newItems.push(contentItem);
-                console.log('✅ 파일 변환 완료:', contentItem.title);
-            } catch {
-                console.error('❌ 파일 변환 실패:', file.name);
+            } catch (error) {
+                console.error('파일 변환 실패:', file.name, error);
             }
         }
 
         if (newItems.length > 0) {
-            setItems((prev) => {
-                const updated = [...prev, ...newItems];
-                console.log('📊 아이템 추가됨! 총 개수:', updated.length);
-                return updated;
-            });
+            setItems((prev) => [...prev, ...newItems]);
             alert(`${newItems.length}개 파일이 추가되었습니다!`);
         }
     }, []);

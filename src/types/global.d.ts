@@ -82,6 +82,8 @@ declare global {
         count?: number;
         isExpanded?: boolean;
         depth?: number;
+        isVirtual?: boolean; // 가상 파일(목데이터)인지 구분
+        contentItem?: any; // ContentItem 정보 (가상 파일용)
     }
 
     interface LocalFolderData {

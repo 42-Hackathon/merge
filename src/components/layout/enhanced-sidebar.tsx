@@ -420,8 +420,6 @@ export function EnhancedSidebar({
 
     const categoriesFolder = useMemo((): FileNode => {
         // items가 이미 mockContentItems를 포함하고 있으므로 items만 사용
-        console.log('🔍 사이드바 items:', items.length, items);
-
         const textCount = items.filter(
             (item) => item.type === 'text' && item.folderId !== 'memo'
         ).length;
