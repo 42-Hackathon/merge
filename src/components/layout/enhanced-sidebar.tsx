@@ -64,7 +64,6 @@ function getParentPath(p: string): string {
 }
 
 const SidebarTree = ({
-    scale,
     isCategoriesExpanded,
     isCollapsed,
     userFolders,
@@ -92,8 +91,8 @@ const SidebarTree = ({
                 className="overflow-y-auto"
                 style={{
                     position: 'absolute',
-                    top: `${scale(41)}px`,
-                    bottom: isCategoriesExpanded ? `${scale(235)}px` : `${scale(55)}px`,
+                    top: `41px`,
+                    bottom: isCategoriesExpanded ? `235px` : `55px`,
                     left: 0,
                     right: 0,
                 }}
@@ -103,14 +102,13 @@ const SidebarTree = ({
                         <div className={cn('block w-full min-h-full')}>
                             <div
                                 className="space-y-0.5"
-                                style={{ padding: `${scale(8)}px ${scale(8)}px ${scale(40)}px` }}
+                                style={{ padding: `8px 8px 40px` }}
                             >
                                 {userFolders.map((folder) => (
                                     <FolderItemComponent
                                         key={folder.id}
                                         item={folder}
                                         isCollapsed={isCollapsed}
-                                        scale={scale}
                                         onToggleFolder={onToggleFolder}
                                         onFileSelect={onFileSelect}
                                         onNewFileInFolder={(id) => onNewFileInFolder(id)}
@@ -148,21 +146,20 @@ const SidebarTree = ({
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    padding: `0 ${scale(8)}px ${scale(8)}px`,
+                    padding: `0 8px 8px`,
                 }}
             >
                 <div
                     className="mx-auto bg-white/10"
                     style={{
                         height: '1px',
-                        width: isCollapsed ? `${scale(24)}px` : '80%',
-                        margin: `${scale(8)}px auto`,
+                        width: isCollapsed ? `24px` : '80%',
+                        margin: `8px auto`,
                     }}
                 />
                 <FolderItemComponent
                     item={categoriesFolder}
                     isCollapsed={isCollapsed}
-                    scale={scale}
                     onToggleFolder={onToggleFolder}
                     onFileSelect={onFileSelect}
                     onFolderSelect={onFolderSelect}
@@ -193,9 +190,6 @@ export function EnhancedSidebar({
     onToggleCollapse,
     isCollabActive,
     onCollabToggle,
-    zoomLevel,
-    onZoomIn,
-    onZoomOut,
     cursorPosition,
     onFileDrop,
     items = [],
@@ -209,7 +203,7 @@ export function EnhancedSidebar({
         () => expandedFolders.has('categories'),
         [expandedFolders]
     );
-    const scale = useCallback((base: number) => base * (zoomLevel / 100), [zoomLevel]);
+
 
     const convertDataToFolderItem = useCallback(
         (data: LocalFolderData, prefix: string): FileNode => ({
@@ -530,7 +524,6 @@ export function EnhancedSidebar({
                 <div className="relative z-10 flex flex-col flex-1">
                     <SidebarHeader
                         isCollapsed={isCollapsed}
-                        scale={scale}
                         handleOpenFolder={handleOpenFolder}
                         handleNewFile={() => handleNewItem('file')}
                         handleNewFolder={() => handleNewItem('folder')}
@@ -541,7 +534,6 @@ export function EnhancedSidebar({
 
                     <DndProvider backend={HTML5Backend}>
                         <SidebarTree
-                            scale={scale}
                             isCategoriesExpanded={isCategoriesExpanded}
                             isCollapsed={isCollapsed}
                             userFolders={linkedFolders}
@@ -571,10 +563,6 @@ export function EnhancedSidebar({
                 isCollapsed={isCollapsed}
                 isCollabActive={isCollabActive}
                 onCollabToggle={onCollabToggle}
-                scale={scale}
-                zoomLevel={zoomLevel}
-                onZoomIn={onZoomIn}
-                onZoomOut={onZoomOut}
                 cursorPosition={cursorPosition}
             />
 

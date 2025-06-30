@@ -1,6 +1,5 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router-dom';
 import type { LinksFunction } from 'react-router';
-import { ThemeProvider } from 'next-themes';
 import { Toaster } from '../components/ui/sonner';
 import { useEffect } from 'react';
 
@@ -29,10 +28,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <Links />
             </head>
             <body>
-                <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-                    {children}
-                    <Toaster />
-                </ThemeProvider>
+                {children}
+                <Toaster />
                 <ScrollRestoration />
                 <Scripts />
             </body>

@@ -32,6 +32,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     showStickyNote: () => ipcRenderer.invoke('show-sticky-note'),
     hideStickyNote: () => ipcRenderer.invoke('hide-sticky-note'),
 
+    // --- Zoom Features ---
+    zoomIn: () => ipcRenderer.invoke('zoom:in'),
+    zoomOut: () => ipcRenderer.invoke('zoom:out'),
+    zoomReset: () => ipcRenderer.invoke('zoom:reset'),
+    getZoomLevel: () => ipcRenderer.invoke('zoom:get-level'),
+
     // --- Event Listeners ---
     on: (channel: string, callback: (...args: any[]) => void) => {
         const validChannels = ['clipboard-content', 'new-collection', 'import-content', 'chrome-extension-data'];

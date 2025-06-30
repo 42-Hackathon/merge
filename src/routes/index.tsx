@@ -24,7 +24,7 @@ export default function Index() {
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
   const [rightSidebarWidth, setRightSidebarWidth] = useState(288);
   const [isLeftSidebarCollapsed, setIsLeftSidebarCollapsed] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(100);
+
     const [cursorPosition] = useState({ lineNumber: 1, column: 1 });
   const [isCollabActive, setIsCollabActive] = useState(false);
 
@@ -42,6 +42,60 @@ export default function Index() {
       damping: 30,
     });
   }, [sidebarWidth]);
+
+  // Chrome Extension 데이터 수신
+  useEffect(() => {
+    console.log('🔧 Setting up Chrome Extension data listener...');
+    if (window.electronAPI) {
+      console.log('✅ ElectronAPI available');
+      const cleanup = (window.electronAPI as any).on('chrome-extension-data', (data: any) => {
+        console.log('📨 Received Chrome Extension data:', data);
+        
+        // 도메인에서 www. 제거하는 함수
+        const cleanDomain = (url: string): string => {
+          try {
+            const hostname = new URL(url).hostname;
+            return hostname.replace(/^www\./, '');
+          } catch {
+            return url.replace(/^www\./, '');
+          }
+        };
+
+        // Chrome Extension 데이터를 ContentItem으로 변환
+        const newItem: ContentItem = {
+          id: `ext-${Date.now()}-${Math.random()}`,
+          title: data.data.title || data.data.page_title || `${data.data.type} from ${data.source}`,
+          content: data.data.type === 'image' ? 
+                  (data.data.alt_text || data.data.title || '') : 
+                  (data.data.text || data.data.link_url || data.data.video_url || ''),
+          type: data.data.type as ContentItem['type'],
+          stage: 'review',
+          tags: [data.source, data.data.type, cleanDomain(data.data.source_url || '')],
+          folderId: data.data.type === 'image' ? 'images' : 
+                   data.data.type === 'link' ? 'links' : 
+                   data.data.type === 'video' ? 'videos' : 'text',
+          createdAt: data.timestamp,
+          updatedAt: data.timestamp,
+          metadata: {
+            url: data.data.image_url || data.data.link_url || data.data.video_url || data.data.source_url,
+            dimensions: data.data.width && data.data.height ? 
+                       { width: data.data.width, height: data.data.height } : undefined,
+            ...data.data
+          }
+        };
+        
+        // 새 아이템을 리스트 맨 앞에 추가
+        setItems(prevItems => [newItem, ...prevItems]);
+        
+        // 시각적 피드백
+        console.log('✨ New item added to collection:', newItem.title);
+      });
+      
+      return cleanup;
+    } else {
+      console.warn('❌ ElectronAPI not available');
+    }
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -150,13 +204,7 @@ export default function Index() {
     }
   };
 
-  const handleZoomIn = () => {
-        setZoomLevel((prev) => Math.min(prev + 5, 200));
-  };
 
-  const handleZoomOut = () => {
-        setZoomLevel((prev) => Math.max(prev - 5, 50));
-  };
 
   const handleCollabToggle = () => {
         setIsCollabActive((prev) => !prev);
@@ -295,7 +343,6 @@ export default function Index() {
               window.electronAPI.showStickyNote();
             }
           }}
-          zoomLevel={zoomLevel}
         />
         
         <div className="flex-1 flex overflow-hidden">
@@ -312,9 +359,6 @@ export default function Index() {
                             }
               isCollabActive={isCollabActive}
               onCollabToggle={handleCollabToggle}
-              zoomLevel={zoomLevel}
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
               cursorPosition={cursorPosition}
                             onFileDrop={handleFileDrop}
                             items={items}
@@ -342,8 +386,7 @@ export default function Index() {
                 onItemSelect={handleItemSelect}
                 selectedItems={[]}
                 folderName={getFolderName(selectedFolder)}
-                zoomLevel={zoomLevel}
-                                    onFileDrop={handleFileDrop}
+                onFileDrop={handleFileDrop}
               />
             )}
           </div>

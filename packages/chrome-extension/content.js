@@ -28,8 +28,8 @@ function handleMouseDown(e) {
     // 2. 사용자에게 즉시 피드백을 보여줍니다. (낙관적 UI)
     showFeedback(e.clientX, e.clientY);
 
-    // 클릭된 위치의 가장 상위 요소를 가져옵니다.
-    const targetElement = e.target;
+    // 클릭된 위치에서 가장 적절한 요소를 찾습니다 (이미지 우선)
+    const targetElement = findBestElement(e.target);
     if (!targetElement) return;
 
     // 수집된 정보를 객체로 만듭니다.
@@ -157,7 +157,8 @@ function showFeedback(x, y) {
  * @param {DragEvent} e - 드래그 이벤트 객체
  */
 function handleDragStart(e) {
-  draggedElement = e.target;
+  // 드래그된 요소에서 가장 적절한 요소를 찾습니다 (이미지 우선)
+  draggedElement = findBestElement(e.target);
   
   // 요소 타입별 데이터 추출
   const elementType = getElementType(draggedElement);
@@ -199,6 +200,46 @@ function handleDrop(e) {
 }
 
 /**
+ * 클릭된 요소에서 가장 적절한 타겟 요소를 찾습니다.
+ * 우선순위: 이미지 > 비디오 > 링크 > 텍스트
+ * @param {Element} clickedElement - 클릭된 요소
+ * @returns {Element} 가장 적절한 타겟 요소
+ */
+function findBestElement(clickedElement) {
+  // 1. 클릭된 요소가 이미지나 비디오라면 그대로 사용
+  const tagName = clickedElement.tagName.toLowerCase();
+  if (tagName === 'img') return clickedElement;
+  if (tagName === 'video') return clickedElement;
+  if (tagName === 'iframe' && isVideoFrame(clickedElement)) return clickedElement;
+  
+  // 2. 클릭된 요소 내부에서 이미지나 비디오 찾기
+  const images = clickedElement.querySelectorAll('img');
+  if (images.length > 0) {
+    // 가장 큰 이미지 선택 (썸네일이 아닌 메인 이미지일 가능성 높음)
+    let bestImage = images[0];
+    for (let img of images) {
+      const currentSize = (img.naturalWidth || img.width || 0) * (img.naturalHeight || img.height || 0);
+      const bestSize = (bestImage.naturalWidth || bestImage.width || 0) * (bestImage.naturalHeight || bestImage.height || 0);
+      if (currentSize > bestSize) {
+        bestImage = img;
+      }
+    }
+    return bestImage;
+  }
+  
+  const videos = clickedElement.querySelectorAll('video');
+  if (videos.length > 0) return videos[0];
+  
+  const iframes = clickedElement.querySelectorAll('iframe');
+  for (let iframe of iframes) {
+    if (isVideoFrame(iframe)) return iframe;
+  }
+  
+  // 3. 이미지/비디오가 없으면 원래 요소 반환
+  return clickedElement;
+}
+
+/**
  * 요소의 타입을 판별합니다.
  * @param {Element} element - 대상 요소
  * @returns {string} 요소 타입
@@ -207,9 +248,9 @@ function getElementType(element) {
   const tagName = element.tagName.toLowerCase();
   
   if (tagName === 'img') return 'image';
-  if (tagName === 'a') return 'link';
   if (tagName === 'video') return 'video';
   if (tagName === 'iframe' && isVideoFrame(element)) return 'video';
+  if (tagName === 'a') return 'link';
   if (element.textContent && element.textContent.trim()) return 'text';
   
   return 'unknown';

@@ -17,6 +17,12 @@ declare global {
             onImportContent: (callback: () => void) => void;
             removeAllListeners: (channel: string) => void;
 
+            // Zoom Controls
+            zoomIn: () => Promise<number>;
+            zoomOut: () => Promise<number>;
+            zoomReset: () => Promise<number>;
+            getZoomLevel: () => Promise<number>;
+
             // Window Controls
             minimizeWindow: () => Promise<void>;
             maximizeWindow: () => Promise<boolean>;

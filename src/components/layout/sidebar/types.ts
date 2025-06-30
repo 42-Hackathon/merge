@@ -31,7 +31,6 @@ export interface FolderItemComponentProps {
     level?: number;
     isDeletable?: boolean;
     isCollapsed: boolean;
-    scale: (base: number) => number;
     onToggleFolder: (id: string) => void;
     onFileSelect: (file: FileNode) => void;
     onFolderSelect?: (folderId: string) => void;
@@ -50,7 +49,6 @@ export interface FolderItemComponentProps {
 
 export interface SidebarHeaderProps {
     isCollapsed: boolean;
-    scale: (base: number) => number;
     handleOpenFolder: () => void;
     handleNewFile: () => void;
     handleNewFolder: () => void;
@@ -63,10 +61,6 @@ export interface SidebarFooterProps {
     isCollapsed: boolean;
     isCollabActive: boolean;
     onCollabToggle: () => void;
-    scale: (base: number) => number;
-    zoomLevel: number;
-    onZoomIn: () => void;
-    onZoomOut: () => void;
     cursorPosition: { lineNumber: number; column: number };
 }
 
@@ -79,16 +73,12 @@ export interface EnhancedSidebarProps extends Omit<ComponentProps<'div'>, 'onSel
     onToggleCollapse: () => void;
     isCollabActive: boolean;
     onCollabToggle: () => void;
-    zoomLevel: number;
-    onZoomIn: () => void;
-    onZoomOut: () => void;
     cursorPosition: { lineNumber: number; column: number };
     onFileDrop?: (files: FileList) => void;
     items?: ContentItem[]; // 실제 콘텐츠 아이템들
 }
 
 export interface SidebarTreeProps {
-    scale: (base: number) => number;
     isCategoriesExpanded: boolean;
     isCollapsed: boolean;
     userFolders: FileNode[];

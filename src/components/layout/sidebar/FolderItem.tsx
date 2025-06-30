@@ -26,12 +26,10 @@ import { ItemTypes } from './types';
 function RenamingInput({
     item,
     level,
-    scale,
     onRenameItem,
 }: {
     item: FolderItemComponentProps['item'];
     level: number;
-    scale: (val: number) => number;
     onRenameItem: (id: string, newName: string) => void;
 }) {
     const [editText, setEditText] = useState(item.name);
@@ -54,16 +52,16 @@ function RenamingInput({
     return (
         <div
             className="flex items-center w-full h-full"
-            style={{ paddingLeft: `${scale(8) + level * scale(12)}px` }}
+            style={{ paddingLeft: `${8 + level * 12}px` }}
         >
             <div
                 style={{
-                    width: `${scale(12)}px`,
+                    width: `12px`,
                     visibility: item.children ? 'visible' : 'hidden',
                 }}
                 className="flex-shrink-0"
             />
-            <div style={{ width: `${scale(12)}px` }} className="mr-1.5 flex-shrink-0" />
+            <div style={{ width: `12px` }} className="mr-1.5 flex-shrink-0" />
             <input
                 type="text"
                 value={editText}
@@ -73,7 +71,7 @@ function RenamingInput({
                 autoFocus
                 onFocus={(e) => e.target.select()}
                 className="w-full h-full bg-transparent text-foreground border border-primary rounded-md px-1 outline-none focus:ring-1 focus:ring-primary"
-                style={{ fontSize: `${scale(13)}px` }}
+                style={{ fontSize: `13px` }}
             />
         </div>
     );
@@ -83,7 +81,6 @@ export const FolderItemComponent = memo(
     ({
         item,
         level = 0,
-        scale,
         isCollapsed,
         onToggleFolder,
         onNewFileInFolder,
@@ -215,7 +212,7 @@ export const FolderItemComponent = memo(
                 <div
                     className="flex-shrink-0 flex items-center justify-center"
                     style={{
-                        width: `${scale(12)}px`,
+                        width: `12px`,
                         visibility: isFolder && !isCategoryParent ? 'visible' : 'hidden',
                     }}
                 >
@@ -224,12 +221,12 @@ export const FolderItemComponent = memo(
                         transition={{ duration: 0.15 }}
                     >
                         <ChevronRight
-                            style={{ width: `${scale(10)}px`, height: `${scale(10)}px` }}
+                            style={{ width: `10px`, height: `10px` }}
                         />
                     </motion.div>
                 </div>
                 <Icon
-                    style={{ width: `${scale(12)}px`, height: `${scale(12)}px` }}
+                    style={{ width: `12px`, height: `12px` }}
                     className="mx-1.5 flex-shrink-0"
                 />
                 <span className="flex-1 text-left truncate">{item.name}</span>
@@ -242,13 +239,12 @@ export const FolderItemComponent = memo(
                 <div
                     ref={ref}
                     className="relative w-full"
-                    style={{ height: `${scale(28)}px`, opacity: isDragging ? 0.5 : 1 }}
+                    style={{ height: `28px`, opacity: isDragging ? 0.5 : 1 }}
                 >
                     {isRenaming ? (
                         <RenamingInput
                             item={item}
                             level={level}
-                            scale={scale}
                             onRenameItem={onRenameItem}
                         />
                     ) : (
@@ -264,7 +260,7 @@ export const FolderItemComponent = memo(
                                             isCategoryFolder &&
                                             'bg-green-500/30 ring-2 ring-green-400/50'
                                     )}
-                                    style={{ paddingLeft: `${scale(8) + level * scale(12)}px` }}
+                                    style={{ paddingLeft: `${8 + level * 12}px` }}
                                     onClick={handleClick}
                                     onDragOver={handleFileDragOver}
                                     onDragLeave={handleFileDragLeave}
@@ -325,7 +321,6 @@ export const FolderItemComponent = memo(
                                         key={child.id}
                                         item={child}
                                         level={level + 1}
-                                        scale={scale}
                                         isCollapsed={isCollapsed}
                                         onToggleFolder={onToggleFolder}
                                         onFileSelect={onFileSelect}

@@ -9,13 +9,12 @@ import {
     ChevronsDownUp,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '../../ui/button';
 import type { SidebarHeaderProps } from './types';
 
 export const SidebarHeader = memo(
     ({
         isCollapsed,
-        scale,
         handleOpenFolder,
         handleNewFile,
         handleNewFolder,
@@ -25,7 +24,7 @@ export const SidebarHeader = memo(
     }: SidebarHeaderProps) => (
         <div
             className="flex items-center justify-between border-b border-white/[0.15]"
-            style={{ padding: `${scale(6)}px ${scale(8)}px` }}
+            style={{ padding: `6px 8px` }}
         >
             <div className="flex items-center gap-x-1">
                 {!isCollapsed && (
@@ -34,10 +33,10 @@ export const SidebarHeader = memo(
                         size="icon"
                         onClick={handleOpenFolder}
                         className="text-white/80 hover:text-white hover:bg-white/[0.15]"
-                        style={{ height: `${scale(28)}px`, width: `${scale(28)}px` }}
+                        style={{ height: `28px`, width: `28px` }}
                         title="로컬 폴더 불러오기"
                     >
-                        <FolderDown style={{ width: `${scale(16)}px`, height: `${scale(16)}px` }} />
+                        <FolderDown style={{ width: `16px`, height: `16px` }} />
                     </Button>
                 )}
             </div>
@@ -49,11 +48,11 @@ export const SidebarHeader = memo(
                             size="icon"
                             onClick={handleNewFile}
                             className="text-white/80 hover:text-white hover:bg-white/[0.15]"
-                            style={{ height: `${scale(28)}px`, width: `${scale(28)}px` }}
+                            style={{ height: `28px`, width: `28px` }}
                             title="새 파일"
                         >
                             <FilePlus
-                                style={{ width: `${scale(16)}px`, height: `${scale(16)}px` }}
+                                style={{ width: `16px`, height: `16px` }}
                             />
                         </Button>
                         <Button
@@ -61,11 +60,11 @@ export const SidebarHeader = memo(
                             size="icon"
                             onClick={handleNewFolder}
                             className="text-white/80 hover:text-white hover:bg-white/[0.15]"
-                            style={{ height: `${scale(28)}px`, width: `${scale(28)}px` }}
+                            style={{ height: `28px`, width: `28px` }}
                             title="새 폴더"
                         >
                             <FolderPlus
-                                style={{ width: `${scale(16)}px`, height: `${scale(16)}px` }}
+                                style={{ width: `16px`, height: `16px` }}
                             />
                         </Button>
                         <Button
@@ -73,16 +72,16 @@ export const SidebarHeader = memo(
                             size="icon"
                             onClick={handleToggleAllFolders}
                             className="text-white/80 hover:text-white hover:bg-white/[0.15]"
-                            style={{ height: `${scale(28)}px`, width: `${scale(28)}px` }}
+                            style={{ height: `28px`, width: `28px` }}
                             title={allFoldersExpanded ? '모두 접기' : '모두 펼치기'}
                         >
                             {allFoldersExpanded ? (
                                 <ChevronsDownUp
-                                    style={{ width: `${scale(16)}px`, height: `${scale(16)}px` }}
+                                    style={{ width: `16px`, height: `16px` }}
                                 />
                             ) : (
                                 <ChevronsUpDown
-                                    style={{ width: `${scale(16)}px`, height: `${scale(16)}px` }}
+                                    style={{ width: `16px`, height: `16px` }}
                                 />
                             )}
                         </Button>
@@ -93,15 +92,15 @@ export const SidebarHeader = memo(
                     size="icon"
                     onClick={onToggleCollapse}
                     className="text-white/80 hover:text-white hover:bg-white/[0.15] transition-all duration-200 flex items-center justify-center"
-                    style={{ height: `${scale(24)}px`, width: `${scale(24)}px` }}
+                    style={{ height: `24px`, width: `24px` }}
                 >
                     {isCollapsed ? (
                         <PanelLeftOpen
-                            style={{ width: `${scale(14)}px`, height: `${scale(14)}px` }}
+                            style={{ width: `14px`, height: `14px` }}
                         />
                     ) : (
                         <PanelLeftClose
-                            style={{ width: `${scale(14)}px`, height: `${scale(14)}px` }}
+                            style={{ width: `14px`, height: `14px` }}
                         />
                     )}
                 </Button>

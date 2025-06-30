@@ -1,7 +1,7 @@
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Users, ZoomIn, ZoomOut } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '../../ui/button';
 import type { SidebarFooterProps } from './types';
 
 export const SidebarFooter = memo(
@@ -9,15 +9,46 @@ export const SidebarFooter = memo(
         isCollapsed,
         isCollabActive,
         onCollabToggle,
-        scale,
-        zoomLevel,
-        onZoomIn,
-        onZoomOut,
         cursorPosition,
-    }: SidebarFooterProps) => (
+    }: SidebarFooterProps) => {
+        const [zoomLevel, setZoomLevel] = useState(100);
+
+        // 초기 줌 레벨 가져오기
+        useEffect(() => {
+            const getInitialZoom = async () => {
+                if (window.electronAPI?.getZoomLevel) {
+                    const level = await window.electronAPI.getZoomLevel();
+                    setZoomLevel(level);
+                }
+            };
+            getInitialZoom();
+        }, []);
+
+        const handleZoomIn = async () => {
+            if (window.electronAPI?.zoomIn) {
+                const newLevel = await window.electronAPI.zoomIn();
+                setZoomLevel(newLevel);
+            }
+        };
+
+        const handleZoomOut = async () => {
+            if (window.electronAPI?.zoomOut) {
+                const newLevel = await window.electronAPI.zoomOut();
+                setZoomLevel(newLevel);
+            }
+        };
+
+        const handleZoomReset = async () => {
+            if (window.electronAPI?.zoomReset) {
+                const newLevel = await window.electronAPI.zoomReset();
+                setZoomLevel(newLevel);
+            }
+        };
+
+        return (
         <div
             className="flex-shrink-0 border-t border-white/[0.15]"
-            style={{ padding: `${scale(8)}px`, rowGap: `${scale(8)}px` }}
+            style={{ padding: `8px`, rowGap: `8px` }}
         >
             {isCollapsed ? (
                 <div className="flex items-center justify-center">
@@ -29,33 +60,33 @@ export const SidebarFooter = memo(
                                 ? 'bg-blue-500/50 text-white'
                                 : 'text-white/70 hover:bg-white/10'
                         }`}
-                        style={{ width: `${scale(32)}px`, height: `${scale(32)}px` }}
+                        style={{ width: `32px`, height: `32px` }}
                         onClick={onCollabToggle}
                         title="협업 모드"
                     >
-                        <Users style={{ width: `${scale(18)}px`, height: `${scale(18)}px` }} />
+                        <Users style={{ width: `18px`, height: `18px` }} />
                     </Button>
                 </div>
             ) : (
                 <>
-                    <div className="space-y-1 text-white/70" style={{ fontSize: `${scale(12)}px` }}>
+                    <div className="space-y-1 text-white/70" style={{ fontSize: `12px` }}>
                         <div className="flex justify-between">
                             <span>클라우드 용량</span>
                             <span>15.7 / 50 GB</span>
                         </div>
                         <div
                             className="w-full bg-white/10 rounded-full"
-                            style={{ height: `${scale(4)}px` }}
+                            style={{ height: `4px` }}
                         >
                             <div
                                 className="bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full"
-                                style={{ width: `${(15.7 / 50) * 100}%`, height: `${scale(4)}px` }}
+                                style={{ width: `${(15.7 / 50) * 100}%`, height: `4px` }}
                             />
                         </div>
                     </div>
                     <div
                         className="flex items-center justify-between text-white/70"
-                        style={{ fontSize: `${scale(12)}px` }}
+                        style={{ fontSize: `12px` }}
                     >
                         <Button
                             variant={isCollabActive ? 'secondary' : 'ghost'}
@@ -65,38 +96,38 @@ export const SidebarFooter = memo(
                                     ? 'bg-blue-500/50 text-white'
                                     : 'text-white/70 hover:bg-white/10'
                             }`}
-                            style={{ width: `${scale(28)}px`, height: `${scale(28)}px` }}
+                            style={{ width: `28px`, height: `28px` }}
                             onClick={onCollabToggle}
                             title="협업 모드"
                         >
-                            <Users style={{ width: `${scale(16)}px`, height: `${scale(16)}px` }} />
+                            <Users style={{ width: `16px`, height: `16px` }} />
                         </Button>
-                        <div className="flex items-center" style={{ columnGap: `${scale(4)}px` }}>
+                        <div className="flex items-center" style={{ columnGap: `4px` }}>
                             <Button
                                 variant="ghost"
                                 className="flex items-center justify-center rounded-md"
-                                style={{ width: `${scale(24)}px`, height: `${scale(24)}px` }}
-                                onClick={onZoomOut}
+                                style={{ width: `24px`, height: `24px` }}
+                                onClick={handleZoomOut}
+                                title="축소"
                             >
-                                <ZoomOut
-                                    style={{ width: `${scale(14)}px`, height: `${scale(14)}px` }}
-                                />
+                                <ZoomOut style={{ width: `14px`, height: `14px` }} />
                             </Button>
                             <div
-                                className="text-center tabular-nums"
-                                style={{ fontSize: `${scale(11)}px`, width: `${scale(35)}px` }}
+                                className="text-center tabular-nums cursor-pointer"
+                                style={{ fontSize: `11px`, width: `35px` }}
+                                onClick={handleZoomReset}
+                                title="기본 크기로 리셋 (100%)"
                             >
-                                {Math.round(zoomLevel)}%
+                                {zoomLevel}%
                             </div>
                             <Button
                                 variant="ghost"
                                 className="flex items-center justify-center rounded-md"
-                                style={{ width: `${scale(24)}px`, height: `${scale(24)}px` }}
-                                onClick={onZoomIn}
+                                style={{ width: `24px`, height: `24px` }}
+                                onClick={handleZoomIn}
+                                title="확대"
                             >
-                                <ZoomIn
-                                    style={{ width: `${scale(14)}px`, height: `${scale(14)}px` }}
-                                />
+                                <ZoomIn style={{ width: `14px`, height: `14px` }} />
                             </Button>
                         </div>
                         <div className="text-right">
@@ -108,5 +139,6 @@ export const SidebarFooter = memo(
                 </>
             )}
         </div>
-    )
+        );
+    }
 );

@@ -295,6 +295,83 @@ ipcMain.handle('hide-sticky-note', () => {
     }
 });
 
+// --- Zoom IPC Handlers ---
+// VSCode 스타일 줌 레벨 (퍼센트)
+const ZOOM_LEVELS = [50, 75, 90, 100, 110, 125, 150, 175, 200, 250, 300];
+
+const getZoomLevelFromPercent = (percent: number): number => {
+    // 퍼센트를 Electron의 zoomLevel로 변환 (Math.pow(1.2, zoomLevel) * 100 = percent)
+    return Math.log(percent / 100) / Math.log(1.2);
+};
+
+const getPercentFromZoomLevel = (zoomLevel: number): number => {
+    return Math.round(Math.pow(1.2, zoomLevel) * 100);
+};
+
+const findClosestZoomIndex = (currentPercent: number): number => {
+    let closestIndex = 0;
+    let minDiff = Math.abs(ZOOM_LEVELS[0] - currentPercent);
+    
+    for (let i = 1; i < ZOOM_LEVELS.length; i++) {
+        const diff = Math.abs(ZOOM_LEVELS[i] - currentPercent);
+        if (diff < minDiff) {
+            minDiff = diff;
+            closestIndex = i;
+        }
+    }
+    return closestIndex;
+};
+
+ipcMain.handle('zoom:in', () => {
+    if (mainWindow) {
+        const currentZoomLevel = mainWindow.webContents.getZoomLevel();
+        const currentPercent = getPercentFromZoomLevel(currentZoomLevel);
+        const currentIndex = findClosestZoomIndex(currentPercent);
+        
+        // 다음 단계로 증가
+        const nextIndex = Math.min(currentIndex + 1, ZOOM_LEVELS.length - 1);
+        const nextPercent = ZOOM_LEVELS[nextIndex];
+        const nextZoomLevel = getZoomLevelFromPercent(nextPercent);
+        
+        mainWindow.webContents.setZoomLevel(nextZoomLevel);
+        return nextPercent;
+    }
+    return 100;
+});
+
+ipcMain.handle('zoom:out', () => {
+    if (mainWindow) {
+        const currentZoomLevel = mainWindow.webContents.getZoomLevel();
+        const currentPercent = getPercentFromZoomLevel(currentZoomLevel);
+        const currentIndex = findClosestZoomIndex(currentPercent);
+        
+        // 이전 단계로 감소
+        const prevIndex = Math.max(currentIndex - 1, 0);
+        const prevPercent = ZOOM_LEVELS[prevIndex];
+        const prevZoomLevel = getZoomLevelFromPercent(prevPercent);
+        
+        mainWindow.webContents.setZoomLevel(prevZoomLevel);
+        return prevPercent;
+    }
+    return 100;
+});
+
+ipcMain.handle('zoom:reset', () => {
+    if (mainWindow) {
+        mainWindow.webContents.setZoomLevel(0);
+        return 100;
+    }
+    return 100;
+});
+
+ipcMain.handle('zoom:get-level', () => {
+    if (mainWindow) {
+        const zoomLevel = mainWindow.webContents.getZoomLevel();
+        return getPercentFromZoomLevel(zoomLevel);
+    }
+    return 100;
+});
+
 // --- File System IPC Handlers ---
 
 const itemExists = async (itemPath: string): Promise<boolean> => {
