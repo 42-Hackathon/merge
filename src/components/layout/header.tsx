@@ -47,7 +47,13 @@ export function Header({
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             className="flex items-center border-b bg-zinc-100/60 dark:bg-zinc-900/60 backdrop-blur-xl border-black/10 dark:border-white/10"
-            style={{ height: `${scale(40)}px` }}
+            style={
+                {
+                    height: `${scale(40)}px`,
+                    // @ts-ignore
+                    WebkitAppRegion: 'drag',
+                } as React.CSSProperties
+            }
         >
             <div className="relative z-10 flex items-center w-full">
                 {/* Left - App Title & Navigation */}
@@ -95,9 +101,13 @@ export function Header({
                             ? 'bg-white/50 dark:bg-black/20'
                             : 'bg-transparent hover:bg-black/5 dark:hover:bg-white/5'
                     }`}
-                                    style={{
-                                        padding: `0 ${scale(12)}px`,
-                                    }}
+                                    style={
+                                        {
+                                            padding: `0 ${scale(12)}px`,
+                                            // @ts-ignore
+                                            WebkitAppRegion: 'no-drag',
+                                        } as React.CSSProperties
+                                    }
                                 >
                                     <div
                                         className="flex items-center"
@@ -125,10 +135,14 @@ export function Header({
                                             onTabClose?.(tab.id);
                                         }}
                                         className="ml-2 rounded-md hover:bg-black/10 dark:hover:bg-white/20 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
-                                        style={{
-                                            width: `${scale(18)}px`,
-                                            height: `${scale(18)}px`,
-                                        }}
+                                        style={
+                                            {
+                                                width: `${scale(18)}px`,
+                                                height: `${scale(18)}px`,
+                                                // @ts-ignore
+                                                WebkitAppRegion: 'no-drag',
+                                            } as React.CSSProperties
+                                        }
                                     >
                                         <X
                                             style={{
@@ -144,7 +158,15 @@ export function Header({
                 </div>
 
                 {/* Center - Enhanced Search */}
-                <div className="absolute left-1/2 transform -translate-x-1/2">
+                <div
+                    className="absolute left-1/2 transform -translate-x-1/2"
+                    style={
+                        {
+                            // @ts-ignore
+                            WebkitAppRegion: 'no-drag',
+                        } as React.CSSProperties
+                    }
+                >
                     <Button
                         variant="glass"
                         size="sm"
@@ -169,7 +191,15 @@ export function Header({
                 </div>
 
                 {/* Right - Enhanced Controls */}
-                <div className="flex items-center px-4 gap-1">
+                <div
+                    className="flex items-center px-4 gap-1"
+                    style={
+                        {
+                            // @ts-ignore
+                            WebkitAppRegion: 'no-drag',
+                        } as React.CSSProperties
+                    }
+                >
                     <button
                         onClick={onStickyNoteToggle}
                         className="group relative flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
