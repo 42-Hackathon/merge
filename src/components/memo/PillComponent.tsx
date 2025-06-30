@@ -78,8 +78,21 @@ export const PillComponent: React.FC<NodeViewProps> = ({ node, selected }) => {
                         <span className="truncate flex-1 mx-1.5">{title}</span>
                     </NodeViewWrapper>
                 </TooltipTrigger>
-                <TooltipContent>
-                    <p>{content}</p>
+                <TooltipContent 
+                    side="bottom"
+                    hideArrow={true}
+                    className="max-w-xs p-3 bg-black/70 backdrop-blur-xl border border-white/20 rounded-lg shadow-xl text-white"
+                    sideOffset={8}
+                >
+                    <div className="space-y-1.5">
+                        <div className="text-xs font-medium text-white/90">{title}</div>
+                        {content && (
+                            <div className="text-xs text-white/70 leading-relaxed line-clamp-3">
+                                {content.length > 150 ? content.substring(0, 150) + '...' : content}
+                            </div>
+                        )}
+                        <div className="text-xs text-white/50 italic">클릭하여 자세히 보기</div>
+                    </div>
                 </TooltipContent>
             </Tooltip>
         </TooltipProvider>
