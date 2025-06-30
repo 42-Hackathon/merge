@@ -102,7 +102,7 @@ const SidebarTree = ({
                         <div className={cn('block w-full min-h-full')}>
                             <div
                                 className="space-y-0.5"
-                                style={{ padding: `8px 8px 40px` }}
+                                style={{ padding: `4px 4px 40px` }}
                             >
                                 {userFolders.map((folder) => (
                                     <FolderItemComponent
@@ -146,7 +146,7 @@ const SidebarTree = ({
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    padding: `0 8px 8px`,
+                    padding: `0 4px 4px`,
                 }}
             >
                 <div

@@ -597,7 +597,7 @@ export function EnhancedMemoSidebar({
           </div>
             </div>
       ) : (
-        <div className="flex-shrink-0 flex items-center justify-between border-b border-white/10" style={{ padding: `6px 8px` }}>
+        <div className="flex-shrink-0 flex items-center justify-between border-b border-white/[0.15]" style={{ padding: `6px 8px` }}>
             {/* 좌측: 접기 버튼 */}
             <Button 
                 variant="ghost" 
@@ -615,8 +615,8 @@ export function EnhancedMemoSidebar({
                 <motion.div
                     className="absolute top-0.5 bottom-0.5 bg-white/15 backdrop-blur-sm rounded-md border border-white/20"
                     animate={{
-                        left: mode === 'memo' ? '2px' : '50%',
-                        width: mode === 'memo' ? 'calc(50% - 2px)' : 'calc(50% - 2px)'
+                        left: mode === 'memo' ? '2px' : '46px',
+                        width: mode === 'memo' ? '42px' : '26px'
                     }}
                     transition={{ 
                         type: "spring", 
@@ -628,21 +628,23 @@ export function EnhancedMemoSidebar({
                 
                 <button
                     onClick={() => onModeChange('memo')}
-                    className={`relative z-10 flex items-center justify-center px-3 py-1.5 text-sm font-medium transition-all duration-200 rounded-md min-w-[50px] ${
+                    className={`relative z-10 flex items-center justify-center text-sm font-medium transition-all duration-200 rounded-md ${
                         mode === 'memo' 
                             ? 'text-white' 
                             : 'text-white/60 hover:text-white/80'
                     }`}
+                    style={{ padding: `4px 8px`, fontSize: `12px`, width: `42px` }}
                 >
                     Memo
                 </button>
                 <button
                     onClick={() => onModeChange('ai')}
-                    className={`relative z-10 flex items-center justify-center px-3 py-1.5 text-sm font-medium transition-all duration-200 rounded-md min-w-[50px] ${
+                    className={`relative z-10 flex items-center justify-center text-sm font-medium transition-all duration-200 rounded-md ${
                         mode === 'ai' 
                             ? 'text-white' 
                             : 'text-white/60 hover:text-white/80'
                     }`}
+                    style={{ padding: `4px 8px`, fontSize: `12px`, width: `30px` }}
                 >
                     AI
                 </button>
