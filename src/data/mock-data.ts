@@ -145,21 +145,21 @@ export const mockContentItems: ContentItem[] = [
         },
     },
 
-    // 🎥 UX research methodology course
+    // 🎥 Neuralink Progress Update
     {
         id: '9',
-        title: 'Advanced UX Research Methods',
-        content: 'Expert course on advanced user experience research methodologies. Combines qualitative and quantitative research methods with data-driven insight extraction using real-world case studies.',
+        title: 'Neuralink Progress Update - 7 Participants, Telepathy & Blind Sight Demo',
+        content: 'Comprehensive presentation showcasing Neuralink\'s latest BCI developments. Features live demonstrations from 7 active participants (4 spinal cord injury, 3 ALS patients) using Telepathy product for cursor control, gaming, and robotic arm manipulation. Includes technical deep-dives on surgical robots, chip design, and roadmap through 2028 with speech cortex implants, Blind Sight vision restoration, and AI integration. Participants average 50+ hours/week independent use with record-breaking 7 BPS performance.',
         type: 'video',
-        stage: 'refine',
-        tags: ['ux-research', 'methodology', 'data-analysis', 'insights'],
+        stage: 'consolidate',
+        tags: ['neuralink', 'bci', 'brain-computer-interface', 'telepathy', 'blind-sight', 'elon-musk', 'neuroscience', 'cybernetics', 'ai-integration', 'spinal-cord-injury', 'als', 'assistive-technology', 'robotic-control', 'neural-prosthetics'],
         folderId: 'videos',
-        createdAt: '2024-01-20T21:30:00Z',
-        updatedAt: '2024-01-20T21:30:00Z',
+        createdAt: '2025-06-28T21:30:00Z',
+        updatedAt: '2025-06-28T21:30:00Z',
         metadata: {
             url: 'https://youtu.be/FASMejN_5gs?si=xoBluFVMN62QCw5Z',
-            duration: 2580,
-            resolution: '1080p',
+            duration: 7200,
+            resolution: '2160p',
             platform: 'YouTube'
         },
     },

@@ -44,13 +44,13 @@ async function sendToElectronApp(data, source) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        type: 'FLUX_DATA',
-        source: source,
-        data: data,
-        timestamp: new Date().toISOString()
+    type: 'FLUX_DATA',
+    source: source,
+    data: data,
+    timestamp: new Date().toISOString()
       })
     });
-
+  
     if (response.ok) {
       const result = await response.json();
       console.log(`✅ Sent ${source} data to Electron app:`, result);
@@ -108,7 +108,7 @@ async function storeData(data, source) {
   };
 
   try {
-    // 1. 스토리지에서 기존 데이터를 가져옵니다.
+  // 1. 스토리지에서 기존 데이터를 가져옵니다.
     const result = await chrome.storage.local.get({ fluxCollections: [] });
     
     // 2. 새 데이터를 배열에 추가합니다.
@@ -117,13 +117,13 @@ async function storeData(data, source) {
     // 3. 업데이트된 배열을 다시 스토리지에 저장합니다.
     await chrome.storage.local.set({ fluxCollections: updatedCollections });
     
-    console.log(`Flux: ${source} data stored. Total items:`, updatedCollections.length);
-    
-    // 데이터 요약 로깅
-    if (data.type) {
-      console.log(`✓ Collected ${data.type} from ${new URL(data.source_url).hostname}`);
-    }
-    
+      console.log(`Flux: ${source} data stored. Total items:`, updatedCollections.length);
+      
+      // 데이터 요약 로깅
+      if (data.type) {
+        console.log(`✓ Collected ${data.type} from ${new URL(data.source_url).hostname}`);
+      }
+      
     // Electron 앱으로 데이터 전송 (연결된 경우에만)
     if (isConnected) {
       await sendToElectronApp(dataToStore, source);

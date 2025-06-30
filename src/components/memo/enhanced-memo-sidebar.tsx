@@ -588,7 +588,7 @@ export function EnhancedMemoSidebar({
 
       {/* Header */}
       {showMemoList ? (
-        <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-white/10 h-14">
+        <div className="flex-shrink-0 flex items-center justify-between border-b border-white/10" style={{ padding: `6px 8px` }}>
             <h3 className="font-semibold text-lg ml-2">
                 {mode === 'ai' ? 'AI Chat' : 'Saved Memos'}
             </h3>
@@ -597,51 +597,57 @@ export function EnhancedMemoSidebar({
           </div>
             </div>
       ) : (
-        <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-white/10 h-14">
-            <div className="flex items-center gap-3">
-                {/* 메모/AI 스위치 */}
-                <div className="relative flex items-center bg-white/8 rounded-lg p-0.5 backdrop-blur-sm border border-white/10">
-                    {/* 슬라이딩 인디케이터 */}
-                    <motion.div
-                        className="absolute top-0.5 bottom-0.5 bg-white/15 backdrop-blur-sm rounded-md border border-white/20"
-                        animate={{
-                            left: mode === 'memo' ? '2px' : '50%',
-                            width: mode === 'memo' ? 'calc(50% - 2px)' : 'calc(50% - 2px)'
-                        }}
-                        transition={{ 
-                            type: "spring", 
-                            stiffness: 400, 
-                            damping: 30,
-                            mass: 0.6
-                        }}
-                    />
-                    
-                    <button
-                        onClick={() => onModeChange('memo')}
-                        className={`relative z-10 flex items-center justify-center px-4 py-2 text-sm font-medium transition-all duration-200 rounded-md min-w-[60px] ${
-                            mode === 'memo' 
-                                ? 'text-white' 
-                                : 'text-white/60 hover:text-white/80'
-                        }`}
-                    >
-                        Memo
-                    </button>
-                    <button
-                        onClick={() => onModeChange('ai')}
-                        className={`relative z-10 flex items-center justify-center px-4 py-2 text-sm font-medium transition-all duration-200 rounded-md min-w-[60px] ${
-                            mode === 'ai' 
-                                ? 'text-white' 
-                                : 'text-white/60 hover:text-white/80'
-                        }`}
-                    >
-                        AI
-                    </button>
-                </div>
+        <div className="flex-shrink-0 flex items-center justify-between border-b border-white/10" style={{ padding: `6px 8px` }}>
+            {/* 좌측: 접기 버튼 */}
+            <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onClose}
+                className="text-white/80 hover:text-white hover:bg-white/[0.15] transition-all duration-200 flex items-center justify-center"
+                style={{ height: `24px`, width: `24px` }}
+            >
+                <PanelRightClose style={{ width: `14px`, height: `14px` }} />
+            </Button>
+
+            {/* 우측: 메모/AI 스위치 */}
+            <div className="relative flex items-center bg-white/8 rounded-lg p-0.5 backdrop-blur-sm border border-white/10">
+                {/* 슬라이딩 인디케이터 */}
+                <motion.div
+                    className="absolute top-0.5 bottom-0.5 bg-white/15 backdrop-blur-sm rounded-md border border-white/20"
+                    animate={{
+                        left: mode === 'memo' ? '2px' : '50%',
+                        width: mode === 'memo' ? 'calc(50% - 2px)' : 'calc(50% - 2px)'
+                    }}
+                    transition={{ 
+                        type: "spring", 
+                        stiffness: 400, 
+                        damping: 30,
+                        mass: 0.6
+                    }}
+                />
+                
+                <button
+                    onClick={() => onModeChange('memo')}
+                    className={`relative z-10 flex items-center justify-center px-3 py-1.5 text-sm font-medium transition-all duration-200 rounded-md min-w-[50px] ${
+                        mode === 'memo' 
+                            ? 'text-white' 
+                            : 'text-white/60 hover:text-white/80'
+                    }`}
+                >
+                    Memo
+                </button>
+                <button
+                    onClick={() => onModeChange('ai')}
+                    className={`relative z-10 flex items-center justify-center px-3 py-1.5 text-sm font-medium transition-all duration-200 rounded-md min-w-[50px] ${
+                        mode === 'ai' 
+                            ? 'text-white' 
+                            : 'text-white/60 hover:text-white/80'
+                    }`}
+                >
+                    AI
+                </button>
+            </div>
         </div>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-                <PanelRightClose className="h-5 w-5" />
-                </Button>
-              </div>
       )}
 
       {/* Main Content */}
@@ -728,7 +734,7 @@ export function EnhancedMemoSidebar({
                           <div key={pill.id} className="group relative flex-shrink-0">
                             <div 
                               draggable
-                              onDragStart={(e) => handlePillDragStart(e, pill)}
+                        onDragStart={(e) => handlePillDragStart(e, pill)}
                               className={`flex items-center text-xs rounded-full pl-2 pr-2 py-1 backdrop-blur-xl border cursor-grab active:cursor-grabbing transition-all duration-200 ${getPillStyleClass(pill.type)}`} 
                               onClick={() => insertPillIntoEditor(pill)} 
                               title={pill.title}
@@ -761,7 +767,7 @@ export function EnhancedMemoSidebar({
                               </div>
                             )}
                             
-                            <button onClick={() => setContentPills(pills => pills.filter(p => p.id !== pill.id))} className="absolute top-1/2 -translate-y-1/2 right-1.5 bg-gray-700 hover:bg-red-500 border border-gray-600 rounded-full h-4 w-4 flex items-center justify-center text-white text-[10px] opacity-0 group-hover:opacity-100 transition-all" title="Remove pill"><X className="h-2.5 w-2.5" /></button>
+                      <button onClick={() => setContentPills(pills => pills.filter(p => p.id !== pill.id))} className="absolute top-1/2 -translate-y-1/2 right-1.5 bg-gray-700 hover:bg-red-500 border border-gray-600 rounded-full h-4 w-4 flex items-center justify-center text-white text-[10px] opacity-0 group-hover:opacity-100 transition-all" title="Remove pill"><X className="h-2.5 w-2.5" /></button>
                           </div>
                         ))}
                   {contentPills.length === 0 && (
@@ -816,10 +822,10 @@ export function EnhancedMemoSidebar({
                               title={pill.title}
                             >
                               <div className={`p-1 rounded-md bg-white/5 mr-2 ${getPillStyleClass(pill.type)}`}>
-                                <PillIcon type={pill.type} />
-                              </div>
+                                      <PillIcon type={pill.type} />
+                                    </div>
                               <span className="truncate">{pill.title}</span>
-                            </div>
+                                  </div>
                             
                             {/* 이미지 호버 미리보기 (pill 목록용) */}
                             {pill.type === 'image' && (

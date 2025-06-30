@@ -327,14 +327,14 @@ export default function Index() {
 
   return (
     <div 
-      className="h-screen w-screen overflow-hidden relative bg-cover bg-center"
+      className="h-screen w-screen overflow-auto relative bg-cover bg-center main-scrollbar smooth-scroll optimize-text"
       style={{
                 backgroundImage:
                     "url('https://images.unsplash.com/photo-1620121692029-d088224ddc74')",
       }}
     >
       {/* Main Layout */}
-      <div className="relative z-10 h-full flex flex-col">
+      <div className="relative z-10 h-full flex flex-col gpu-accelerated">
         {/* Header */}
         <Header
           onSearchToggle={() => setIsSearchOpen(true)}
@@ -348,7 +348,7 @@ export default function Index() {
         <div className="flex-1 flex overflow-hidden">
           {isLeftSidebarOpen && (
             <EnhancedSidebar 
-              className="flex-shrink-0"
+              className="flex-shrink-0 gpu-accelerated"
               width={sidebarWidth}
               onResetWidth={handleResetWidth}
               selectedFolder={selectedFolder}
@@ -365,7 +365,7 @@ export default function Index() {
             />
           )}
           
-          <div className="flex-1 min-w-0 flex flex-col">
+          <div className="flex-1 min-w-0 flex flex-col gpu-accelerated">
             <TabBar
               openTabs={tabs}
               activeTabId={activeTabId}
@@ -375,7 +375,7 @@ export default function Index() {
                         <div className="flex-1 overflow-hidden">
                             {/* Simple logic: if activeTabId exists, show file viewer, otherwise show content grid */}
                             {activeTabId ? (
-                                <div className="h-full p-4 overflow-y-auto">
+                                <div className="h-full p-4 overflow-y-auto content-scrollbar smooth-scroll">
                 <FileViewer />
               </div>
             ) : (
@@ -414,13 +414,13 @@ export default function Index() {
             <motion.div
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              className="fixed right-4 top-20 z-30"
+              className="fixed right-4 top-20 z-30 optimize-animation"
             >
               <Button
                 onClick={() => setIsRightSidebarOpen(true)}
                 variant="glass"
                 size="icon"
-                className="text-white hover:bg-white/15 h-10 w-10 backdrop-blur-xl bg-white/10 border border-white/20 rounded-full relative overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
+                className="text-white hover:bg-white/15 h-10 w-10 backdrop-blur-xl bg-white/10 border border-white/20 rounded-full relative overflow-hidden shadow-lg hover:shadow-xl hover-lift glass-transition"
                 title="Open Sidebar"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent rounded-full" />

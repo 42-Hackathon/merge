@@ -38,6 +38,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     zoomReset: () => ipcRenderer.invoke('zoom:reset'),
     getZoomLevel: () => ipcRenderer.invoke('zoom:get-level'),
 
+    // --- Window Controls ---
+    minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
+    maximizeWindow: () => ipcRenderer.invoke('window:maximize'),
+    closeWindow: () => ipcRenderer.invoke('window:close'),
+
     // --- Event Listeners ---
     on: (channel: string, callback: (...args: any[]) => void) => {
         const validChannels = ['clipboard-content', 'new-collection', 'import-content', 'chrome-extension-data'];

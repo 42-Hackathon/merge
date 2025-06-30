@@ -197,6 +197,42 @@
         --chart-5: 340 75% 55%;
     }
 
+    /* 전역 기본 커서 설정 */
+    * {
+        cursor: default !important;
+    }
+
+    /* 상호작용 요소들에 대한 적절한 커서 */
+    button, 
+    a, 
+    [role="button"], 
+    [role="link"],
+    .cursor-pointer {
+        cursor: pointer !important;
+    }
+
+    input, 
+    textarea, 
+    [contenteditable] {
+        cursor: text !important;
+    }
+
+    .cursor-grab {
+        cursor: grab !important;
+    }
+
+    .cursor-grabbing {
+        cursor: grabbing !important;
+    }
+
+    .cursor-col-resize {
+        cursor: col-resize !important;
+    }
+
+    .cursor-row-resize {
+        cursor: row-resize !important;
+    }
+
     .dark {
         --background: 222.2 84% 4.9%;
         --foreground: 210 40% 98%;
@@ -578,6 +614,98 @@
 
 /* Hide scrollbar for Firefox */
 .hide-scrollbar {
-    scrollbar-width: none; /* For Firefox */
-    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* 메인 윈도우 스크롤바 스타일 */
+.main-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.main-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.main-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.main-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* 콘텐츠 영역 스크롤바 스타일 */
+.content-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.content-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.content-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+}
+
+.content-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* 애니메이션 성능 최적화 */
+.gpu-accelerated {
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+}
+
+.optimize-animation {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+}
+
+.smooth-transition {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-transition {
+    transition: background-color 0.2s ease, border-color 0.2s ease, backdrop-filter 0.2s ease;
+}
+
+/* 스크롤 성능 최적화 */
+.smooth-scroll {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 텍스트 렌더링 최적화 */
+.optimize-text {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 호버 효과 최적화 */
+.hover-lift {
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+    will-change: transform;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px) translateZ(0);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* 모션 감소 선호 사용자를 위한 설정 */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }

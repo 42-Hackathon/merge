@@ -146,7 +146,7 @@ export function DraggableContentGrid({
                         <div 
                             className={`bg-gradient-to-br from-blue-50 to-indigo-100 
                                           absolute inset-0 flex items-center justify-center ${item.metadata?.url ? 'hidden' : 'flex'}`}
-                        >
+                    >
                             <motion.div 
                                 className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
                                 initial={{ opacity: 0 }}
@@ -157,16 +157,16 @@ export function DraggableContentGrid({
                                     ease: 'easeOut'
                                 }}
                             />
-                            <div className="relative z-10 text-center">
+                        <div className="relative z-10 text-center">
                                 <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
                                     <span style={{ fontSize: `20px` }}>🖼️</span>
-                                </div>
-                                <span
+                            </div>
+                            <span
                                     style={{ fontSize: `12px` }}
                                     className="text-white font-medium"
-                                >
+                            >
                                     Image
-                                </span>
+                            </span>
                             </div>
                         </div>
                         
@@ -214,7 +214,7 @@ export function DraggableContentGrid({
                                 />
                             ) : null}
                             <span style={{ fontSize: `14px`, display: faviconUrl ? 'none' : 'inline' }}>🔗</span>
-                        </div>
+                            </div>
                         
                         {/* URL만 표시 */}
                         <div className="flex-1 min-w-0">
@@ -287,23 +287,23 @@ export function DraggableContentGrid({
                                         ease: 'easeOut'
                                     }}
                                 />
-                                <div className="relative z-10 text-center">
+                        <div className="relative z-10 text-center">
                                     <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
                                         <span style={{ fontSize: `20px` }}>📹</span>
-                                    </div>
-                                    <span
+                            </div>
+                            <span
                                         style={{ fontSize: `12px` }}
                                         className="text-white font-medium"
-                                    >
+                            >
                                         Video
-                                    </span>
+                            </span>
                                     {item.metadata?.platform && (
                                         <div style={{ fontSize: `10px` }} className="text-white/80 mt-1">
                                             {item.metadata.platform}
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                        </div>
                         )}
                         
                         {/* 호버 오버레이 */}
@@ -335,10 +335,10 @@ export function DraggableContentGrid({
     };
 
     return (
-        <div className="flex-1 flex flex-col bg-transparent border-0 shadow-none ring-0">
+        <div className="flex-1 flex flex-col bg-transparent border-0 shadow-none ring-0 gpu-accelerated">
             {/* Header */}
             <div
-                className="flex items-center justify-between"
+                className="flex items-center justify-between optimize-text"
                 style={{
                     padding: `8px 16px`,
                 }}
@@ -409,7 +409,7 @@ export function DraggableContentGrid({
 
             {/* Content Grid */}
             <div className="flex-1 flex overflow-hidden">
-                <div className="flex-1 overflow-y-auto" style={{ padding: `16px` }}>
+                <div className="flex-1 overflow-y-auto content-scrollbar smooth-scroll" style={{ padding: `16px` }}>
                     {items.length === 0 ? (
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -497,6 +497,7 @@ export function DraggableContentGrid({
                                             damping: 20,
                                             mass: 0.8
                                         }}
+                                        className="optimize-animation"
                                         style={{ 
                                             willChange: 'transform',
                                             transform: 'translate3d(0,0,0)',
@@ -504,7 +505,7 @@ export function DraggableContentGrid({
                                         }}
                                     >
                                     <GlassCard
-                                        className={`cursor-pointer relative group
+                                        className={`cursor-pointer relative group glass-transition hover-lift
                                           bg-white/[0.08] backdrop-blur-lg border border-white/20
                                           ${viewMode === 'list' ? 'flex items-center' : ''} 
                                           ${draggedItem === item.id ? 'opacity-50 scale-95' : ''}
@@ -609,7 +610,7 @@ export function DraggableContentGrid({
                                                 <h3
                                                     className="font-semibold text-white line-clamp-2 leading-tight tracking-tight mb-2"
                                                     style={{ fontSize: `16px`, fontWeight: '600' }}
-                                                >
+                                                                >
                                                     {item.title}
                                                 </h3>
 
@@ -624,32 +625,34 @@ export function DraggableContentGrid({
                                                                 style={{ fontSize: `10px` }}
                                                             >
                                                                 {tag}
-                                                            </span>
+                                                                </span>
                                                         ))}
                                                     </div>
 
                                                     {/* 우측: 도메인(링크 타입일 때), 생성일 */}
                                                     <div className="flex items-center gap-2 text-white/70">
                                                         {item.type === 'link' && item.metadata?.url && (
-                                                            <span style={{ fontSize: `10px` }} className="font-medium">
+                                                            <span style={{ fontSize: `10px` }}>
                                                                 {cleanDomain(item.metadata.url)}
                                                             </span>
                                                         )}
-                                                        <span style={{ fontSize: `10px` }} className="font-medium">
-                                                            {new Date(item.createdAt).toLocaleDateString()}
-                                                        </span>
+                                                        {item.type !== 'link' && (
+                                                            <span style={{ fontSize: `10px` }}>
+                                                                {new Date(item.createdAt).toLocaleDateString()}
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </GlassCard>
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
-                        </div>
-                    )}
-                </div>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </div>
+                )}
             </div>
         </div>
-    );
+    </div>
+);
 }
