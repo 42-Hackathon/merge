@@ -34,7 +34,7 @@ export const SidebarHeader = memo(
                         onClick={handleOpenFolder}
                         className="text-white/80 hover:text-white hover:bg-white/[0.15]"
                         style={{ height: `28px`, width: `28px` }}
-                        title="로컬 폴더 불러오기"
+                        title="Open Local Folder"
                     >
                         <FolderDown style={{ width: `16px`, height: `16px` }} />
                     </Button>
@@ -61,7 +61,7 @@ export const SidebarHeader = memo(
                             onClick={handleNewFolder}
                             className="text-white/80 hover:text-white hover:bg-white/[0.15]"
                             style={{ height: `28px`, width: `28px` }}
-                            title="새 폴더"
+                            title="New Folder"
                         >
                             <FolderPlus
                                 style={{ width: `16px`, height: `16px` }}

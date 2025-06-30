@@ -64,7 +64,7 @@ export function TabBar({ openTabs, activeTabId, onTabChange, onTabClose }: TabBa
                                     width: '16px',
                                     height: '16px',
                                 }}
-                                title="탭 닫기"
+                                title="Close Tab"
                             >
                                 <X className="h-3 w-3" />
                             </button>

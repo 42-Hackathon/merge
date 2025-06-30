@@ -32,7 +32,7 @@ export function DraggableContentGrid({
     onViewModeChange,
     onItemSelect,
     selectedItems,
-    folderName = '모든 콘텐츠',
+    folderName = 'All Content',
     onFileDrop, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: DraggableContentGridProps) {
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -165,7 +165,7 @@ export function DraggableContentGrid({
                                     style={{ fontSize: `12px` }}
                                     className="text-white font-medium"
                                 >
-                                    이미지
+                                    Image
                                 </span>
                             </div>
                         </div>
@@ -295,7 +295,7 @@ export function DraggableContentGrid({
                                         style={{ fontSize: `12px` }}
                                         className="text-white font-medium"
                                     >
-                                        동영상
+                                        Video
                                     </span>
                                     {item.metadata?.platform && (
                                         <div style={{ fontSize: `10px` }} className="text-white/80 mt-1">
@@ -358,7 +358,7 @@ export function DraggableContentGrid({
                             padding: `2px 6px`,
                         }}
                     >
-                        {items.length}개 항목
+                        {items.length} items
                     </Badge>
                 </div>
 
@@ -370,7 +370,7 @@ export function DraggableContentGrid({
                         onClick={() => onViewModeChange('masonry')}
                         className="text-white hover:bg-white/10 rounded-md flex items-center justify-center"
                         style={{ height: `28px`, width: `28px` }}
-                        title="폭포수 보기"
+                        title="Masonry View"
                     >
                         <LayoutGrid style={{ height: `14px`, width: `14px` }} />
                     </Button>
@@ -380,7 +380,7 @@ export function DraggableContentGrid({
                         onClick={() => onViewModeChange('justified')}
                         className="text-white hover:bg-white/10 rounded-md flex items-center justify-center"
                         style={{ height: `28px`, width: `28px` }}
-                        title="양쪽 정렬"
+                        title="Justified Layout"
                     >
                         <Columns style={{ height: `14px`, width: `14px` }} />
                     </Button>
@@ -390,7 +390,7 @@ export function DraggableContentGrid({
                         onClick={() => onViewModeChange('grid')}
                         className="text-white hover:bg-white/10 rounded-md flex items-center justify-center"
                         style={{ height: `28px`, width: `28px` }}
-                        title="그리드 보기"
+                        title="Grid View"
                     >
                         <Grid3X3 style={{ height: `14px`, width: `14px` }} />
                     </Button>
@@ -400,7 +400,7 @@ export function DraggableContentGrid({
                         onClick={() => onViewModeChange('list')}
                         className="text-white hover:bg-white/10 rounded-md flex items-center justify-center"
                         style={{ height: `28px`, width: `28px` }}
-                        title="목록 보기"
+                        title="List View"
                     >
                         <List style={{ height: `14px`, width: `14px` }} />
                     </Button>
@@ -428,16 +428,16 @@ export function DraggableContentGrid({
                                 />
                             </div>
                             <p style={{ fontSize: `16px` }} className="mb-1">
-                                새로운 아이디어를 시작해보세요
+                                Start a new idea
                             </p>
                             <p style={{ fontSize: `12px` }}>
-                                여기에 바로 작성하거나 콘텐츠를 수집해보세요
+                                Write directly here or collect content
                             </p>
 
                             {/* Inline Editor */}
                             <div className="mt-6 w-full max-w-2xl">
                                 <Textarea
-                                    placeholder="여기에 바로 작성을 시작하세요... (Obsidian, Notion처럼)"
+                                    placeholder="Start writing here... (like Obsidian, Notion)"
                                     value={editorContent}
                                     onChange={(e) => setEditorContent(e.target.value)}
                                     className="min-h-[200px] bg-white/5 border-white/20 text-white placeholder:text-white/60 resize-none rounded-xl"
@@ -463,7 +463,7 @@ export function DraggableContentGrid({
                                                 fontSize: `12px`,
                                             }}
                                         >
-                                            취소
+                                            Cancel
                                         </Button>
                                         <Button
                                             size="sm"
@@ -474,7 +474,7 @@ export function DraggableContentGrid({
                                                 fontSize: `12px`,
                                             }}
                                         >
-                                            저장
+                                            Save
                                         </Button>
                                     </div>
                                 )}

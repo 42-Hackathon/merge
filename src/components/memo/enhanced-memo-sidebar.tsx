@@ -60,7 +60,7 @@ export function EnhancedMemoSidebar({
   const width = controlledWidth ?? internalWidth;
   const setWidth = setControlledWidth ?? setInternalWidth;
 
-  const [editorContent, setEditorContent] = useState("<p># 새 메모</p><p>여기에 내용을 작성하세요...</p>");
+  const [editorContent, setEditorContent] = useState("<p># New Memo</p><p>Write your content here...</p>");
   const [isDragging, setIsDragging] = useState(false);
   const [contentPills, setContentPills] = useState<ContentPill[]>([]);
   const [showMemoList, setShowMemoList] = useState(false);
@@ -129,7 +129,7 @@ export function EnhancedMemoSidebar({
   }, [isPillListVisible]);
 
   const extractTitle = useCallback((htmlContent: string): string => {
-    if (!htmlContent?.trim()) return '제목 없음';
+    if (!htmlContent?.trim()) return 'Untitled';
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = htmlContent;
     
@@ -144,7 +144,7 @@ export function EnhancedMemoSidebar({
       }
     }
     
-    if (!firstLine) return '제목 없음';
+    if (!firstLine) return 'Untitled';
     return firstLine.length > 50 ? firstLine.substring(0, 50) + '...' : firstLine;
   }, []);
 
@@ -152,7 +152,7 @@ export function EnhancedMemoSidebar({
     if (saveStatus === 'saving') return;
     if (isManualSave) setSaveStatus('saving');
 
-    const title = extractTitle(editorContent) || '제목 없음';
+    const title = extractTitle(editorContent) || 'Untitled';
       const now = new Date().toISOString();
       
     let newMemos: SavedMemo[];
@@ -181,8 +181,8 @@ export function EnhancedMemoSidebar({
     setCurrentMemoId(newMemoId);
 
     if (isManualSave) {
-      toast("메모 저장됨", {
-        description: `"${title}"(이)가 저장되었습니다.`,
+      toast("Memo Saved", {
+        description: `"${title}" has been saved.`,
       });
         setSaveStatus('saved');
         setTimeout(() => setSaveStatus('idle'), 2000);
@@ -200,7 +200,7 @@ export function EnhancedMemoSidebar({
   }, [savedMemos]);
   
   const createNewMemo = useCallback(() => {
-    tiptapEditorRef.current?.editor?.commands.setContent("<p># 새 메모</p><p>여기에 내용을 작성하세요...</p>");
+    tiptapEditorRef.current?.editor?.commands.setContent("<p># New Memo</p><p>Write your content here...</p>");
     setCurrentMemoId(null);
     setSaveStatus('idle');
     setShowMemoList(false);
@@ -212,8 +212,8 @@ export function EnhancedMemoSidebar({
     if (currentMemoId === memoIdToDelete) {
         createNewMemo();
       }
-    toast("메모 삭제됨", {
-      description: "선택한 메모가 삭제되었습니다.",
+    toast("Memo Deleted", {
+      description: "Selected memo has been deleted.",
     });
   };
 
@@ -568,8 +568,8 @@ export function EnhancedMemoSidebar({
 
   const renderSaveStatus = () => {
     switch (saveStatus) {
-      case 'saving': return <span className="text-xs text-yellow-400">저장 중...</span>;
-      case 'saved': return <span className="text-xs text-green-400">저장됨!</span>;
+      case 'saving': return <span className="text-xs text-yellow-400">Saving...</span>;
+      case 'saved': return <span className="text-xs text-green-400">Saved!</span>;
       default: return null;
     }
   };
@@ -590,7 +590,7 @@ export function EnhancedMemoSidebar({
       {showMemoList ? (
         <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-white/10 h-14">
             <h3 className="font-semibold text-lg ml-2">
-                {mode === 'ai' ? 'AI 대화' : '저장된 메모'}
+                {mode === 'ai' ? 'AI Chat' : 'Saved Memos'}
             </h3>
             <div className="bg-white/10 text-white/80 text-xs font-medium px-2 py-1 rounded-full">
                 {savedMemos.length}개
@@ -624,7 +624,7 @@ export function EnhancedMemoSidebar({
                                 : 'text-white/60 hover:text-white/80'
                         }`}
                     >
-                        메모
+                        Memo
                     </button>
                     <button
                         onClick={() => onModeChange('ai')}
@@ -689,8 +689,8 @@ export function EnhancedMemoSidebar({
           ) : (
             <div className="text-center text-white/50 pt-16 flex flex-col items-center">
               <FileText size={48} className="mb-4 text-white/20"/>
-              <p className="font-semibold">저장된 메모가 없습니다</p>
-              <p className="text-sm text-white/40">새 메모를 작성하고 저장해보세요.</p>
+              <p className="font-semibold">No saved memos</p>
+              <p className="text-sm text-white/40">Create and save a new memo to get started.</p>
                   </div>
                 )}
         </div>
@@ -704,7 +704,7 @@ export function EnhancedMemoSidebar({
             />
             {isEditorDragOver && (
                 <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-400 rounded-lg flex items-center justify-center pointer-events-none z-10 m-2">
-                    <span className="text-white font-semibold text-sm">여기에 드롭하여 콘텐츠 추가</span>
+                    <span className="text-white font-semibold text-sm">Drop here to add content</span>
                   </div>
                 )}
           </div>
@@ -752,7 +752,7 @@ export function EnhancedMemoSidebar({
                                     }}
                                   />
                                   <div className="hidden text-xs text-white/60 text-center mt-1">
-                                    이미지를 불러올 수 없음
+                                    Image not available
                                   </div>
                                   <div className="text-xs text-white/80 text-center mt-1 truncate max-w-[200px]">
                                     {pill.title}
@@ -765,7 +765,7 @@ export function EnhancedMemoSidebar({
                           </div>
                         ))}
                   {contentPills.length === 0 && (
-                    <div className="text-xs text-white/40 px-2">콘텐츠를 여기에 드래그하여 추가하세요.</div>
+                    <div className="text-xs text-white/40 px-2">Drag content here to add.</div>
                   )}
                       </div>
                             </div>
@@ -836,7 +836,7 @@ export function EnhancedMemoSidebar({
                                     }}
                                   />
                                   <div className="hidden text-xs text-white/60 text-center mt-1">
-                                    이미지를 불러올 수 없음
+                                    Image not available
                                   </div>
                                   <div className="text-xs text-white/80 text-center mt-1 truncate max-w-[200px]">
                                     {pill.title}

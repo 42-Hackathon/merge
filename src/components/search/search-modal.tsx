@@ -42,10 +42,10 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
 
   const recentSearches = [
-    "디자인 시스템",
-    "React 컴포넌트",
-    "UI 패턴",
-    "사용자 경험"
+    "design system",
+    "React components",
+    "UI patterns",
+    "user experience"
   ];
 
   const popularTags = [
@@ -53,18 +53,18 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   ];
 
   const filters = [
-    { id: 'all', name: '전체', icon: Search },
-    { id: 'text', name: '텍스트', icon: FileText },
-    { id: 'image', name: '이미지', icon: Image },
-    { id: 'link', name: '링크', icon: Link },
-    { id: 'video', name: '동영상', icon: Video }
+    { id: 'all', name: 'All', icon: Search },
+    { id: 'text', name: 'Text', icon: FileText },
+    { id: 'image', name: 'Images', icon: Image },
+    { id: 'link', name: 'Links', icon: Link },
+    { id: 'video', name: 'Videos', icon: Video }
   ];
 
   const mockResults: SearchResult[] = [
     {
       id: '1',
-      title: '디자인 시스템 가이드라인',
-      content: '일관된 사용자 경험을 위한 디자인 시스템 구축 방법론과 컴포넌트 라이브러리 설계 원칙...',
+      title: 'Design System Guidelines',
+      content: 'Methodology for building design systems for consistent user experience and component library design principles...',
       type: 'text',
       tags: ['design', 'system', 'ui'],
       createdAt: '2024-01-15',
@@ -72,8 +72,8 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     },
     {
       id: '2',
-      title: 'React 성능 최적화 기법',
-      content: 'React 애플리케이션의 렌더링 성능을 향상시키는 다양한 최적화 기법들...',
+      title: 'React Performance Optimization Techniques',
+      content: 'Various optimization techniques to improve rendering performance of React applications...',
       type: 'text',
       tags: ['react', 'performance', 'optimization'],
       createdAt: '2024-01-14',
@@ -84,7 +84,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   useEffect(() => {
     if (query.length > 2) {
       setIsSearching(true);
-      // 실제 검색 로직 시뮬레이션
+      // Simulate actual search logic
       setTimeout(() => {
         setResults(mockResults.filter(item => 
           item.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -116,7 +116,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-5 w-5" />
             <Input
-              placeholder="검색어를 입력하세요... (유의어 검색 지원)"
+              placeholder="Search your content... (semantic search supported)"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="pl-12 bg-white/10 border-white/20 text-white placeholder:text-white/60 text-lg h-12"
@@ -161,7 +161,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <Clock className="h-4 w-4 text-white/70" />
-                    <span className="text-white/80 text-sm font-medium">최근 검색</span>
+                    <span className="text-white/80 text-sm font-medium">Recent Searches</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {recentSearches.map(search => (
@@ -184,7 +184,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <TrendingUp className="h-4 w-4 text-white/70" />
-                    <span className="text-white/80 text-sm font-medium">인기 태그</span>
+                    <span className="text-white/80 text-sm font-medium">Popular Tags</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {popularTags.map(tag => (
@@ -208,19 +208,19 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                     className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full mx-auto mb-4"
                   />
-                  <p>검색 중...</p>
+                  <p>Searching...</p>
                 </div>
               </div>
             ) : results.length === 0 ? (
               <div className="text-center py-12 text-white/60">
                 <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>검색 결과가 없습니다</p>
-                <p className="text-sm mt-1">다른 키워드로 시도해보세요</p>
+                <p>No results found</p>
+                <p className="text-sm mt-1">Try different keywords</p>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="text-white/80 text-sm">
-                  {results.length}개의 결과를 찾았습니다
+                  Found {results.length} results
                 </div>
                 {results.map(result => {
                   const TypeIcon = getTypeIcon(result.type);
@@ -250,7 +250,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                               </div>
                             </div>
                             <Badge variant="outline" className="border-green-500/50 text-green-400">
-                              정확도: {result.relevance}%
+                              {result.relevance}% match
                             </Badge>
                           </div>
                         </div>

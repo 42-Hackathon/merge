@@ -61,21 +61,21 @@ export function RefactoredEnhancedSidebar({
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['categories']));
 
   const allContentFolder: FolderItem = {
-      id: 'all', name: '모든 콘텐츠', icon: Archive, count: 1247
+      id: 'all', name: 'All Content', icon: Archive, count: 1247
   };
   const categoriesFolder: FolderItem = {
-      id: 'categories', name: '카테고리', icon: Folder, count: 0,
+      id: 'categories', name: 'Categories', icon: Folder, count: 0,
       children: [
-        { id: 'text', name: '텍스트 하이라이팅', icon: FileText, count: 456 },
-        { id: 'links', name: '링크', icon: Link, count: 234 },
-        { id: 'images', name: '이미지', icon: Image, count: 189 },
-        { id: 'videos', name: '동영상', icon: Video, count: 67 },
-        { id: 'clipboard', name: '클립보드', icon: Clipboard, count: 123 },
-        { id: 'screenshots', name: '스크린샷', icon: Camera, count: 178 }
+        { id: 'text', name: 'Texts', icon: FileText, count: 456 },
+        { id: 'links', name: 'Links', icon: Link, count: 234 },
+        { id: 'images', name: 'Images', icon: Image, count: 189 },
+        { id: 'videos', name: 'Videos', icon: Video, count: 67 },
+        { id: 'clipboard', name: 'Clipboard', icon: Clipboard, count: 123 },
+        { id: 'screenshots', name: 'Screenshots', icon: Camera, count: 178 }
       ]
   };
   const userFolders: FolderItem[] = [
-    { id: 'local-placeholder', name: '로컬 폴더를 여기에 추가', icon: FolderOpen, count: 0 }
+    { id: 'local-placeholder', name: 'Add local folders here', icon: FolderOpen, count: 0 }
   ];
 
   const toggleFolder = (folderId: string) => {
@@ -152,7 +152,7 @@ export function RefactoredEnhancedSidebar({
     <BaseSidebar
       isOpen={!isCollapsed}
       onClose={onToggleCollapse || (() => {})}
-      title="폴더"
+      title="Folders"
       icon={Folder}
       position="left"
       width={width}

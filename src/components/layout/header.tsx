@@ -182,7 +182,7 @@ export function Header({
                             style={{ columnGap: `8px` }}
                         >
                             <Search style={{ width: `14px`, height: `14px` }} />
-                            <span>검색하기...</span>
+                            <span>Search...</span>
                         </div>
                     </Button>
                 </div>
@@ -204,7 +204,7 @@ export function Header({
                             height: `28px`,
                             width: `28px`,
                         }}
-                        title="스티키 노트"
+                        title="Sticky Note"
                         whileHover={{ scale: 1.08 }}
                         whileTap={{ scale: 0.95 }}
                         transition={{ 
@@ -243,7 +243,7 @@ export function Header({
                             height: `28px`,
                             width: `28px`,
                         }}
-                        title="설정"
+                        title="Settings"
                     >
                         <div className="absolute inset-0 rounded-full bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 backdrop-blur-sm" />
                         <Settings

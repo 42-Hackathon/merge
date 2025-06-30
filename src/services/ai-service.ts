@@ -32,10 +32,10 @@ interface OpenRouterResponse {
 class AIService {
   private apiKey: string;
   private baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
-  private model = 'anthropic/claude-3.5-sonnet'; // 기본 모델
+  private model = 'anthropic/claude-3.5-sonnet'; // Default model
 
   constructor() {
-    // Electron 환경에서는 사용자가 직접 API 키를 입력하도록 설정
+    // In Electron environment, set up for users to enter API key directly
     this.apiKey = '';
   }
 
@@ -48,14 +48,14 @@ class AIService {
     contextItems: ContextItem[] = []
   ): Promise<string> {
     if (!this.apiKey) {
-      // API 키가 없을 때 Mock 응답 제공 (데모용)
+      // Provide mock response when API key is not available (for demo)
       return this.getMockResponse(messages, contextItems);
     }
 
-    // 컨텍스트 아이템들을 시스템 메시지로 변환
+    // Convert context items to system message
     const contextMessage = this.buildContextMessage(contextItems);
     
-    // OpenRouter API 형식으로 메시지 변환
+    // Convert messages to OpenRouter API format
     const apiMessages = [
       ...(contextMessage ? [{ role: 'system', content: contextMessage }] : []),
       ...messages.map(msg => ({
@@ -83,29 +83,29 @@ class AIService {
       });
 
       if (!response.ok) {
-        throw new Error(`API 요청 실패: ${response.status} ${response.statusText}`);
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
       }
 
       const data: OpenRouterResponse = await response.json();
       
       if (!data.choices || data.choices.length === 0) {
-        throw new Error('AI 응답을 받을 수 없습니다.');
+        throw new Error('Unable to receive AI response.');
       }
 
       return data.choices[0].message.content;
     } catch (error) {
-      console.error('AI 서비스 오류:', error);
+      console.error('AI service error:', error);
       throw new Error(
         error instanceof Error 
           ? error.message 
-          : 'AI 서비스에 연결할 수 없습니다.'
+          : 'Unable to connect to AI service.'
       );
     }
   }
 
   private getMockResponse(messages: AIMessage[], contextItems: ContextItem[]): Promise<string> {
     return new Promise((resolve) => {
-      // 1-2초 대기 (실제 API 호출처럼 보이게)
+      // Wait 1-2 seconds (to look like actual API call)
       setTimeout(() => {
         const lastMessage = messages[messages.length - 1];
         const userQuestion = lastMessage?.content || '';
@@ -113,20 +113,20 @@ class AIService {
         let response = '';
         
         if (contextItems.length > 0) {
-          response = `안녕하세요! 현재 ${contextItems.length}개의 컨텍스트 정보를 참고하여 답변드리겠습니다.\n\n`;
-          response += `📋 참고한 정보: ${contextItems.map(item => item.title).join(', ')}\n\n`;
+          response = `Hello! I will answer based on ${contextItems.length} context information pieces.\n\n`;
+          response += `📋 Referenced information: ${contextItems.map(item => item.title).join(', ')}\n\n`;
         }
         
-        if (userQuestion.toLowerCase().includes('hello') || userQuestion.includes('안녕')) {
-          response += '안녕하세요! AI 어시스턴트입니다. 무엇을 도와드릴까요?';
-        } else if (userQuestion.includes('?') || userQuestion.includes('질문')) {
-          response += `"${userQuestion}"에 대한 질문이군요! \n\n이것은 데모 응답입니다. 실제 AI 기능을 사용하려면 OpenRouter API 키를 설정해주세요.`;
+        if (userQuestion.toLowerCase().includes('hello') || userQuestion.includes('hi')) {
+          response += 'Hello! I am an AI assistant. How can I help you?';
+        } else if (userQuestion.includes('?')) {
+          response += `A question about "${userQuestion}"! \n\nThis is a demo response. To use actual AI features, please set up your OpenRouter API key.`;
         } else {
-          response += `말씀하신 내용을 잘 이해했습니다. \n\n현재는 데모 모드로 실행 중입니다. 실제 AI 응답을 받으려면:\n\n1. OpenRouter.ai에서 API 키 발급\n2. Settings에서 API 키 입력\n\n그러면 Claude 3.5 Sonnet과 실제 대화할 수 있습니다!`;
+          response += `I understand what you've said. \n\nCurrently running in demo mode. To receive actual AI responses:\n\n1. Get API key from OpenRouter.ai\n2. Enter API key in Settings\n\nThen you can have real conversations with Claude 3.5 Sonnet!`;
         }
         
         resolve(response);
-      }, Math.random() * 1000 + 500); // 0.5-1.5초 랜덤 지연
+      }, Math.random() * 1000 + 500); // 0.5-1.5 second random delay
     });
   }
 
@@ -144,11 +144,11 @@ class AIService {
       return section;
     });
 
-    return `다음은 사용자가 수집한 정보들입니다. 이 정보들을 참고하여 질문에 답변해주세요:
+    return `Here is the information collected by the user. Please refer to this information when answering questions:
 
 ${contextSections.join('\n---\n')}
 
-위 정보들을 바탕으로 사용자의 질문에 도움이 되는 답변을 제공해주세요.`;
+Based on the above information, please provide helpful answers to the user's questions.`;
   }
 
   // 스트리밍 응답을 위한 메서드 (향후 확장용)

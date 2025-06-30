@@ -130,11 +130,11 @@ const SidebarTree = ({
                     <ContextMenuContent className="w-48">
                         <ContextMenuItem onClick={handleOpenFolder}>
                             <FolderDown className="w-4 h-4 mr-2" />
-                            <span>로컬 폴더 불러오기</span>
+                            <span>Open Local Folder</span>
                         </ContextMenuItem>
                         <ContextMenuItem onClick={handleNewFolder}>
                             <FolderPlus className="w-4 h-4 mr-2" />
-                            <span>새 폴더 추가</span>
+                            <span>Add New Folder</span>
                         </ContextMenuItem>
                     </ContextMenuContent>
                 </ContextMenu>
@@ -427,32 +427,32 @@ export function EnhancedSidebar({
         return {
             id: 'categories',
             path: 'categories',
-            name: '모든 콘텐츠',
+            name: 'All Content',
             icon: Folder,
             count: items.length,
             children: [
                 {
                     id: 'text',
                     path: 'text',
-                    name: '텍스트 하이라이팅',
+                    name: 'Texts',
                     icon: FileText,
                     count: textCount,
                 },
-                { id: 'links', path: 'links', name: '링크', icon: Link, count: linksCount },
-                { id: 'images', path: 'images', name: '이미지', icon: Image, count: imagesCount },
-                { id: 'videos', path: 'videos', name: '동영상', icon: Video, count: videosCount },
-                { id: 'memo', path: 'memo', name: '메모', icon: FileText, count: memoCount },
+                { id: 'links', path: 'links', name: 'Links', icon: Link, count: linksCount },
+                { id: 'images', path: 'images', name: 'Images', icon: Image, count: imagesCount },
+                { id: 'videos', path: 'videos', name: 'Videos', icon: Video, count: videosCount },
+                { id: 'memo', path: 'memo', name: 'Memos', icon: FileText, count: memoCount },
                 {
                     id: 'clipboard',
                     path: 'clipboard',
-                    name: '클립보드',
+                    name: 'Clipboard',
                     icon: Clipboard,
                     count: clipboardCount,
                 },
                 {
                     id: 'screenshots',
                     path: 'screenshots',
-                    name: '스크린샷',
+                    name: 'Screenshots',
                     icon: Camera,
                     count: screenshotsCount,
                 },

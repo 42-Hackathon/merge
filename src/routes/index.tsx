@@ -43,7 +43,7 @@ export default function Index() {
     });
   }, [sidebarWidth]);
 
-  // Chrome Extension 데이터 수신
+  // Chrome Extension data reception
   useEffect(() => {
     console.log('🔧 Setting up Chrome Extension data listener...');
     if (window.electronAPI) {
@@ -51,7 +51,7 @@ export default function Index() {
       const cleanup = (window.electronAPI as any).on('chrome-extension-data', (data: any) => {
         console.log('📨 Received Chrome Extension data:', data);
         
-        // 도메인에서 www. 제거하는 함수
+        // Function to remove www. from domain
         const cleanDomain = (url: string): string => {
           try {
             const hostname = new URL(url).hostname;
@@ -61,7 +61,7 @@ export default function Index() {
           }
         };
 
-        // Chrome Extension 데이터를 ContentItem으로 변환
+        // Convert Chrome Extension data to ContentItem
         const newItem: ContentItem = {
           id: `ext-${Date.now()}-${Math.random()}`,
           title: data.data.title || data.data.page_title || `${data.data.type} from ${data.source}`,
@@ -84,10 +84,10 @@ export default function Index() {
           }
         };
         
-        // 새 아이템을 리스트 맨 앞에 추가
+        // Add new item to the front of the list
         setItems(prevItems => [newItem, ...prevItems]);
         
-        // 시각적 피드백
+        // Visual feedback
         console.log('✨ New item added to collection:', newItem.title);
       });
       
@@ -107,18 +107,18 @@ export default function Index() {
 
     const handleItemSelect = useCallback(
         (item: ContentItem) => {
-            // 파일 타입별로 적절하게 처리
+            // Handle appropriately by file type
             if (item.type === 'link') {
-                // 링크는 외부 브라우저에서 열기
+                // Open links in external browser
                 if (item.path && (item.path.startsWith('http') || item.path.startsWith('https'))) {
                     window.open(item.path, '_blank');
                 } else {
-                    alert('유효하지 않은 링크입니다.');
+                    alert('Invalid link.');
                 }
                 return;
             }
 
-            // 모든 콘텐츠(목데이터 포함)를 파일뷰어에서 열기
+            // Open all content (including mock data) in file viewer
     const fileNode: FileNode = {
       id: item.id,
       name: item.title,
@@ -131,9 +131,9 @@ export default function Index() {
                         : item.type === 'video'
                         ? 'unsupported'
                         : 'unsupported',
-                // 목데이터인지 실제 파일인지 구분
+                // Distinguish between mock data and actual files
                 isVirtual: !item.metadata?.originalPath,
-                contentItem: item, // 목데이터 정보 포함
+                contentItem: item, // Include mock data information
     };
     openTab(fileNode);
         },
@@ -175,31 +175,31 @@ export default function Index() {
 
   const handleFolderSelect = (folderId: string) => {
     setSelectedFolder(folderId);
-        // 카테고리 선택 시 activeTabId를 null로 설정하여 콘텐츠 그리드 표시
-        setActiveTab(''); // 빈 문자열로 설정하여 탭 비활성화
+        // Set activeTabId to null when selecting category to display content grid
+        setActiveTab(''); // Set to empty string to deactivate tab
   };
 
   const getFolderName = (folderId: string) => {
     switch (folderId) {
             case 'all':
-                return '모든 콘텐츠';
+                return 'All Content';
             case 'text':
-                return '텍스트 하이라이팅';
+                return 'Texts';
             case 'images':
-                return '이미지';
+                return 'Images';
             case 'links':
-                return '링크';
+                return 'Links';
             case 'videos':
-                return '동영상';
+                return 'Videos';
             case 'memo':
-                return '메모';
+                return 'Memos';
             case 'clipboard':
-                return '클립보드';
+                return 'Clipboard';
             case 'screenshots':
-                return '스크린샷';
+                return 'Screenshots';
       default: {
                 const folder = items.find((item) => item.folderId === folderId);
-        return folder?.title ?? '콘텐츠';
+        return folder?.title ?? 'Content';
       }
     }
   };
@@ -210,7 +210,7 @@ export default function Index() {
         setIsCollabActive((prev) => !prev);
   };
 
-    // 파일 타입 감지 함수
+    // File type detection function
     const getFileType = (fileName: string): ContentItem['type'] => {
         const ext = fileName.split('.').pop()?.toLowerCase() || '';
 
@@ -237,25 +237,25 @@ export default function Index() {
         return 'file';
     };
 
-    // 파일을 ContentItem으로 변환 (경로 참조 방식)
+    // Convert file to ContentItem (path reference method)
     const convertFileToContentItem = async (
         file: File & { path?: string }
     ): Promise<ContentItem> => {
         const fileType = getFileType(file.name);
         let content = '';
 
-        // 작은 텍스트 파일은 미리보기로 일부 내용 읽기
+        // Read partial content as preview for small text files
         if (fileType === 'text' && file.size < 50 * 1024) {
-            // 50KB 미만만 미리보기
+            // Preview only files under 50KB
             try {
                 const fullContent = await file.text();
                 content =
                     fullContent.length > 200 ? fullContent.substring(0, 200) + '...' : fullContent;
             } catch {
-                content = `텍스트 파일 미리보기를 읽을 수 없습니다.`;
+                content = `Unable to read text file preview.`;
             }
         } else {
-            content = `${fileType} 파일 - 크기: ${(file.size / 1024).toFixed(1)}KB`;
+            content = `${fileType} file - Size: ${(file.size / 1024).toFixed(1)}KB`;
         }
 
         return {
@@ -273,7 +273,7 @@ export default function Index() {
                     : fileType === 'text'
                     ? 'text'
                     : 'files',
-            path: file.path || file.name, // 실제 파일 경로 저장
+            path: file.path || file.name, // Store actual file path
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             metadata: {
@@ -284,7 +284,7 @@ export default function Index() {
         };
     };
 
-    // 파일 드롭 핸들러
+    // File drop handler
     const handleFileDrop = useCallback(async (files: FileList) => {
         const newItems: ContentItem[] = [];
 
@@ -294,13 +294,13 @@ export default function Index() {
                 const contentItem = await convertFileToContentItem(file);
                 newItems.push(contentItem);
             } catch (error) {
-                console.error('파일 변환 실패:', file.name, error);
+                console.error('File conversion failed:', file.name, error);
             }
         }
 
         if (newItems.length > 0) {
             setItems((prev) => [...prev, ...newItems]);
-            alert(`${newItems.length}개 파일이 추가되었습니다!`);
+            alert(`${newItems.length} files have been added!`);
         }
     }, []);
 
@@ -316,13 +316,13 @@ export default function Index() {
     return item.folderId === selectedFolder;
   });
 
-  // 왼쪽 사이드바 너비 계산
+  // Calculate left sidebar width
   const leftSidebarWidth = isLeftSidebarCollapsed ? 48 : sidebarWidth.get();
   
-  // 오른쪽 사이드바 최대 너비 계산 (전체 화면 - 왼쪽 사이드바 - 최소 콘텐츠 영역)
-  const maxRightSidebarWidth = window.innerWidth - leftSidebarWidth - 300; // 최소 300px 콘텐츠 영역 보장
+  // Calculate right sidebar maximum width (full screen - left sidebar - minimum content area)
+  const maxRightSidebarWidth = window.innerWidth - leftSidebarWidth - 300; // Ensure minimum 300px content area
   
-  // 좌측 사이드바 가시성 제어 - 70px 이하로 좁아지면 숨김
+  // Left sidebar visibility control - hide when narrower than 70px
   const isLeftSidebarOpen = sidebarWidth.get() > 70;
 
   return (
@@ -373,7 +373,7 @@ export default function Index() {
               onTabClose={closeTab}
             />
                         <div className="flex-1 overflow-hidden">
-                            {/* 초간단 로직: activeTabId가 있으면 파일뷰어, 없으면 콘텐츠그리드 */}
+                            {/* Simple logic: if activeTabId exists, show file viewer, otherwise show content grid */}
                             {activeTabId ? (
                                 <div className="h-full p-4 overflow-y-auto">
                 <FileViewer />
@@ -392,7 +392,7 @@ export default function Index() {
           </div>
                     </div>
 
-          {/* Right Sidebar - 데칼코마니 형태로 변경 */}
+          {/* Right Sidebar - Changed to decalcomania form */}
           {isRightSidebarOpen ? (
             <EnhancedMemoSidebar 
               isOpen={isRightSidebarOpen}
@@ -401,7 +401,7 @@ export default function Index() {
               onModeChange={setRightSidebarMode}
               width={rightSidebarWidth}
               onWidthChange={(newWidth) => {
-                // 최대 너비 제한 적용
+                // Apply maximum width restriction
                                 const constrainedWidth = Math.min(
                                     newWidth,
                                     maxRightSidebarWidth
@@ -421,7 +421,7 @@ export default function Index() {
                 variant="glass"
                 size="icon"
                 className="text-white hover:bg-white/15 h-10 w-10 backdrop-blur-xl bg-white/10 border border-white/20 rounded-full relative overflow-hidden shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
-                title="사이드바 열기"
+                title="Open Sidebar"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent rounded-full" />
                 <div className="relative z-10">

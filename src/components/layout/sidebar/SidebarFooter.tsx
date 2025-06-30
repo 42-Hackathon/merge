@@ -62,7 +62,7 @@ export const SidebarFooter = memo(
                         }`}
                         style={{ width: `32px`, height: `32px` }}
                         onClick={onCollabToggle}
-                        title="협업 모드"
+                        title="Collaboration Mode"
                     >
                         <Users style={{ width: `18px`, height: `18px` }} />
                     </Button>
@@ -71,7 +71,7 @@ export const SidebarFooter = memo(
                 <>
                     <div className="space-y-1 text-white/70" style={{ fontSize: `12px` }}>
                         <div className="flex justify-between">
-                            <span>클라우드 용량</span>
+                            <span>Cloud Storage</span>
                             <span>15.7 / 50 GB</span>
                         </div>
                         <div
@@ -98,7 +98,7 @@ export const SidebarFooter = memo(
                             }`}
                             style={{ width: `28px`, height: `28px` }}
                             onClick={onCollabToggle}
-                            title="협업 모드"
+                            title="Collaboration Mode"
                         >
                             <Users style={{ width: `16px`, height: `16px` }} />
                         </Button>
@@ -108,7 +108,7 @@ export const SidebarFooter = memo(
                                 className="flex items-center justify-center rounded-md"
                                 style={{ width: `24px`, height: `24px` }}
                                 onClick={handleZoomOut}
-                                title="축소"
+                                title="Zoom Out"
                             >
                                 <ZoomOut style={{ width: `14px`, height: `14px` }} />
                             </Button>
@@ -116,7 +116,7 @@ export const SidebarFooter = memo(
                                 className="text-center tabular-nums cursor-pointer"
                                 style={{ fontSize: `11px`, width: `35px` }}
                                 onClick={handleZoomReset}
-                                title="기본 크기로 리셋 (100%)"
+                                title="Reset to Default Size (100%)"
                             >
                                 {zoomLevel}%
                             </div>
@@ -125,7 +125,7 @@ export const SidebarFooter = memo(
                                 className="flex items-center justify-center rounded-md"
                                 style={{ width: `24px`, height: `24px` }}
                                 onClick={handleZoomIn}
-                                title="확대"
+                                title="Zoom In"
                             >
                                 <ZoomIn style={{ width: `14px`, height: `14px` }} />
                             </Button>

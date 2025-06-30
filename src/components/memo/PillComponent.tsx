@@ -143,7 +143,7 @@ export const PillComponent: React.FC<NodeViewProps> = ({ node, selected }) => {
                         <div className="flex items-center justify-center h-20 bg-white/5 rounded-md border border-white/10">
                             <div className="text-center">
                                 <div className="animate-spin h-4 w-4 border-2 border-white/40 border-t-white/80 rounded-full mx-auto mb-1"></div>
-                                <div className="text-xs text-white/50">이미지 로딩 중...</div>
+                                <div className="text-xs text-white/50">Loading image...</div>
                             </div>
                         </div>
                     ) : imageSource && !imageError ? (
@@ -161,13 +161,13 @@ export const PillComponent: React.FC<NodeViewProps> = ({ node, selected }) => {
                             <div className="text-center">
                                 <ImageOff className="h-6 w-6 text-white/40 mx-auto mb-1" />
                                 <div className="text-xs text-white/50">
-                                    {content ? '이미지를 불러올 수 없습니다' : '이미지가 없습니다'}
+                                    {content ? 'Unable to load image' : 'No image available'}
                                 </div>
                             </div>
                         </div>
                     )}
                     
-                    <div className="text-xs text-white/50 italic">클릭하여 자세히 보기</div>
+                    <div className="text-xs text-white/50 italic">Click to view details</div>
                 </div>
             );
         }
@@ -181,7 +181,7 @@ export const PillComponent: React.FC<NodeViewProps> = ({ node, selected }) => {
                         {content.length > 150 ? content.substring(0, 150) + '...' : content}
                     </div>
                 )}
-                <div className="text-xs text-white/50 italic">클릭하여 자세히 보기</div>
+                <div className="text-xs text-white/50 italic">Click to view details</div>
             </div>
         );
     };

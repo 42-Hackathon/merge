@@ -6,9 +6,7 @@ import './index.css';
 
 const StickyNote: React.FC = () => {
     const [isPinned, setIsPinned] = useState(true);
-    const [editorContent, setEditorContent] = useState(
-        '<p># 스티키 노트</p><p>여기에 내용을 작성하세요...</p>'
-    );
+    const [content, setContent] = useState('<p># Sticky Note</p><p>Write your content here...</p>');
     const [isEditorDragOver, setIsEditorDragOver] = useState(false);
     const [backgroundOpacity, setBackgroundOpacity] = useState(70); // 20-100 범위
     const tiptapEditorRef = useRef<TiptapEditorHandle>(null);
@@ -147,8 +145,8 @@ const StickyNote: React.FC = () => {
             >
                 <TiptapEditor
                     ref={tiptapEditorRef}
-                    content={editorContent}
-                    onContentChange={setEditorContent}
+                    content={content}
+                    onContentChange={setContent}
                     onDragOver={handleEditorDragOver}
                     onDragLeave={handleEditorDragLeave}
                     onDrop={handleEditorDrop}

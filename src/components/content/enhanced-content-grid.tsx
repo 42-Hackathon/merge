@@ -33,7 +33,7 @@ export function EnhancedContentGrid({
   onViewModeChange, 
   onItemSelect, 
   selectedItems,
-  folderName = "모든 콘텐츠"
+  folderName = "All Content"
 }: EnhancedContentGridProps) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -61,21 +61,21 @@ export function EnhancedContentGrid({
       case 'image':
         return (
           <div className={`${baseClasses} bg-gradient-to-br from-blue-400 to-purple-600 rounded-md mb-2 flex items-center justify-center relative overflow-hidden`}>
-            <span className="text-white text-xs">이미지</span>
+            <span className="text-white text-xs">Image</span>
             <div className="absolute inset-0 bg-black/20" />
           </div>
         );
       case 'link':
         return (
           <div className={`${baseClasses} bg-gradient-to-br from-green-400 to-blue-600 rounded-md mb-2 flex items-center justify-center relative overflow-hidden`}>
-            <span className="text-white text-xs">링크</span>
+            <span className="text-white text-xs">Link</span>
             <div className="absolute inset-0 bg-black/20" />
           </div>
         );
       case 'video':
         return (
           <div className={`${baseClasses} bg-gradient-to-br from-red-400 to-pink-600 rounded-md mb-2 flex items-center justify-center relative overflow-hidden`}>
-            <span className="text-white text-xs">동영상</span>
+            <span className="text-white text-xs">Video</span>
             <div className="absolute inset-0 bg-black/20" />
           </div>
         );
@@ -97,7 +97,7 @@ export function EnhancedContentGrid({
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-bold text-white">{folderName}</h1>
           <Badge variant="secondary" className="bg-white/20 text-white text-xs">
-            {items.length}개 항목
+            {items.length} items
           </Badge>
         </div>
         
@@ -108,7 +108,7 @@ export function EnhancedContentGrid({
             size="icon"
             onClick={() => onViewModeChange('masonry')}
             className="text-white hover:bg-white/10 h-7 w-7"
-            title="폭포수 보기"
+            title="Masonry View"
           >
             <LayoutGrid className="h-3.5 w-3.5" />
           </Button>
@@ -117,7 +117,7 @@ export function EnhancedContentGrid({
             size="icon"
             onClick={() => onViewModeChange('justified')}
             className="text-white hover:bg-white/10 h-7 w-7"
-            title="양쪽 정렬"
+            title="Justified Layout"
           >
             <Columns className="h-3.5 w-3.5" />
           </Button>
@@ -126,7 +126,7 @@ export function EnhancedContentGrid({
             size="icon"
             onClick={() => onViewModeChange('grid')}
             className="text-white hover:bg-white/10 h-7 w-7"
-            title="그리드 보기"
+            title="Grid View"
           >
             <Grid3X3 className="h-3.5 w-3.5" />
           </Button>
@@ -135,7 +135,7 @@ export function EnhancedContentGrid({
             size="icon"
             onClick={() => onViewModeChange('list')}
             className="text-white hover:bg-white/10 h-7 w-7"
-            title="목록 보기"
+            title="List View"
           >
             <List className="h-3.5 w-3.5" />
           </Button>
@@ -155,13 +155,13 @@ export function EnhancedContentGrid({
               <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-3">
                 <Edit3 className="h-6 w-6" />
               </div>
-              <p className="text-base mb-1">새로운 아이디어를 시작해보세요</p>
-              <p className="text-xs">여기에 바로 작성하거나 콘텐츠를 수집해보세요</p>
+              <p className="text-base mb-1">Start a new idea</p>
+              <p className="text-xs">Write directly here or collect content</p>
               
               {/* Inline Editor */}
               <div className="mt-6 w-full max-w-2xl">
                 <Textarea
-                  placeholder="여기에 바로 작성을 시작하세요... (Obsidian, Notion처럼)"
+                  placeholder="Start writing here... (like Obsidian, Notion)"
                   value={editorContent}
                   onChange={(e) => setEditorContent(e.target.value)}
                   className="min-h-[200px] bg-white/5 border-white/20 text-white placeholder:text-white/50 resize-none"
@@ -178,13 +178,13 @@ export function EnhancedContentGrid({
                       }}
                       className="text-white/70 hover:bg-white/10 h-7 px-3 text-xs"
                     >
-                      취소
+                      Cancel
                     </Button>
                     <Button
                       size="sm"
                       className="bg-blue-500 hover:bg-blue-600 text-white h-7 px-3 text-xs"
                     >
-                      저장
+                      Save
                     </Button>
                   </div>
                 )}

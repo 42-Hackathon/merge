@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   Send, 
   X, 
@@ -10,7 +10,6 @@ import {
   Camera, 
   Clipboard,
   Bot,
-  User,
   Settings
 } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -20,12 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface AIChatProps {
-  width?: number;
-  onAddContext?: (items: ContextItem[]) => void;
-}
-
-export function AIChat({ width, onAddContext }: AIChatProps) {
+export function AIChat() {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,20 +30,20 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // API 키 설정
+  // API key setup
   const handleApiKeyChange = (newApiKey: string) => {
     setApiKey(newApiKey);
     aiService.setApiKey(newApiKey);
   };
 
-  // 초기 API 키 설정
+  // Initialize API key
   useEffect(() => {
     if (apiKey) {
       aiService.setApiKey(apiKey);
     }
   }, [apiKey]);
 
-  // 메시지가 추가될 때마다 스크롤을 맨 아래로
+  // Scroll to bottom when messages are added
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -57,9 +51,9 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
   const handleSendMessage = useCallback(async () => {
     if (!inputValue.trim() || isLoading) return;
     
-    // API 키가 없으면 데모 모드 알림 (한 번만)
+    // Demo mode notification if no API key (only once)
     if (!apiKey.trim() && messages.length === 0) {
-      toast.success('데모 모드로 실행 중입니다. 실제 AI 응답을 원하면 API 키를 설정하세요.');
+      toast.success('Running in demo mode. Set up API key for actual AI responses.');
     }
 
     const userMessage: AIMessage = {
@@ -86,7 +80,7 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'AI 응답을 받을 수 없습니다.');
+      toast.error(error instanceof Error ? error.message : 'Unable to get AI response.');
     } finally {
       setIsLoading(false);
     }
@@ -99,10 +93,7 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
     }
   };
 
-  const clearChat = () => {
-    setMessages([]);
-    setContextItems([]);
-  };
+
 
   const removeContextItem = (id: string) => {
     setContextItems(prev => prev.filter(item => item.id !== id));
@@ -116,21 +107,21 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
     });
   };
 
-  // 드래그앤드롭 핸들러
+  // Drag and drop handlers
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     
     try {
-      // 1. ContentPill 드래그 처리
+      // 1. Handle ContentPill drag
       const jsonData = e.dataTransfer.getData('application/json');
       if (jsonData) {
         const item: ContextItem = JSON.parse(jsonData);
         addContextItem(item);
-        toast.success(`"${item.title}" 컨텍스트에 추가됨`);
+        toast.success(`"${item.title}" added to context`);
         return;
       }
 
-      // 2. 파일 드래그 처리
+      // 2. Handle file drag
       const files = Array.from(e.dataTransfer.files);
       if (files.length > 0) {
         for (const file of files) {
@@ -146,16 +137,16 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
           };
           addContextItem(contextItem);
         }
-        toast.success(`${files.length}개 파일이 컨텍스트에 추가됨`);
+        toast.success(`${files.length} files added to context`);
         return;
       }
 
-      // 3. 텍스트 드래그 처리
+      // 3. Handle text drag
       const textData = e.dataTransfer.getData('text/plain');
       if (textData) {
-        // 제목을 더 명확하게 생성
+        // Create clearer title
         const firstLine = textData.split('\n')[0].trim();
-        let title = firstLine || '텍스트 내용';
+        let title = firstLine || 'Text content';
         if (title.length > 50) {
           title = title.substring(0, 50) + '...';
         }
@@ -167,13 +158,13 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
           content: textData,
         };
         addContextItem(contextItem);
-        toast.success('텍스트가 컨텍스트에 추가됨');
+        toast.success('Text added to context');
         return;
       }
 
     } catch (error) {
-      console.error('드롭 데이터 파싱 오류:', error);
-      toast.error('파일을 처리할 수 없습니다.');
+      console.error('Drop data parsing error:', error);
+      toast.error('Unable to process file.');
     }
   }, []);
 
@@ -196,13 +187,13 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
   };
 
   const formatTime = (timestamp: string) => {
-    return new Date(timestamp).toLocaleTimeString('ko-KR', { 
+    return new Date(timestamp).toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit' 
     });
   };
 
-  // 파일 타입 판별 함수
+  // File type detection function
   const getFileType = (file: File): ContextItem['type'] => {
     const type = file.type.toLowerCase();
     const name = file.name.toLowerCase();
@@ -214,7 +205,7 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
     return 'other';
   };
 
-  // 파일 내용 읽기 함수
+  // File content reading function
   const readFileContent = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -224,38 +215,38 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
         if (typeof result === 'string') {
           resolve(result);
         } else {
-          resolve(`[파일: ${file.name}] (${(file.size / 1024).toFixed(1)}KB)`);
+          resolve(`[File: ${file.name}] (${(file.size / 1024).toFixed(1)}KB)`);
         }
       };
       
       reader.onerror = () => {
-        reject(new Error('파일을 읽을 수 없습니다.'));
+        reject(new Error('Unable to read file.'));
       };
       
-      // 텍스트 파일만 내용을 읽고, 나머지는 파일 정보만 저장
+      // Only read content for text files, store file info for others
       if (file.type.startsWith('text/') || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
         reader.readAsText(file);
       } else {
-        resolve(`[파일: ${file.name}]\n파일 타입: ${file.type}\n크기: ${(file.size / 1024).toFixed(1)}KB`);
+        resolve(`[File: ${file.name}]\nFile type: ${file.type}\nSize: ${(file.size / 1024).toFixed(1)}KB`);
       }
     });
   };
 
   return (
     <div className="flex flex-col h-full relative">
-      {/* 우상단 호버 영역 */}
+      {/* Top-right hover area */}
       <div 
         className="absolute top-0 right-0 w-16 h-16 z-20"
         onMouseEnter={() => setShowApiKeyPanel(true)}
         onMouseLeave={() => setShowApiKeyPanel(false)}
       >
-        {/* 호버 인디케이터 */}
+        {/* Hover indicator */}
         <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/5 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
           <Settings className="h-3 w-3 text-white/40" />
         </div>
       </div>
 
-      {/* API 키 설정 패널 */}
+      {/* API key setup panel */}
       <AnimatePresence>
         {showApiKeyPanel && (
           <motion.div
@@ -269,7 +260,7 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Settings className="h-4 w-4 text-white/60" />
-                <span className="text-sm font-medium text-white/80">API 키 설정</span>
+                <span className="text-sm font-medium text-white/80">API Key Setup</span>
               </div>
               <div className="flex items-center gap-2">
                 <input
@@ -285,18 +276,18 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
                   rel="noopener noreferrer"
                   className="text-sm text-blue-400 hover:text-blue-300 underline flex-shrink-0"
                 >
-                  발급받기
+                  Get Key
                 </a>
               </div>
               <p className="text-xs text-white/50">
-                OpenRouter API 키를 입력하면 실제 AI와 대화할 수 있습니다. 키 없이도 데모 모드로 사용 가능합니다.
+                Enter your OpenRouter API key to chat with real AI. Demo mode available without key.
               </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* 메시지 영역 */}
+      {/* Messages area */}
       <div 
         className="flex-1 overflow-hidden"
         onDrop={handleDrop}
@@ -307,15 +298,15 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
             {messages.length === 0 ? (
               <div className="text-center text-white/50 pt-16">
                 <Bot size={40} className="mx-auto mb-4 text-white/20" />
-                <h3 className="font-medium mb-2 text-sm">AI 어시스턴트와 대화를 시작하세요</h3>
-                <p className="text-xs mb-4 text-white/40">수집한 콘텐츠를 드래그하여 컨텍스트로 추가할 수 있습니다</p>
+                <h3 className="font-medium mb-2 text-sm">Start chatting with AI Assistant</h3>
+                <p className="text-xs mb-4 text-white/40">Drag your collected content here to add as context</p>
               </div>
             ) : (
               messages.map((message) => (
                 <div key={message.id} className="mb-4">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-medium text-white/70">
-                      {message.role === 'user' ? '사용자' : 'AI'}
+                      {message.role === 'user' ? 'You' : 'AI'}
                     </span>
                     <span className="text-xs text-white/40">
                       {formatTime(message.timestamp)}
@@ -353,7 +344,7 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
                     <div className="w-2 h-2 bg-white/50 rounded-full animate-pulse delay-75"></div>
                     <div className="w-2 h-2 bg-white/50 rounded-full animate-pulse delay-150"></div>
                   </div>
-                  <span className="text-xs text-white/50">생각 중...</span>
+                  <span className="text-xs text-white/50">Thinking...</span>
                 </div>
               </div>
             )}
@@ -362,7 +353,7 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
         </ScrollArea>
       </div>
 
-      {/* 컨텍스트바 */}
+      {/* Context bar */}
       <div className="flex-shrink-0 p-3 min-h-[3.5rem] transition-colors duration-200">
         <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
           <div className="flex items-center gap-2 w-max">
@@ -388,7 +379,7 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
         </div>
       </div>
 
-      {/* 입력 영역 */}
+      {/* Input area */}
       <div className="flex-shrink-0 p-4 border-t border-white/10">
         <div className="relative">
           <textarea
@@ -399,11 +390,11 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
             placeholder={
               !apiKey.trim() 
                 ? (contextItems.length > 0 
-                    ? `[데모 모드] ${contextItems.length}개 컨텍스트와 함께 질문하세요...` 
-                    : "[데모 모드] AI에게 질문하세요... (Shift+Enter로 줄바꿈)")
+                    ? `[Demo Mode] Ask with ${contextItems.length} context items...` 
+                    : "[Demo Mode] Ask AI... (Shift+Enter for new line)")
                 : (contextItems.length > 0 
-                    ? `${contextItems.length}개 컨텍스트와 함께 AI에게 질문하세요...` 
-                    : "AI에게 질문하세요... (Shift+Enter로 줄바꿈)")
+                    ? `Ask AI with ${contextItems.length} context items...` 
+                    : "Ask AI... (Shift+Enter for new line)")
             }
             className="w-full px-4 py-4 pr-12 bg-white/10 rounded-lg border border-white/20 text-white placeholder-white/50 text-xs resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 min-h-[60px] max-h-32 leading-relaxed"
             rows={3}
