@@ -11,6 +11,7 @@ import { TiptapEditor, TiptapEditorHandle } from "./tiptap-editor";
 import { v4 as uuidv4 } from 'uuid';
 import { Separator } from "../ui/separator";
 import { toast } from "sonner";
+import { AIChat } from "../chat/ai-chat";
 
 type ContentType = 'text' | 'image' | 'link' | 'video' | 'audio' | 'clipboard' | 'screenshot' | 'other';
 
@@ -477,6 +478,14 @@ export function EnhancedMemoSidebar({
 
   const handlePillDragStart = (e: React.DragEvent, pill: ContentPill) => {
      e.dataTransfer.setData('application/x-content-pill', JSON.stringify(pill));
+     // AI 채팅을 위한 ContextItem 형식으로도 데이터 설정
+     e.dataTransfer.setData('application/json', JSON.stringify({
+       id: pill.id,
+       type: pill.type,
+       title: pill.title,
+       content: pill.content,
+       metadata: pill.metadata
+     }));
    };
   
   const handleEditorDragOver = (e: React.DragEvent) => {
@@ -605,7 +614,9 @@ export function EnhancedMemoSidebar({
       )}
 
       {/* Main Content */}
-      {showMemoList ? (
+      {mode === 'ai' ? (
+        <AIChat width={width} />
+      ) : showMemoList ? (
         <div className="flex-1 overflow-y-auto p-2">
           {savedMemos.length > 0 ? (
             <ScrollArea className="h-full">
