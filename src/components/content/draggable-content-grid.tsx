@@ -105,7 +105,7 @@ export function DraggableContentGrid({
                             width: viewMode === 'list' ? `48px` : '100%',
                             height: `${baseHeight}px`,
                         }}
-                        className={`relative overflow-hidden rounded-lg group-hover:scale-105 transition-transform duration-500`}
+                        className="relative overflow-hidden rounded-lg"
                     >
                         {/* 실제 이미지 표시 */}
                         {item.metadata?.url ? (
@@ -130,7 +130,16 @@ export function DraggableContentGrid({
                         className={`bg-gradient-to-br from-blue-50 to-indigo-100 
                                       absolute inset-0 flex items-center justify-center ${item.metadata?.url ? 'hidden' : 'flex'}`}
                     >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <motion.div 
+                            className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
+                            initial={{ opacity: 0 }}
+                            whileHover={{ opacity: 1 }}
+                            transition={{ 
+                                type: 'tween',
+                                duration: 0.25,
+                                ease: 'easeOut'
+                            }}
+                        />
                         <div className="relative z-10 text-center">
                             <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
                                 <span style={{ fontSize: `20px` }}>🖼️</span>
@@ -145,7 +154,16 @@ export function DraggableContentGrid({
                         </div>
                         
                         {/* 호버 오버레이 */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <motion.div 
+                            className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"
+                            initial={{ opacity: 0 }}
+                            whileHover={{ opacity: 1 }}
+                            transition={{ 
+                                type: 'tween',
+                                duration: 0.25,
+                                ease: 'easeOut'
+                            }}
+                        />
                     </div>
                 );
             case 'link':
@@ -155,10 +173,18 @@ export function DraggableContentGrid({
                             width: viewMode === 'list' ? `48px` : '100%',
                             height: `${baseHeight}px`,
                         }}
-                        className={`bg-gradient-to-br from-emerald-50 to-teal-100 
-                                  relative overflow-hidden rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform duration-500`}
+                        className="bg-gradient-to-br from-emerald-50 to-teal-100 rounded-lg relative overflow-hidden rounded-lg flex items-center justify-center"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <motion.div 
+                            className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
+                            initial={{ opacity: 0 }}
+                            whileHover={{ opacity: 1 }}
+                            transition={{ 
+                                type: 'tween',
+                                duration: 0.25,
+                                ease: 'easeOut'
+                            }}
+                        />
                         <div className="relative z-10 text-center">
                             <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
                                 <span style={{ fontSize: `20px` }}>🔗</span>
@@ -182,10 +208,18 @@ export function DraggableContentGrid({
                             width: viewMode === 'list' ? `48px` : '100%',
                             height: `${baseHeight}px`,
                         }}
-                        className={`bg-gradient-to-br from-rose-50 to-pink-100 
-                                  relative overflow-hidden rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform duration-500`}
+                        className="bg-gradient-to-br from-rose-50 to-pink-100 rounded-lg relative overflow-hidden rounded-lg flex items-center justify-center"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <motion.div 
+                            className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
+                            initial={{ opacity: 0 }}
+                            whileHover={{ opacity: 1 }}
+                            transition={{ 
+                                type: 'tween',
+                                duration: 0.25,
+                                ease: 'easeOut'
+                            }}
+                        />
                         <div className="relative z-10 text-center">
                             <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
                                 <span style={{ fontSize: `20px` }}>📹</span>
@@ -367,15 +401,24 @@ export function DraggableContentGrid({
                                         key={item.id}
                                         whileHover={{ 
                                             scale: viewMode !== 'list' ? 1.02 : 1.005,
-                                            y: viewMode !== 'list' ? -6 : 0
+                                            y: viewMode !== 'list' ? -4 : 0
                                         }}
                                         whileTap={{ scale: 0.98 }}
-                                        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                                        transition={{ 
+                                            type: 'spring', 
+                                            stiffness: 300, 
+                                            damping: 20,
+                                            mass: 0.8
+                                        }}
+                                        style={{ 
+                                            willChange: 'transform',
+                                            transform: 'translate3d(0,0,0)',
+                                            backfaceVisibility: 'hidden'
+                                        }}
                                     >
                                     <GlassCard
-                                        className={`cursor-pointer relative group transition-all duration-300
-                                          bg-white/[0.08] backdrop-blur-xl border border-white/20
-                                          hover:bg-white/[0.15] hover:border-white/30
+                                        className={`cursor-pointer relative group
+                                          bg-white/[0.08] backdrop-blur-lg border border-white/20
                                           ${viewMode === 'list' ? 'flex items-center' : ''} 
                                           ${draggedItem === item.id ? 'opacity-50 scale-95' : ''}
                                           ${selectedItems.includes(item.id) ? 'ring-2 ring-blue-400/50 ring-offset-2 ring-offset-transparent' : ''}

@@ -197,21 +197,45 @@ export function Header({
                         } as React.CSSProperties
                     }
                 >
-                    <button
+                    <motion.button
                         onClick={onStickyNoteToggle}
-                        className="group relative flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+                        className="group relative flex items-center justify-center"
                         style={{
                             height: `28px`,
                             width: `28px`,
                         }}
                         title="스티키 노트"
+                        whileHover={{ scale: 1.08 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ 
+                            type: 'spring',
+                            stiffness: 400,
+                            damping: 25,
+                            mass: 0.6
+                        }}
                     >
-                        <div className="absolute inset-0 rounded-full bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 backdrop-blur-sm" />
-                        <StickyNote
-                            className="relative z-10 text-white/70 group-hover:text-white transition-colors duration-200"
-                            style={{ width: `14px`, height: `14px` }}
+                        <motion.div 
+                            className="absolute inset-0 rounded-full bg-white/5 backdrop-blur-sm"
+                                                         initial={{ opacity: 0 }}
+                             whileHover={{ opacity: 1 }}
+                             transition={{ 
+                                 type: 'tween',
+                                 duration: 0.25,
+                                 ease: 'easeOut'
+                             }}
                         />
-                    </button>
+                        <motion.div
+                                                         initial={{ color: 'rgba(255,255,255,0.7)' }}
+                             whileHover={{ color: 'rgba(255,255,255,1)' }}
+                             transition={{ 
+                                 type: 'tween',
+                                 duration: 0.2,
+                                 ease: 'easeOut'
+                             }}
+                        >
+                            <StickyNote style={{ width: `14px`, height: `14px` }} />
+                        </motion.div>
+                    </motion.button>
 
                     <button
                         className="group relative flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"

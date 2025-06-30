@@ -603,12 +603,17 @@ export function EnhancedMemoSidebar({
                 <div className="relative flex items-center bg-white/8 rounded-lg p-0.5 backdrop-blur-sm border border-white/10">
                     {/* 슬라이딩 인디케이터 */}
                     <motion.div
-                        className="absolute top-0.5 bottom-0.5 bg-white/15 backdrop-blur-md rounded-md border border-white/20"
+                        className="absolute top-0.5 bottom-0.5 bg-white/15 backdrop-blur-sm rounded-md border border-white/20"
                         animate={{
                             left: mode === 'memo' ? '2px' : '50%',
                             width: mode === 'memo' ? 'calc(50% - 2px)' : 'calc(50% - 2px)'
                         }}
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        transition={{ 
+                            type: "spring", 
+                            stiffness: 400, 
+                            damping: 30,
+                            mass: 0.6
+                        }}
                     />
                     
                     <button
@@ -648,7 +653,17 @@ export function EnhancedMemoSidebar({
             <ScrollArea className="h-full">
               <ul className="space-y-1 p-1">
                 {savedMemos.slice().reverse().map((memo) => (
-                  <li key={memo.id} onClick={() => loadMemo(memo.id)} className="relative group p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer">
+                  <motion.li 
+                    key={memo.id} 
+                    onClick={() => loadMemo(memo.id)} 
+                    className="relative group p-3 rounded-lg cursor-pointer"
+                    whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+                    transition={{ 
+                        type: 'tween',
+                        duration: 0.2,
+                        ease: 'easeOut'
+                    }}
+                >
                     <p className="font-medium truncate text-sm mb-2">{memo.title}</p>
                     <div className="flex items-center gap-4 text-xs text-white/50">
                       <div className="flex items-center gap-1.5">
@@ -667,7 +682,7 @@ export function EnhancedMemoSidebar({
                       onClick={(e) => { e.stopPropagation(); deleteMemo(memo.id); }}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
                       </ScrollArea>
@@ -785,7 +800,16 @@ export function EnhancedMemoSidebar({
                     <ScrollArea className="max-h-60 pr-2">
                       <div className="space-y-1.5">
                                 {contentPills.map(pill => (
-                          <li key={pill.id} className="group relative flex items-center p-1 rounded-lg hover:bg-white/5 transition-colors">
+                          <motion.li 
+                            key={pill.id} 
+                            className="group relative flex items-center p-1 rounded-lg"
+                            whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+                            transition={{ 
+                                type: 'tween',
+                                duration: 0.2,
+                                ease: 'easeOut'
+                            }}
+                          >
                             <div
                               className={`w-full flex items-center text-xs px-2 py-1.5 rounded-lg border border-transparent cursor-pointer ${getPillStyleClass(pill.type)}`}
                               onClick={() => { insertPillIntoEditor(pill); setIsPillListVisible(false); }}
@@ -832,7 +856,7 @@ export function EnhancedMemoSidebar({
                             >
                                 <Trash2 className="h-3.5 w-3.5" />
                             </Button>
-                          </li>
+                          </motion.li>
                                 ))}
                               </div>
                             </ScrollArea>
