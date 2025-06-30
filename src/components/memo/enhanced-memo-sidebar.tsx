@@ -11,6 +11,7 @@ import { TiptapEditor, TiptapEditorHandle } from "./tiptap-editor";
 import { v4 as uuidv4 } from 'uuid';
 import { Separator } from "../ui/separator";
 import { toast } from "sonner";
+import { AIChat } from "../chat/ai-chat";
 
 type ContentType = 'text' | 'image' | 'link' | 'video' | 'audio' | 'clipboard' | 'screenshot' | 'other';
 
@@ -22,8 +23,8 @@ const MAX_VISIBLE_PILLS = 5;
 interface EnhancedMemoSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'memo' | 'chat' | 'view';
-  onModeChange: (mode: 'memo' | 'chat' | 'view') => void;
+  mode: 'memo' | 'chat' | 'view' | 'ai';
+  onModeChange: (mode: 'memo' | 'chat' | 'view' | 'ai') => void;
   width?: number;
   onWidthChange?: (width: number) => void;
   maxWidth?: number;
@@ -477,6 +478,14 @@ export function EnhancedMemoSidebar({
 
   const handlePillDragStart = (e: React.DragEvent, pill: ContentPill) => {
      e.dataTransfer.setData('application/x-content-pill', JSON.stringify(pill));
+     // AI 채팅을 위한 ContextItem 형식으로도 데이터 설정
+     e.dataTransfer.setData('application/json', JSON.stringify({
+       id: pill.id,
+       type: pill.type,
+       title: pill.title,
+       content: pill.content,
+       metadata: pill.metadata
+     }));
    };
   
   const handleEditorDragOver = (e: React.DragEvent) => {
@@ -562,18 +571,49 @@ export function EnhancedMemoSidebar({
       {/* Header */}
       {showMemoList ? (
         <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-white/10 h-14">
-            <h3 className="font-semibold text-lg ml-2">저장된 메모</h3>
+            <h3 className="font-semibold text-lg ml-2">
+                {mode === 'ai' ? 'AI 대화' : '저장된 메모'}
+            </h3>
             <div className="bg-white/10 text-white/80 text-xs font-medium px-2 py-1 rounded-full">
                 {savedMemos.length}개
           </div>
             </div>
       ) : (
         <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-white/10 h-14">
-            <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" onClick={() => onModeChange(mode === 'memo' ? 'chat' : 'memo')}>
-                    <MessageCircle className="h-5 w-5" />
-                </Button>
-                <span className="font-semibold">메모</span>
+            <div className="flex items-center gap-3">
+                {/* 메모/AI 스위치 */}
+                <div className="relative flex items-center bg-white/8 rounded-lg p-0.5 backdrop-blur-sm border border-white/10">
+                    {/* 슬라이딩 인디케이터 */}
+                    <motion.div
+                        className="absolute top-0.5 bottom-0.5 bg-white/15 backdrop-blur-md rounded-md border border-white/20"
+                        animate={{
+                            left: mode === 'memo' ? '2px' : '50%',
+                            width: mode === 'memo' ? 'calc(50% - 2px)' : 'calc(50% - 2px)'
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                    
+                    <button
+                        onClick={() => onModeChange('memo')}
+                        className={`relative z-10 flex items-center justify-center px-4 py-2 text-sm font-medium transition-all duration-200 rounded-md min-w-[60px] ${
+                            mode === 'memo' 
+                                ? 'text-white' 
+                                : 'text-white/60 hover:text-white/80'
+                        }`}
+                    >
+                        메모
+                    </button>
+                    <button
+                        onClick={() => onModeChange('ai')}
+                        className={`relative z-10 flex items-center justify-center px-4 py-2 text-sm font-medium transition-all duration-200 rounded-md min-w-[60px] ${
+                            mode === 'ai' 
+                                ? 'text-white' 
+                                : 'text-white/60 hover:text-white/80'
+                        }`}
+                    >
+                        AI
+                    </button>
+                </div>
         </div>
             <Button variant="ghost" size="icon" onClick={onClose}>
                 <PanelRightClose className="h-5 w-5" />
@@ -582,7 +622,9 @@ export function EnhancedMemoSidebar({
       )}
 
       {/* Main Content */}
-      {showMemoList ? (
+      {mode === 'ai' ? (
+        <AIChat width={width} />
+      ) : showMemoList ? (
         <div className="flex-1 overflow-y-auto p-2">
           {savedMemos.length > 0 ? (
             <ScrollArea className="h-full">
@@ -734,24 +776,28 @@ export function EnhancedMemoSidebar({
                 )}
 
       {/* Footer */}
-      <div className="flex-shrink-0 flex items-center justify-between p-2 border-t border-white/10 h-12">
-                      <div className="flex items-center gap-1">
-          <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={() => setShowMemoList(!showMemoList)}>
-            <List className="h-5 w-5" />
-          </Button>
-          <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={createNewMemo}>
-            <Plus className="h-5 w-5" />
-          </Button>
-          <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={() => saveMemo()}>
-            <Save className="h-5 w-5" />
-                      </Button>
-                    </div>
-        <div className="flex items-center gap-2 pr-2">
-          {renderSaveStatus()}
-          <Separator orientation="vertical" className="h-5" />
-          <span className="text-xs font-mono"># MD</span>
-                            </div>
-                            </div>
-                        </div>
+      {mode !== 'ai' && (
+        <div className="flex-shrink-0 flex items-center justify-between p-2 border-t border-white/10 h-12">
+                        <div className="flex items-center gap-1">
+            <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={() => setShowMemoList(!showMemoList)}>
+              <List className="h-5 w-5" />
+            </Button>
+            <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={createNewMemo}>
+              <Plus className="h-5 w-5" />
+            </Button>
+            <Button variant="link" className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" onClick={() => saveMemo()}>
+              <Save className="h-5 w-5" />
+                        </Button>
+                      </div>
+          <div className="flex items-center gap-2 pr-2">
+            {renderSaveStatus()}
+            <Separator orientation="vertical" className="h-5" />
+            <span className="text-xs font-mono">
+              # MD
+            </span>
+                              </div>
+                              </div>
+      )}
+                          </div>
   );
 }
