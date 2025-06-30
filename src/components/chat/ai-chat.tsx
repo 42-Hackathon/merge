@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   Send, 
-  Sparkles, 
   X, 
   FileText, 
   Image, 
@@ -12,9 +11,7 @@ import {
   Clipboard,
   Bot,
   User,
-  Settings,
-  Plus,
-  Trash2
+  Settings
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
@@ -34,16 +31,16 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [contextItems, setContextItems] = useState<ContextItem[]>([]);
   const [apiKey, setApiKey] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
+  const [showApiKeyPanel, setShowApiKeyPanel] = useState(false);
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // API 키 설정
   const handleApiKeyChange = (newApiKey: string) => {
     setApiKey(newApiKey);
     aiService.setApiKey(newApiKey);
   };
-  
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // 초기 API 키 설정
   useEffect(() => {
@@ -245,50 +242,55 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* 헤더 */}
-      <div className="flex-shrink-0 flex items-center justify-between p-2 border-b border-white/10">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-white/60">AI 어시스턴트</span>
-        </div>
-        <div className="flex items-center gap-1 flex-shrink-0">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-7 w-7 text-white/60 hover:text-white/80"
-            onClick={() => setShowSettings(!showSettings)}
-          >
-            <Settings className="h-3.5 w-3.5" />
-          </Button>
+    <div className="flex flex-col h-full relative">
+      {/* 우상단 호버 영역 */}
+      <div 
+        className="absolute top-0 right-0 w-16 h-16 z-20"
+        onMouseEnter={() => setShowApiKeyPanel(true)}
+        onMouseLeave={() => setShowApiKeyPanel(false)}
+      >
+        {/* 호버 인디케이터 */}
+        <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/5 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+          <Settings className="h-3 w-3 text-white/40" />
         </div>
       </div>
 
-      {/* API 키 설정 */}
+      {/* API 키 설정 패널 */}
       <AnimatePresence>
-        {showSettings && (
+        {showApiKeyPanel && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="flex-shrink-0 px-3 py-2 border-b border-white/10 bg-white/5"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-0 right-0 w-80 p-3 bg-black/60 backdrop-blur-xl border border-white/20 rounded-lg shadow-2xl z-30 m-3"
+            onMouseEnter={() => setShowApiKeyPanel(true)}
+            onMouseLeave={() => setShowApiKeyPanel(false)}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-white/60 flex-shrink-0">API Key</span>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => handleApiKeyChange(e.target.value)}
-                placeholder="sk-or-v1-..."
-                className="flex-1 px-2 py-1 bg-white/10 rounded border border-white/20 text-white placeholder-white/50 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500/50"
-              />
-              <a 
-                href="https://openrouter.ai/keys" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-xs text-white/50 hover:text-white/70 underline flex-shrink-0"
-              >
-                발급받기
-              </a>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Settings className="h-4 w-4 text-white/60" />
+                <span className="text-sm font-medium text-white/80">API 키 설정</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => handleApiKeyChange(e.target.value)}
+                  placeholder="sk-or-v1-..."
+                  className="flex-1 px-3 py-2 bg-white/10 rounded-lg border border-white/20 text-white placeholder-white/50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                />
+                <a 
+                  href="https://openrouter.ai/keys" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-400 hover:text-blue-300 underline flex-shrink-0"
+                >
+                  발급받기
+                </a>
+              </div>
+              <p className="text-xs text-white/50">
+                OpenRouter API 키를 입력하면 실제 AI와 대화할 수 있습니다. 키 없이도 데모 모드로 사용 가능합니다.
+              </p>
             </div>
           </motion.div>
         )}
@@ -307,17 +309,6 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
                 <Bot size={40} className="mx-auto mb-4 text-white/20" />
                 <h3 className="font-medium mb-2 text-sm">AI 어시스턴트와 대화를 시작하세요</h3>
                 <p className="text-xs mb-4 text-white/40">수집한 콘텐츠를 드래그하여 컨텍스트로 추가할 수 있습니다</p>
-                
-                {!apiKey && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setShowSettings(true)}
-                    className="border-white/20 text-white/70 hover:bg-white/10"
-                  >
-                    API 키 설정하기
-                  </Button>
-                )}
               </div>
             ) : (
               messages.map((message) => (
