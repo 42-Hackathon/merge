@@ -17,6 +17,11 @@ declare global {
             onImportContent: (callback: () => void) => void;
             removeAllListeners: (channel: string) => void;
 
+            // Window Controls
+            minimizeWindow: () => Promise<void>;
+            maximizeWindow: () => Promise<boolean>;
+            closeWindow: () => Promise<void>;
+
             // File System API
             readFile: (
                 filePath: string
@@ -77,6 +82,8 @@ declare global {
         count?: number;
         isExpanded?: boolean;
         depth?: number;
+        isVirtual?: boolean; // 가상 파일(목데이터)인지 구분
+        contentItem?: any; // ContentItem 정보 (가상 파일용)
     }
 
     interface LocalFolderData {

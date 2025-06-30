@@ -17,6 +17,9 @@ export interface ContentItem {
         dimensions?: { width: number; height: number };
         author?: string;
         views?: number;
+        duration?: number; // 동영상 재생 시간 (초)
+        resolution?: string; // 동영상 해상도
+        originalPath?: string; // 원본 파일 경로
     };
     source?: string;
 }

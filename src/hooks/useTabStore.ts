@@ -21,6 +21,30 @@ export const useTabStore = create<TabState>((set, get) => ({
             return;
         }
 
+        // 가상 파일(목데이터)인 경우 바로 탭 열기
+        if (file.isVirtual && file.contentItem) {
+            const newTab: FileNode = {
+                ...file,
+                type: (file.contentItem.type === 'text'
+                    ? 'text'
+                    : file.contentItem.type === 'image'
+                    ? 'image'
+                    : 'unsupported') as
+                    | 'markdown'
+                    | 'text'
+                    | 'image'
+                    | 'unsupported'
+                    | 'pdf'
+                    | 'html',
+            };
+            set((state) => ({
+                tabs: [...state.tabs, newTab],
+                activeTabId: newTab.id,
+            }));
+            return;
+        }
+
+        // 실제 파일인 경우 기존 로직 사용
         if (!window.electronAPI) {
             toast.error('Electron API not available.');
             return;
@@ -31,7 +55,7 @@ export const useTabStore = create<TabState>((set, get) => ({
             if (result.success && result.data?.type !== 'unsupported') {
                 const newTab: FileNode = {
                     ...file,
-                    type: result.data.type,
+                    type: result.data?.type as any,
                 };
                 set((state) => ({
                     tabs: [...state.tabs, newTab],

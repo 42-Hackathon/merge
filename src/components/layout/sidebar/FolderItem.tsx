@@ -97,13 +97,38 @@ export const FolderItemComponent = memo(
         selectedFolder,
         onRemoveFromWorkspace,
         onFileSelect,
+        onFolderSelect,
+        onFileDrop,
     }: FolderItemComponentProps) => {
         const ref = useRef<HTMLDivElement>(null);
+        const [isFileDropping, setIsFileDropping] = useState(false);
+
+        const isFolder = !!item.children;
+        const isExpanded = expandedFolders.has(item.id);
+        const isSelected = selectedFolder === item.id;
+        const Icon = item.icon || (isFolder ? Folder : FileText);
+        const isRenaming = renamingItemId === item.id;
+
+        // 카테고리 폴더인지 확인
+        const isCategoryFolder = [
+            'categories',
+            'text',
+            'links',
+            'images',
+            'videos',
+            'memo',
+            'clipboard',
+            'screenshots',
+        ].includes(item.id);
+
+        // 카테고리 폴더는 파일 드롭만 지원, 폴더 드래그는 비활성화
+        const enableFolderDrag = !isCategoryFolder;
 
         const [{ isDragging }, drag] = useDrag({
             type: ItemTypes.FOLDER_ITEM,
             item: { id: item.id, path: item.path },
             collect: (monitor: DragSourceMonitor) => ({ isDragging: !!monitor.isDragging() }),
+            canDrag: enableFolderDrag, // 카테고리 폴더는 드래그 비활성화
         });
 
         const [{ isOver, canDrop }, drop] = useDrop<
@@ -112,9 +137,11 @@ export const FolderItemComponent = memo(
             { isOver: boolean; canDrop: boolean }
         >(() => ({
             accept: ItemTypes.FOLDER_ITEM,
-            canDrop: (draggedItem) => draggedItem.id !== item.id,
+            canDrop: (draggedItem) => enableFolderDrag && draggedItem.id !== item.id,
             drop: (draggedItem) => {
-                moveItem(draggedItem.id, item.id);
+                if (enableFolderDrag) {
+                    moveItem(draggedItem.id, item.id);
+                }
             },
             collect: (monitor) => ({
                 isOver: monitor.isOver(),
@@ -122,19 +149,75 @@ export const FolderItemComponent = memo(
             }),
         }));
 
-        drag(drop(ref));
+        // 카테고리 폴더가 아닐 때만 react-dnd 적용
+        if (enableFolderDrag) {
+            drag(drop(ref));
+        }
+        const isCategoryParent = item.id === 'categories';
 
-        const isFolder = !!item.children;
-        const isExpanded = expandedFolders.has(item.id);
-        const isSelected = selectedFolder === item.id;
-        const Icon = item.icon || (isFolder ? Folder : FileText);
-        const isRenaming = renamingItemId === item.id;
+        // 파일 드롭 핸들러 (카테고리 폴더에만 적용)
+        const handleFileDragOver = (e: React.DragEvent) => {
+            if (!isCategoryFolder || !onFileDrop) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            // 파일 드롭 허용 명시
+            e.dataTransfer.dropEffect = 'copy';
+
+            const hasFiles = e.dataTransfer.types.includes('Files');
+
+            if (hasFiles && !isFileDropping) {
+                setIsFileDropping(true);
+            }
+        };
+
+        const handleFileDragLeave = (e: React.DragEvent) => {
+            if (!isCategoryFolder || !onFileDrop) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+            setIsFileDropping(false);
+        };
+
+        const handleFileDrop = (e: React.DragEvent) => {
+            if (!isCategoryFolder || !onFileDrop) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+            setIsFileDropping(false);
+
+            if (e.dataTransfer.files.length > 0) {
+                onFileDrop(e.dataTransfer.files);
+            }
+        };
+
+        const handleClick = () => {
+            if (isCategoryParent) {
+                // 카테고리 부모 폴더는 필터링만 (토글 X)
+                if (onFolderSelect) {
+                    onFolderSelect('all'); // '모든 콘텐츠' 필터링
+                }
+            } else if (isCategoryFolder && onFolderSelect) {
+                // 카테고리 하위 폴더는 필터링
+                onFolderSelect(item.id);
+            } else if (isFolder) {
+                // 일반 폴더는 토글
+                onToggleFolder(item.id);
+            } else {
+                // 파일은 선택
+                onFileSelect(item);
+            }
+        };
 
         const itemContent = (
             <div className="flex items-center w-full pr-2">
                 <div
                     className="flex-shrink-0 flex items-center justify-center"
-                    style={{ width: `${scale(12)}px`, visibility: isFolder ? 'visible' : 'hidden' }}
+                    style={{
+                        width: `${scale(12)}px`,
+                        visibility: isFolder && !isCategoryParent ? 'visible' : 'hidden',
+                    }}
                 >
                     <motion.div
                         animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -176,12 +259,16 @@ export const FolderItemComponent = memo(
                                     className={cn(
                                         'w-full h-full justify-start text-white/80 hover:text-white hover:bg-white/[0.12]',
                                         isSelected && 'bg-white/[0.2] text-white',
-                                        isOver && canDrop && 'bg-blue-500/30'
+                                        isOver && canDrop && 'bg-blue-500/30',
+                                        isFileDropping &&
+                                            isCategoryFolder &&
+                                            'bg-green-500/30 ring-2 ring-green-400/50'
                                     )}
                                     style={{ paddingLeft: `${scale(8) + level * scale(12)}px` }}
-                                    onClick={() =>
-                                        isFolder ? onToggleFolder(item.id) : onFileSelect(item)
-                                    }
+                                    onClick={handleClick}
+                                    onDragOver={handleFileDragOver}
+                                    onDragLeave={handleFileDragLeave}
+                                    onDrop={handleFileDrop}
                                 >
                                     {itemContent}
                                 </Button>
@@ -242,6 +329,7 @@ export const FolderItemComponent = memo(
                                         isCollapsed={isCollapsed}
                                         onToggleFolder={onToggleFolder}
                                         onFileSelect={onFileSelect}
+                                        onFolderSelect={onFolderSelect}
                                         onNewFileInFolder={onNewFileInFolder}
                                         onNewFolderInFolder={onNewFolderInFolder}
                                         onDeleteFolder={onDeleteFolder}
@@ -252,6 +340,7 @@ export const FolderItemComponent = memo(
                                         expandedFolders={expandedFolders}
                                         selectedFolder={selectedFolder}
                                         onRemoveFromWorkspace={onRemoveFromWorkspace}
+                                        onFileDrop={onFileDrop}
                                     />
                                 ))}
                             </div>

@@ -205,6 +205,61 @@ ipcMain.handle('hide-sticky-note', () => {
     }
 });
 
+// --- Sticky Note Window Controls ---
+ipcMain.handle('sticky-note:set-opacity', (event, opacity: number) => {
+    if (stickyNoteWindow) {
+        // Windows와 macOS 모두 지원
+        if (process.platform === 'win32') {
+            // Windows에서는 0.1 이하로 설정하면 창이 사라질 수 있으므로 최소값 설정
+            const adjustedOpacity = Math.max(0.2, Math.min(1.0, opacity));
+            stickyNoteWindow.setOpacity(adjustedOpacity);
+        } else {
+            // macOS 및 Linux
+            stickyNoteWindow.setOpacity(opacity);
+        }
+    }
+});
+
+ipcMain.handle('sticky-note:toggle-pin', () => {
+    if (stickyNoteWindow) {
+        const currentState = stickyNoteWindow.isAlwaysOnTop();
+        stickyNoteWindow.setAlwaysOnTop(!currentState);
+        return !currentState;
+    }
+    return false;
+});
+
+ipcMain.handle('sticky-note:close', () => {
+    if (stickyNoteWindow) {
+        stickyNoteWindow.close();
+    }
+});
+
+// --- Main Window Controls ---
+ipcMain.handle('window:minimize', () => {
+    if (mainWindow) {
+        mainWindow.minimize();
+    }
+});
+
+ipcMain.handle('window:maximize', () => {
+    if (mainWindow) {
+        if (mainWindow.isMaximized()) {
+            mainWindow.unmaximize();
+        } else {
+            mainWindow.maximize();
+        }
+        return mainWindow.isMaximized();
+    }
+    return false;
+});
+
+ipcMain.handle('window:close', () => {
+    if (mainWindow) {
+        mainWindow.close();
+    }
+});
+
 // --- File System IPC Handlers ---
 
 const itemExists = async (itemPath: string): Promise<boolean> => {

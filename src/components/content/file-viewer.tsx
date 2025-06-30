@@ -2,19 +2,6 @@ import { useEffect } from 'react';
 import { useFileStore } from '../../hooks/useFileStore';
 import { useTabStore } from '../../hooks/useTabStore';
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { RefAttributes } from 'react';
-import { LucideProps } from 'lucide-react';
-
-interface FileNode {
-    id: string; // Unique identifier for UI state (e.g., expansion, selection)
-    path: string; // The real, absolute path in the file system
-    name: string;
-    icon: React.ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>;
-    count: number;
-    children?: FileNode[];
-    isExpanded?: boolean;
-    depth?: number;
-}
 
 export function FileViewer() {
     const { activeTabId, tabs } = useTabStore();
@@ -24,7 +11,38 @@ export function FileViewer() {
 
     useEffect(() => {
         if (activeTab) {
-            loadFile(activeTab.path);
+            // 가상 파일(목데이터)인 경우 직접 처리
+            if (activeTab.isVirtual && activeTab.contentItem) {
+                clearContent();
+                // 가상 파일 데이터 설정
+                const { contentItem } = activeTab;
+                let content = contentItem.content;
+                let type: 'text' | 'image' | 'markdown' | 'pdf' | 'html' | 'unsupported' = 'text';
+
+                if (contentItem.type === 'image') {
+                    // 이미지의 경우 path 사용 (가상 이미지일 수 있음)
+                    content = contentItem.path || contentItem.id;
+                    type = 'image';
+                } else if (contentItem.type === 'text') {
+                    content = contentItem.content;
+                    type = 'text';
+                }
+
+                // 직접 상태 설정 (useFileStore를 우회)
+                setTimeout(() => {
+                    const fileStore = useFileStore.getState();
+                    fileStore.clearContent();
+                    useFileStore.setState({
+                        content,
+                        type,
+                        isLoading: false,
+                        error: null,
+                    });
+                }, 0);
+            } else {
+                // 실제 파일인 경우 기존 로직 사용
+                loadFile(activeTab.path);
+            }
         } else {
             clearContent();
         }

@@ -530,8 +530,24 @@
 
 /* First paragraph color */
 .ProseMirror p:first-child {
-    color: #a3bef8;
-    font-weight: 500;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+/* Heading colors */
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+    color: #2563eb;
+    font-weight: 600;
+}
+
+/* Dark mode heading colors */
+.dark .ProseMirror p:first-child,
+.dark .ProseMirror h1,
+.dark .ProseMirror h2,
+.dark .ProseMirror h3 {
+    color: #60a5fa;
 }
 
 /* Cursor right vertical line removal */

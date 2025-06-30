@@ -32,6 +32,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     showStickyNote: () => ipcRenderer.invoke('show-sticky-note'),
     hideStickyNote: () => ipcRenderer.invoke('hide-sticky-note'),
 
+    // --- Window Controls ---
+    minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
+    maximizeWindow: () => ipcRenderer.invoke('window:maximize'),
+    closeWindow: () => ipcRenderer.invoke('window:close'),
+
     // --- Event Listeners ---
     on: (channel: string, callback: (...args: any[]) => void) => {
         const validChannels = ['clipboard-content', 'new-collection', 'import-content'];
@@ -59,17 +64,12 @@ contextBridge.exposeInMainWorld('electron', {
         return webFrame.getZoomFactor();
     },
     openStickyNote: () => {
-        ipcRenderer.send('open-sticky-note');
+        ipcRenderer.invoke('show-sticky-note');
     },
-    togglePin: () => {
-        ipcRenderer.send('pin-toggle');
-    },
-    closeWindow: () => {
-        ipcRenderer.send('close-window');
-    },
-    setOpacity: (opacity: number) => {
-        ipcRenderer.send('set-opacity', opacity);
-    },
+    // Window controls for sticky note
+    setOpacity: (opacity: number) => ipcRenderer.invoke('sticky-note:set-opacity', opacity),
+    togglePin: () => ipcRenderer.invoke('sticky-note:toggle-pin'),
+    closeWindow: () => ipcRenderer.invoke('sticky-note:close'),
 });
 
 // Expose a limited API for the sticky note window

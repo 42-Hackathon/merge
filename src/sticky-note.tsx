@@ -10,6 +10,7 @@ const StickyNote: React.FC = () => {
         '<p># 스티키 노트</p><p>여기에 내용을 작성하세요...</p>'
     );
     const [isEditorDragOver, setIsEditorDragOver] = useState(false);
+    const [backgroundOpacity, setBackgroundOpacity] = useState(70); // 20-100 범위
     const tiptapEditorRef = useRef<TiptapEditorHandle>(null);
 
     const handleTogglePin = () => {
@@ -87,22 +88,36 @@ const StickyNote: React.FC = () => {
     );
 
     return (
-        <div className="flex flex-col h-screen bg-neutral-400/20 dark:bg-neutral-800/20 backdrop-blur-xl rounded-lg shadow-lg overflow-hidden border border-black/10 dark:border-white/10">
+        <div
+            className="flex flex-col h-screen backdrop-blur-xl rounded-lg shadow-lg overflow-hidden border border-black/10 dark:border-white/10"
+            style={{
+                backgroundColor: `rgba(248, 250, 252, ${backgroundOpacity / 100})`, // Light mode - 미묘한 회색빛 흰색
+                ...(document.documentElement.classList.contains('dark') && {
+                    backgroundColor: `rgba(51, 65, 85, ${backgroundOpacity / 100})`, // Dark mode - 부드러운 slate
+                }),
+            }}
+        >
             {/* Draggable Header */}
             <div
-                className="flex justify-end items-center p-1 bg-transparent"
-                style={{ WebkitAppRegion: 'drag' }}
+                className="flex justify-end items-center p-1"
+                style={{
+                    WebkitAppRegion: 'drag',
+                    backgroundColor: `rgba(248, 250, 252, ${backgroundOpacity / 100})`, // Light mode - 미묘한 회색빛 흰색
+                    ...(document.documentElement.classList.contains('dark') && {
+                        backgroundColor: `rgba(51, 65, 85, ${backgroundOpacity / 100})`, // Dark mode - 부드러운 slate
+                    }),
+                }}
             >
                 <div style={{ WebkitAppRegion: 'no-drag' }} className="flex items-center space-x-2">
                     <input
                         type="range"
-                        min="0.2"
-                        max="1.0"
-                        step="0.05"
-                        defaultValue="1.0"
+                        min="20"
+                        max="100"
+                        step="5"
+                        value={backgroundOpacity}
                         className="w-20 h-1 bg-neutral-500/50 rounded-lg appearance-none cursor-pointer"
-                        onChange={(e) => window.electron.setOpacity(parseFloat(e.target.value))}
-                        title="투명도 조절"
+                        onChange={(e) => setBackgroundOpacity(parseInt(e.target.value))}
+                        title="배경 불투명도"
                     />
                     <button
                         onClick={handleTogglePin}
@@ -125,9 +140,10 @@ const StickyNote: React.FC = () => {
 
             {/* Content Area */}
             <div
-                className={`flex-grow p-2 overflow-y-auto transition-colors text-zinc-900 dark:text-zinc-100 ${
-                    isEditorDragOver ? 'bg-white/20 dark:bg-black/20' : ''
+                className={`flex-grow p-2 overflow-y-auto overflow-x-visible transition-colors text-zinc-900 dark:text-zinc-100 ${
+                    isEditorDragOver ? 'bg-white/30 dark:bg-black/30' : ''
                 }`}
+                style={{ position: 'relative' }}
             >
                 <TiptapEditor
                     ref={tiptapEditorRef}
