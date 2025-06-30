@@ -582,27 +582,35 @@ export function EnhancedMemoSidebar({
         <div className="flex-shrink-0 flex items-center justify-between p-3 border-b border-white/10 h-14">
             <div className="flex items-center gap-3">
                 {/* 메모/AI 스위치 */}
-                <div className="flex items-center bg-white/10 rounded-lg p-1">
+                <div className="relative flex items-center bg-white/8 rounded-lg p-0.5 backdrop-blur-sm border border-white/10">
+                    {/* 슬라이딩 인디케이터 */}
+                    <motion.div
+                        className="absolute top-0.5 bottom-0.5 bg-white/15 backdrop-blur-md rounded-md border border-white/20"
+                        animate={{
+                            left: mode === 'memo' ? '2px' : '50%',
+                            width: mode === 'memo' ? 'calc(50% - 2px)' : 'calc(50% - 2px)'
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                    
                     <button
                         onClick={() => onModeChange('memo')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all ${
+                        className={`relative z-10 flex items-center justify-center px-4 py-2 text-sm font-medium transition-all duration-200 rounded-md min-w-[60px] ${
                             mode === 'memo' 
-                                ? 'bg-white/20 text-white font-medium' 
-                                : 'text-white/70 hover:text-white/90 hover:bg-white/5'
+                                ? 'text-white' 
+                                : 'text-white/60 hover:text-white/80'
                         }`}
                     >
-                        <MessageCircle className="h-4 w-4" />
                         메모
                     </button>
                     <button
                         onClick={() => onModeChange('ai')}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all ${
+                        className={`relative z-10 flex items-center justify-center px-4 py-2 text-sm font-medium transition-all duration-200 rounded-md min-w-[60px] ${
                             mode === 'ai' 
-                                ? 'bg-white/20 text-white font-medium' 
-                                : 'text-white/70 hover:text-white/90 hover:bg-white/5'
+                                ? 'text-white' 
+                                : 'text-white/60 hover:text-white/80'
                         }`}
                     >
-                        <Sparkles className="h-4 w-4" />
                         AI
                     </button>
                 </div>
