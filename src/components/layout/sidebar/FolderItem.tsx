@@ -192,6 +192,36 @@ export const FolderItemComponent = memo(
             }
         };
 
+        // 메모 에디터로 드래그할 때를 위한 추가 데이터 설정
+        const handleDragStart = (e: React.DragEvent) => {
+            if (!enableFolderDrag) return;
+            
+            // 파일 타입 판별
+            const getFileType = (fileName: string): string => {
+                const ext = fileName.split('.').pop()?.toLowerCase() || '';
+                if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return 'image';
+                if (['mp4', 'webm', 'mov', 'avi'].includes(ext)) return 'video';
+                if (['mp3', 'wav', 'ogg', 'm4a'].includes(ext)) return 'audio';
+                if (['txt', 'md', 'json', 'js', 'ts', 'jsx', 'tsx', 'css', 'html'].includes(ext)) return 'text';
+                return 'other';
+            };
+
+            // 메모 에디터가 인식할 수 있는 content-item 형식으로 데이터 설정
+            const contentItem = {
+                id: item.id,
+                type: !isFolder ? getFileType(item.name) : 'other',
+                title: item.name,
+                content: item.path, // 파일 경로를 content로 사용
+                metadata: {
+                    path: item.path,
+                    isFolder: isFolder
+                }
+            };
+
+            e.dataTransfer.setData('application/content-item', JSON.stringify(contentItem));
+            e.dataTransfer.setData('text/plain', item.path);
+        };
+
         const handleClick = () => {
             if (isCategoryParent) {
                 // 카테고리 부모 폴더는 필터링만 (토글 X)
@@ -269,6 +299,8 @@ export const FolderItemComponent = memo(
                                     onDragOver={handleFileDragOver}
                                     onDragLeave={handleFileDragLeave}
                                     onDrop={handleFileDrop}
+                                    onDragStart={handleDragStart}
+                                    draggable={enableFolderDrag}
                                 >
                                     {itemContent}
                                 </Button>
