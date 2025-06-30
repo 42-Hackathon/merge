@@ -97,8 +97,25 @@ export function DraggableContentGrid({
     const getContentPreview = (item: ContentItem) => {
         const baseHeight = viewMode === 'list' ? 48 : 144;
 
+        // YouTube 동영상 ID 추출 함수
+        const getYouTubeVideoId = (url: string): string | null => {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        };
+
+        // 파비콘 URL 생성 함수
+        const getFaviconUrl = (url: string): string => {
+            try {
+                const domain = new URL(url).hostname;
+                return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+            } catch {
+                return '';
+            }
+        };
+
         switch (item.type) {
-            case 'image':
+            case 'image': {
                 return (
                     <div
                         style={{
@@ -127,30 +144,30 @@ export function DraggableContentGrid({
                         
                         {/* 플레이스홀더 (이미지 없거나 로드 실패 시) */}
                         <div 
-                        className={`bg-gradient-to-br from-blue-50 to-indigo-100 
-                                      absolute inset-0 flex items-center justify-center ${item.metadata?.url ? 'hidden' : 'flex'}`}
-                    >
-                        <motion.div 
-                            className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
-                            initial={{ opacity: 0 }}
-                            whileHover={{ opacity: 1 }}
-                            transition={{ 
-                                type: 'tween',
-                                duration: 0.25,
-                                ease: 'easeOut'
-                            }}
-                        />
-                        <div className="relative z-10 text-center">
-                            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
-                                <span style={{ fontSize: `20px` }}>🖼️</span>
+                            className={`bg-gradient-to-br from-blue-50 to-indigo-100 
+                                          absolute inset-0 flex items-center justify-center ${item.metadata?.url ? 'hidden' : 'flex'}`}
+                        >
+                            <motion.div 
+                                className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
+                                initial={{ opacity: 0 }}
+                                whileHover={{ opacity: 1 }}
+                                transition={{ 
+                                    type: 'tween',
+                                    duration: 0.25,
+                                    ease: 'easeOut'
+                                }}
+                            />
+                            <div className="relative z-10 text-center">
+                                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
+                                    <span style={{ fontSize: `20px` }}>🖼️</span>
+                                </div>
+                                <span
+                                    style={{ fontSize: `12px` }}
+                                    className="text-white font-medium"
+                                >
+                                    이미지
+                                </span>
                             </div>
-                            <span
-                                style={{ fontSize: `12px` }}
-                                className="text-white font-medium"
-                            >
-                                이미지
-                            </span>
-                        </div>
                         </div>
                         
                         {/* 호버 오버레이 */}
@@ -166,17 +183,132 @@ export function DraggableContentGrid({
                         />
                     </div>
                 );
-            case 'link':
+            }
+            case 'link': {
+                const faviconUrl = item.metadata?.url ? getFaviconUrl(item.metadata.url) : '';
+                const domain = item.metadata?.url ? new URL(item.metadata.url).hostname.replace('www.', '') : 'Link';
+                
+                // 링크는 매우 컴팩트한 높이 사용
+                const linkHeight = viewMode === 'list' ? 36 : 42;
+                
+                return (
+                    <div
+                        style={{
+                            width: viewMode === 'list' ? `48px` : '100%',
+                            height: `${linkHeight}px`,
+                        }}
+                        className="bg-white/[0.06] rounded-lg relative overflow-hidden flex items-center justify-start px-3 py-2 border border-white/10"
+                    >
+                        {/* 파비콘 */}
+                        <div className="w-8 h-8 bg-white/15 rounded-md flex items-center justify-center mr-3 flex-shrink-0">
+                            {faviconUrl ? (
+                                <img
+                                    src={faviconUrl}
+                                    alt={domain}
+                                    className="w-4 h-4 rounded-sm"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.display = 'none';
+                                        target.nextElementSibling?.setAttribute('style', 'display: inline');
+                                    }}
+                                />
+                            ) : null}
+                            <span style={{ fontSize: `14px`, display: faviconUrl ? 'none' : 'inline' }}>🔗</span>
+                        </div>
+                        
+                        {/* URL만 표시 */}
+                        <div className="flex-1 min-w-0">
+                            <div className="text-white/90 text-sm truncate font-mono">
+                                {domain}
+                            </div>
+                        </div>
+                        
+                        {/* 외부 링크 아이콘 (더 작게) */}
+                        <div className="w-3 h-3 text-white/30 flex-shrink-0 ml-2">
+                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M6.22 8.22a.75.75 0 0 0 1.06 1.06L10.94 6H8.75a.75.75 0 0 1 0-1.5h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V7.56L8.84 11.22a.75.75 0 0 1-1.06-1.06L11.44 6.5H9.25a.75.75 0 0 1 0-1.5h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V7.56l-3.66 3.66Z"/>
+                            </svg>
+                        </div>
+                    </div>
+                );
+            }
+            case 'video': {
+                const videoId = item.metadata?.url ? getYouTubeVideoId(item.metadata.url) : null;
+                const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
+                
                 return (
                     <div
                         style={{
                             width: viewMode === 'list' ? `48px` : '100%',
                             height: `${baseHeight}px`,
                         }}
-                        className="bg-gradient-to-br from-emerald-50 to-teal-100 rounded-lg relative overflow-hidden rounded-lg flex items-center justify-center"
+                        className="bg-gradient-to-br from-rose-50 to-pink-100 rounded-lg relative overflow-hidden"
                     >
+                        {/* YouTube 썸네일 표시 */}
+                        {thumbnailUrl ? (
+                            <>
+                                <img
+                                    src={thumbnailUrl}
+                                    alt={item.title}
+                                    className="w-full h-full object-cover"
+                                    style={{ 
+                                        borderRadius: viewMode === 'list' ? `6px` : `8px`
+                                    }}
+                                    onError={(e) => {
+                                        // 썸네일 로드 실패 시 플레이스홀더 표시
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.display = 'none';
+                                        target.nextElementSibling?.setAttribute('style', 'display: flex');
+                                    }}
+                                />
+                                {/* 재생 버튼 오버레이 */}
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="w-12 h-12 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                        <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent ml-1"></div>
+                                    </div>
+                                </div>
+                                {/* 동영상 길이 표시 */}
+                                {item.metadata?.duration && (
+                                    <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
+                                        {Math.floor(item.metadata.duration / 60)}:{String(item.metadata.duration % 60).padStart(2, '0')}
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            // 플레이스홀더 (YouTube가 아니거나 썸네일 로드 실패 시)
+                            <div className="w-full h-full flex items-center justify-center">
+                                <motion.div 
+                                    className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
+                                    initial={{ opacity: 0 }}
+                                    whileHover={{ opacity: 1 }}
+                                    transition={{ 
+                                        type: 'tween',
+                                        duration: 0.25,
+                                        ease: 'easeOut'
+                                    }}
+                                />
+                                <div className="relative z-10 text-center">
+                                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
+                                        <span style={{ fontSize: `20px` }}>📹</span>
+                                    </div>
+                                    <span
+                                        style={{ fontSize: `12px` }}
+                                        className="text-white font-medium"
+                                    >
+                                        동영상
+                                    </span>
+                                    {item.metadata?.platform && (
+                                        <div style={{ fontSize: `10px` }} className="text-white/80 mt-1">
+                                            {item.metadata.platform}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* 호버 오버레이 */}
                         <motion.div 
-                            className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
+                            className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"
                             initial={{ opacity: 0 }}
                             whileHover={{ opacity: 1 }}
                             transition={{ 
@@ -185,54 +317,9 @@ export function DraggableContentGrid({
                                 ease: 'easeOut'
                             }}
                         />
-                        <div className="relative z-10 text-center">
-                            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
-                                <span style={{ fontSize: `20px` }}>🔗</span>
-                            </div>
-                            <span
-                                style={{ fontSize: `12px` }}
-                                className="text-white font-medium"
-                            >
-                                링크
-                            </span>
-                            <div style={{ fontSize: `10px` }} className="text-white mt-1">
-                                {item.metadata?.url ? new URL(item.metadata.url).hostname : 'Link'}
-                            </div>
-                        </div>
                     </div>
                 );
-            case 'video':
-                return (
-                    <div
-                        style={{
-                            width: viewMode === 'list' ? `48px` : '100%',
-                            height: `${baseHeight}px`,
-                        }}
-                        className="bg-gradient-to-br from-rose-50 to-pink-100 rounded-lg relative overflow-hidden rounded-lg flex items-center justify-center"
-                    >
-                        <motion.div 
-                            className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
-                            initial={{ opacity: 0 }}
-                            whileHover={{ opacity: 1 }}
-                            transition={{ 
-                                type: 'tween',
-                                duration: 0.25,
-                                ease: 'easeOut'
-                            }}
-                        />
-                        <div className="relative z-10 text-center">
-                            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
-                                <span style={{ fontSize: `20px` }}>📹</span>
-                            </div>
-                            <span
-                                style={{ fontSize: `12px` }}
-                                className="text-white font-medium"
-                            >
-                                동영상
-                            </span>
-                        </div>
-                    </div>
-                );
+            }
             default:
                 return (
                     <div className={`${viewMode === 'list' ? 'flex-1' : ''}`}>

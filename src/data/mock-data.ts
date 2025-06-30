@@ -1,217 +1,417 @@
 import { ContentItem } from '../types/content';
 
 export const mockContentItems: ContentItem[] = [
+    // 🎨 Figma 디자인 도구
     {
         id: '1',
-        title: '디자인 시스템 가이드라인',
-        content:
-            '일관된 사용자 경험을 위한 디자인 시스템 구축 방법론과 컴포넌트 라이브러리 설계 원칙에 대한 상세한 가이드입니다. 색상 팔레트, 타이포그래피, 간격 시스템, 그리고 재사용 가능한 컴포넌트들의 설계 철학을 다룹니다.',
-        type: 'text',
+        title: 'Figma - 협업 디자인 플랫폼',
+        content: '팀과 함께 디자인하고 프로토타입을 만드는 최고의 도구. 실시간 협업과 강력한 컴포넌트 시스템으로 디자인 워크플로우를 혁신합니다.',
+        type: 'link',
         stage: 'consolidate',
-        tags: ['design', 'system', 'ui', 'guidelines'],
-        folderId: 'text',
-        createdAt: '2024-01-15T10:30:00Z',
-        updatedAt: '2024-01-15T10:30:00Z',
+        tags: ['figma', 'design-tool', 'collaboration', 'prototyping'],
+        folderId: 'links',
+        createdAt: '2024-01-20T09:00:00Z',
+        updatedAt: '2024-01-20T09:00:00Z',
         metadata: {
-            author: '김디자이너',
+            url: 'https://www.figma.com',
+            domain: 'figma.com',
+            favicon: 'https://www.figma.com/favicon.ico'
         },
     },
+    
+    // 🖼️ 현대적 대시보드 디자인
     {
         id: '2',
-        title: 'React 성능 최적화 기법',
-        content:
-            'React 애플리케이션의 렌더링 성능을 향상시키는 다양한 최적화 기법들을 소개합니다. useMemo, useCallback, React.memo 등의 훅과 고차 컴포넌트를 활용한 최적화 전략을 다룹니다.',
-        type: 'text',
-        stage: 'refine',
-        tags: ['react', 'performance', 'optimization', 'hooks'],
-        folderId: 'text',
-        createdAt: '2024-01-14T14:20:00Z',
-        updatedAt: '2024-01-14T14:20:00Z',
+        title: 'Modern Dashboard UI Design',
+        content: '깔끔하고 현대적인 대시보드 인터페이스 디자인. 데이터 시각화와 사용자 친화적인 레이아웃을 완벽하게 조합한 작품입니다.',
+        type: 'image',
+        stage: 'consolidate',
+        tags: ['dashboard', 'ui-design', 'modern', 'data-visualization'],
+        folderId: 'images',
+        createdAt: '2024-01-20T16:30:00Z',
+        updatedAt: '2024-01-20T16:30:00Z',
         metadata: {
-            author: '박개발자',
+            url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80',
+            dimensions: { width: 2340, height: 1560 },
+            fileSize: 890000,
         },
     },
+
+    // 🎥 디자인 시스템 아키텍처 강의
     {
         id: '3',
-        title: 'AI 기반 사용자 인터페이스 트렌드',
-        content:
-            '2024년 AI 기술이 사용자 인터페이스 디자인에 미치는 영향과 새로운 패러다임을 분석합니다. 개인화된 UI, 예측적 인터페이스, 그리고 자연어 처리를 활용한 상호작용 방식들을 살펴봅니다.',
-        type: 'text',
-        stage: 'review',
-        tags: ['ai', 'ui', 'trends', '2024'],
-        folderId: 'text',
-        createdAt: '2024-01-13T09:15:00Z',
-        updatedAt: '2024-01-13T09:15:00Z',
-        metadata: {
-            author: '이연구원',
-        },
-    },
-    {
-        id: '4',
-        title: 'Figma 디자인 시스템 템플릿',
-        content:
-            'Figma에서 사용할 수 있는 포괄적인 디자인 시스템 템플릿입니다. 컴포넌트, 스타일, 그리고 프로토타이핑을 위한 완전한 세트를 제공합니다.',
-        type: 'image',
-        stage: 'consolidate',
-        tags: ['figma', 'template', 'design-system'],
-        folderId: 'images',
-        createdAt: '2024-01-12T16:45:00Z',
-        updatedAt: '2024-01-12T16:45:00Z',
-        metadata: {
-            dimensions: { width: 1920, height: 1080 },
-            fileSize: 2048000,
-        },
-    },
-    {
-        id: '5',
-        title: 'TypeScript 고급 패턴 가이드',
-        content:
-            'TypeScript의 고급 타입 시스템을 활용한 패턴들을 소개합니다. 제네릭, 조건부 타입, 매핑된 타입 등을 활용하여 더 안전하고 표현력 있는 코드를 작성하는 방법을 다룹니다.',
-        type: 'link',
-        stage: 'refine',
-        tags: ['typescript', 'patterns', 'advanced'],
-        folderId: 'links',
-        createdAt: '2024-01-11T11:30:00Z',
-        updatedAt: '2024-01-11T11:30:00Z',
-        metadata: {
-            url: 'https://example.com/typescript-patterns',
-        },
-    },
-    {
-        id: '6',
-        title: '모바일 앱 UX 디자인 원칙',
-        content:
-            '모바일 환경에서의 사용자 경험 디자인 원칙과 베스트 프랙티스를 정리한 문서입니다. 터치 인터페이스, 제스처, 그리고 반응형 디자인의 핵심 요소들을 다룹니다.',
-        type: 'text',
-        stage: 'review',
-        tags: ['mobile', 'ux', 'design', 'principles'],
-        folderId: 'text',
-        createdAt: '2024-01-10T13:20:00Z',
-        updatedAt: '2024-01-10T13:20:00Z',
-        metadata: {
-            author: '최UX디자이너',
-        },
-    },
-    {
-        id: '7',
-        title: 'CSS Grid 레이아웃 마스터클래스',
-        content:
-            'CSS Grid를 활용한 현대적인 웹 레이아웃 기법을 마스터하기 위한 종합 가이드입니다. 기본 개념부터 고급 기법까지 실제 예제와 함께 설명합니다.',
+        title: 'Design System Architecture Deep Dive',
+        content: '확장 가능한 디자인 시스템을 구축하는 고급 아키텍처 방법론을 다루는 심화 강의입니다. 토큰 체계, 컴포넌트 라이브러리, 그리고 팀 간 협업 워크플로우를 포괄적으로 설명합니다.',
         type: 'video',
         stage: 'consolidate',
-        tags: ['css', 'grid', 'layout', 'web'],
+        tags: ['design-system', 'architecture', 'tokens', 'workflow'],
         folderId: 'videos',
-        createdAt: '2024-01-09T15:10:00Z',
-        updatedAt: '2024-01-09T15:10:00Z',
+        createdAt: '2024-01-20T19:45:00Z',
+        updatedAt: '2024-01-20T19:45:00Z',
         metadata: {
-            duration: 3600,
+            url: 'https://www.youtube.com/watch?v=IrGYUq1mklk&t=907s',
+            duration: 2340,
             resolution: '1080p',
+            platform: 'YouTube'
         },
     },
+
+    // 📝 2024 디자인 트렌드 분석
     {
-        id: '8',
-        title: '접근성을 고려한 웹 디자인',
-        content:
-            '모든 사용자가 접근할 수 있는 웹사이트를 만들기 위한 접근성 가이드라인과 실무 적용 방법을 다룹니다. WCAG 2.1 기준과 실제 구현 사례를 포함합니다.',
+        id: '4',
+        title: '2024 UI/UX 디자인 트렌드 분석',
+        content: '올해 주목해야 할 디자인 트렌드들을 심층 분석합니다. 뉴모피즘의 진화, AI 기반 개인화 인터페이스, 접근성 우선 디자인, 그리고 지속가능한 디지털 경험 디자인까지 최신 동향을 포괄적으로 다룹니다.',
         type: 'text',
-        stage: 'refine',
-        tags: ['accessibility', 'web', 'inclusive-design'],
+        stage: 'consolidate',
+        tags: ['ui-trends', '2024', 'analysis', 'neomorphism', 'ai-design'],
         folderId: 'text',
-        createdAt: '2024-01-08T10:45:00Z',
-        updatedAt: '2024-01-08T10:45:00Z',
+        createdAt: '2024-01-21T09:00:00Z',
+        updatedAt: '2024-01-21T09:00:00Z',
         metadata: {
-            author: '정접근성전문가',
+            author: '김UX전문가',
+            wordCount: 2800,
         },
     },
+
+    // 🎥 실제 Figma 튜토리얼 동영상
     {
-        id: '9',
-        title: 'Node.js 마이크로서비스 아키텍처',
-        content:
-            'Node.js를 활용한 마이크로서비스 아키텍처 설계와 구현 방법을 다룹니다. 서비스 분리, API 게이트웨이, 데이터 일관성 등의 핵심 개념을 실제 예제와 함께 설명합니다.',
+        id: '5',
+        title: 'Figma Tutorial: Design Systems',
+        content: 'Figma를 사용해서 완전한 디자인 시스템을 구축하는 방법을 단계별로 설명하는 실무 튜토리얼입니다. 컴포넌트 설계부터 토큰 관리까지 모든 과정을 다룹니다.',
+        type: 'video',
+        stage: 'consolidate',
+        tags: ['figma', 'design-system', 'tutorial', 'components'],
+        folderId: 'videos',
+        createdAt: '2024-01-20T20:15:00Z',
+        updatedAt: '2024-01-20T20:15:00Z',
+        metadata: {
+            url: 'https://www.youtube.com/watch?v=EK-pHkc5EL4',
+            duration: 1680,
+            resolution: '1080p',
+            platform: 'YouTube'
+        },
+    },
+
+    // 🔗 Dribbble 영감 플랫폼
+    {
+        id: '6',
+        title: 'Dribbble - 디자인 영감 플랫폼',
+        content: '전 세계 최고의 디자이너들의 작품을 발견하고 영감을 받을 수 있는 디자인 커뮤니티. UI/UX, 브랜딩, 일러스트레이션 등 다양한 분야의 작품들을 만나보세요.',
         type: 'link',
         stage: 'review',
-        tags: ['nodejs', 'microservices', 'architecture'],
+        tags: ['dribbble', 'inspiration', 'portfolio', 'community'],
         folderId: 'links',
-        createdAt: '2024-01-07T14:30:00Z',
-        updatedAt: '2024-01-07T14:30:00Z',
+        createdAt: '2024-01-20T10:30:00Z',
+        updatedAt: '2024-01-20T10:30:00Z',
         metadata: {
-            url: 'https://example.com/nodejs-microservices',
+            url: 'https://dribbble.com',
+            domain: 'dribbble.com',
+            favicon: 'https://dribbble.com/favicon.ico'
         },
     },
+
+    // 📋 클라이언트 피드백 메모
+    {
+        id: '7',
+        title: '클라이언트 피드백 정리 - 모바일 앱 리디자인',
+        content: '모바일 앱 리디자인 프로젝트에 대한 클라이언트 피드백을 종합 정리했습니다. 주요 수정 요청사항: 1) 메인 내비게이션 구조 단순화 2) 컬러 팔레트를 브랜드 가이드라인에 맞게 조정 3) 버튼 크기 키우기.',
+        type: 'text',
+        stage: 'review',
+        tags: ['client-feedback', 'mobile-app', 'redesign', 'navigation'],
+        folderId: 'memo',
+        createdAt: '2024-01-21T17:30:00Z',
+        updatedAt: '2024-01-21T17:30:00Z',
+        metadata: {
+            author: '정프로젝트매니저',
+            priority: 'high',
+        },
+    },
+
+    // 🖼️ 모바일 앱 인터페이스
+    {
+        id: '8',
+        title: 'Mobile App Interface Showcase',
+        content: '모바일 앱을 위한 세련된 인터페이스 디자인 컬렉션. 터치 친화적인 요소들과 직관적인 내비게이션을 보여주는 케이스 스터디입니다.',
+        type: 'image',
+        stage: 'review',
+        tags: ['mobile-ui', 'app-design', 'interface', 'touch'],
+        folderId: 'images',
+        createdAt: '2024-01-20T17:15:00Z',
+        updatedAt: '2024-01-20T17:15:00Z',
+        metadata: {
+            url: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80',
+            dimensions: { width: 2340, height: 1560 },
+            fileSize: 750000,
+        },
+    },
+
+    // 🎥 UX 리서치 방법론 강의
+    {
+        id: '9',
+        title: 'Advanced UX Research Methods',
+        content: '사용자 경험 연구를 위한 심화 방법론을 다루는 전문가 강의입니다. 정성적, 정량적 연구 방법의 조합과 데이터 기반 인사이트 도출 과정을 실무 사례와 함께 설명합니다.',
+        type: 'video',
+        stage: 'refine',
+        tags: ['ux-research', 'methodology', 'data-analysis', 'insights'],
+        folderId: 'videos',
+        createdAt: '2024-01-20T21:30:00Z',
+        updatedAt: '2024-01-20T21:30:00Z',
+        metadata: {
+            url: 'https://youtu.be/FASMejN_5gs?si=xoBluFVMN62QCw5Z',
+            duration: 2580,
+            resolution: '1080p',
+            platform: 'YouTube'
+        },
+    },
+
+    // 🔗 Material Design 3
     {
         id: '10',
-        title: '브랜드 아이덴티티 디자인 프로세스',
-        content:
-            '효과적인 브랜드 아이덴티티를 구축하기 위한 체계적인 디자인 프로세스를 소개합니다. 브랜드 전략 수립부터 비주얼 시스템 개발까지의 전 과정을 다룹니다.',
-        type: 'image',
+        title: 'Material Design 3',
+        content: 'Google의 최신 디자인 시스템. Dynamic Color, Material You, 그리고 적응형 디자인 원칙을 통해 개인화된 사용자 경험을 만드는 방법을 제시합니다.',
+        type: 'link',
         stage: 'consolidate',
-        tags: ['branding', 'identity', 'design-process'],
-        folderId: 'images',
-        createdAt: '2024-01-06T12:15:00Z',
-        updatedAt: '2024-01-06T12:15:00Z',
+        tags: ['material-design', 'design-system', 'google', 'guidelines'],
+        folderId: 'links',
+        createdAt: '2024-01-20T11:15:00Z',
+        updatedAt: '2024-01-20T11:15:00Z',
         metadata: {
-            dimensions: { width: 1600, height: 900 },
-            fileSize: 1536000,
+            url: 'https://m3.material.io',
+            domain: 'm3.material.io',
+            favicon: 'https://m3.material.io/favicon.ico'
         },
     },
+
+    // 🎥 실제 UX 디자인 동영상
     {
         id: '11',
-        title: '프로젝트 회의 노트',
-        content:
-            '2024년 1월 신규 프로젝트 킥오프 미팅 내용 정리. 주요 목표, 일정, 역할 분담에 대한 상세한 내용을 포함합니다.',
-        type: 'text',
+        title: 'UX Design Process - Case Study',
+        content: '실제 UX 디자인 프로젝트의 전 과정을 담은 케이스 스터디 영상입니다. 사용자 리서치부터 최종 프로토타입까지 디자인 씽킹 프로세스를 상세히 보여줍니다.',
+        type: 'video',
         stage: 'review',
-        tags: ['meeting', 'project', 'notes'],
-        folderId: 'memo',
-        createdAt: '2024-01-05T16:30:00Z',
-        updatedAt: '2024-01-05T16:30:00Z',
+        tags: ['ux-design', 'case-study', 'design-process', 'user-research'],
+        folderId: 'videos',
+        createdAt: '2024-01-20T21:00:00Z',
+        updatedAt: '2024-01-20T21:00:00Z',
         metadata: {
-            author: '김프로젝트매니저',
+            url: 'https://www.youtube.com/watch?v=ebPLYcAx__s',
+            duration: 2250,
+            resolution: '1080p',
+            platform: 'YouTube'
         },
     },
+
+    // 📝 접근성 체크리스트
     {
         id: '12',
-        title: '개발 아이디어 메모',
-        content:
-            '새로운 기능 개발에 대한 아이디어들을 정리한 메모입니다. 사용자 경험 개선 방안과 기술적 구현 방법을 포함합니다.',
-        type: 'text',
-        stage: 'consolidate',
-        tags: ['development', 'ideas', 'features'],
-        folderId: 'memo',
-        createdAt: '2024-01-04T09:20:00Z',
-        updatedAt: '2024-01-04T09:20:00Z',
-        metadata: {
-            author: '이개발자',
-        },
-    },
-    {
-        id: '13',
-        title: '클립보드 스크랩',
-        content:
-            '유용한 코드 스니펫과 링크들을 모아둔 클립보드 스크랩입니다. 자주 사용하는 함수들과 참고 자료들이 포함되어 있습니다.',
+        title: '접근성 우선 디자인 체크리스트',
+        content: 'WCAG 2.1 AA 기준을 충족하는 접근성 디자인을 위한 실무 체크리스트입니다. 색상 대비, 키보드 내비게이션, 스크린 리더 호환성, 포커스 관리 등 핵심 요소들을 항목별로 정리했습니다.',
         type: 'text',
         stage: 'refine',
-        tags: ['snippets', 'code', 'reference'],
-        folderId: 'clipboard',
-        createdAt: '2024-01-03T14:45:00Z',
-        updatedAt: '2024-01-03T14:45:00Z',
+        tags: ['accessibility', 'wcag', 'checklist', 'inclusive-design'],
+        folderId: 'text',
+        createdAt: '2024-01-21T10:30:00Z',
+        updatedAt: '2024-01-21T10:30:00Z',
         metadata: {
-            author: '박개발자',
+            author: '박접근성디자이너',
+            wordCount: 1950,
         },
     },
+
+    // 🖼️ 타이포그래피 스터디
+    {
+        id: '13',
+        title: 'Typography & Layout Study',
+        content: '타이포그래피와 레이아웃의 조화를 보여주는 디자인 스터디. 가독성과 미적 균형을 고려한 텍스트 배치의 예술을 탐구합니다.',
+        type: 'image',
+        stage: 'refine',
+        tags: ['typography', 'layout', 'composition', 'hierarchy'],
+        folderId: 'images',
+        createdAt: '2024-01-20T18:00:00Z',
+        updatedAt: '2024-01-20T18:00:00Z',
+        metadata: {
+            url: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80',
+            dimensions: { width: 2340, height: 1560 },
+            fileSize: 680000,
+        },
+    },
+
+    // 🔗 Coolors 팔레트 생성기
     {
         id: '14',
-        title: 'UI 컴포넌트 스크린샷',
-        content: '새로운 UI 컴포넌트 디자인의 스크린샷입니다. 다양한 상태와 변형들을 캡처했습니다.',
-        type: 'image',
-        stage: 'review',
-        tags: ['ui', 'components', 'design'],
-        folderId: 'screenshots',
-        createdAt: '2024-01-02T11:30:00Z',
-        updatedAt: '2024-01-02T11:30:00Z',
+        title: 'Coolors - 컬러 팔레트 생성기',
+        content: '아름다운 컬러 조합을 쉽게 만들고 탐색할 수 있는 도구. 무한한 컬러 팔레트 생성, 접근성 검사, 그리고 다양한 포맷으로 내보내기 기능을 제공합니다.',
+        type: 'link',
+        stage: 'refine',
+        tags: ['colors', 'palette', 'generator', 'accessibility'],
+        folderId: 'links',
+        createdAt: '2024-01-20T14:20:00Z',
+        updatedAt: '2024-01-20T14:20:00Z',
         metadata: {
-            dimensions: { width: 1920, height: 1080 },
-            fileSize: 2048000,
+            url: 'https://coolors.co',
+            domain: 'coolors.co',
+            favicon: 'https://coolors.co/favicon.ico'
         },
     },
+
+    // 📎 CSS 스니펫 모음
+    {
+        id: '15',
+        title: '자주 사용하는 CSS 스니펫 모음',
+        content: `/* 글래스모피즘 카드 */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* 부드러운 그라데이션 */
+.gradient-bg {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}`,
+        type: 'text',
+        stage: 'refine',
+        tags: ['css', 'snippets', 'glassmorphism', 'animations'],
+        folderId: 'clipboard',
+        createdAt: '2024-01-21T19:20:00Z',
+        updatedAt: '2024-01-21T19:20:00Z',
+        metadata: {
+            author: '이프론트엔드개발자',
+            language: 'css',
+        },
+    },
+
+    // 🎥 실제 Figma 프로토타이핑 동영상
+    {
+        id: '16',
+        title: 'Advanced Figma Prototyping',
+        content: 'Figma의 고급 프로토타이핑 기능을 마스터하는 완전 가이드입니다. 스마트 애니메이션, 인터랙티브 컴포넌트, 복잡한 사용자 플로우를 구현하는 방법을 실무 중심으로 설명합니다.',
+        type: 'video',
+        stage: 'refine',
+        tags: ['figma', 'prototyping', 'animation', 'interaction'],
+        folderId: 'videos',
+        createdAt: '2024-01-20T22:30:00Z',
+        updatedAt: '2024-01-20T22:30:00Z',
+        metadata: {
+            url: 'https://youtu.be/o3r1CBEFYX4?si=fnFHfeLAVU2ygbDH',
+            duration: 1890,
+            resolution: '1080p',
+            platform: 'YouTube'
+        },
+    },
+
+    // 🖼️ 컬러 이론 실습
+    {
+        id: '17',
+        title: 'Color Theory in Practice',
+        content: '컬러 이론을 실제 디자인에 적용한 사례. 색상의 심리적 효과와 브랜드 정체성을 강화하는 컬러 전략을 시각적으로 설명합니다.',
+        type: 'image',
+        stage: 'consolidate',
+        tags: ['color-theory', 'branding', 'psychology', 'visual'],
+        folderId: 'images',
+        createdAt: '2024-01-20T19:30:00Z',
+        updatedAt: '2024-01-20T19:30:00Z',
+        metadata: {
+            url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80',
+            dimensions: { width: 2340, height: 1560 },
+            fileSize: 920000,
+        },
+    },
+
+    // 📝 디자인 핸드오프 가이드
+    {
+        id: '18',
+        title: '디자인 핸드오프 베스트 프랙티스',
+        content: '디자이너와 개발자 간의 원활한 협업을 위한 핸드오프 가이드입니다. Figma Dev Mode 활용법, 디자인 토큰 전달 방식, 반응형 디자인 명세서 작성법을 다룹니다.',
+        type: 'text',
+        stage: 'review',
+        tags: ['handoff', 'collaboration', 'dev-mode', 'communication'],
+        folderId: 'text',
+        createdAt: '2024-01-21T14:15:00Z',
+        updatedAt: '2024-01-21T14:15:00Z',
+        metadata: {
+            author: '이협업전문가',
+            wordCount: 2200,
+        },
+    },
+
+    // 🔗 Framer 프로토타이핑
+    {
+        id: '19',
+        title: 'Framer - 인터랙티브 프로토타이핑',
+        content: '코드 없이도 복잡한 인터랙션과 애니메이션을 만들 수 있는 프로토타이핑 도구. 실제와 같은 사용자 경험을 디자인하고 테스트할 수 있습니다.',
+        type: 'link',
+        stage: 'consolidate',
+        tags: ['framer', 'prototyping', 'animation', 'interaction'],
+        folderId: 'links',
+        createdAt: '2024-01-20T15:45:00Z',
+        updatedAt: '2024-01-20T15:45:00Z',
+        metadata: {
+            url: 'https://www.framer.com',
+            domain: 'framer.com',
+            favicon: 'https://www.framer.com/favicon.ico'
+        },
+    },
+
+    // 📝 B2B SaaS 패턴 라이브러리
+    {
+        id: '20',
+        title: 'B2B SaaS 디자인 패턴 라이브러리',
+        content: 'B2B SaaS 제품을 위한 검증된 디자인 패턴 모음집입니다. 대시보드 레이아웃, 데이터 테이블, 폼 디자인, 온보딩 플로우 등 자주 사용되는 UI 패턴들을 정리했습니다.',
+        type: 'text',
+        stage: 'consolidate',
+        tags: ['b2b-saas', 'patterns', 'dashboard', 'data-tables'],
+        folderId: 'text',
+        createdAt: '2024-01-21T16:00:00Z',
+        updatedAt: '2024-01-21T16:00:00Z',
+        metadata: {
+            author: '최SaaS디자이너',
+            wordCount: 3200,
+        },
+    },
+
+    // 📋 시스템 업데이트 계획
+    {
+        id: '21',
+        title: '디자인 시스템 컴포넌트 업데이트 계획',
+        content: 'Q2 디자인 시스템 로드맵 및 컴포넌트 업데이트 계획입니다. 4월: Button, Input, Modal 컴포넌트 리뉴얼, 5월: Table, Chart 컴포넌트 추가, 6월: 다크모드 지원 확장.',
+        type: 'text',
+        stage: 'consolidate',
+        tags: ['design-system', 'roadmap', 'components', 'migration'],
+        folderId: 'memo',
+        createdAt: '2024-01-21T18:45:00Z',
+        updatedAt: '2024-01-21T18:45:00Z',
+        metadata: {
+            author: '김시스템디자이너',
+            priority: 'medium',
+        },
+    },
+
+    // 📎 브랜드 컬러 참고 자료
+    {
+        id: '22',
+        title: '컬러 팔레트 참고 자료',
+        content: `브랜드별 시그니처 컬러들:
+        
+• Figma: #F24E1E, #FF7262, #A259FF
+• Slack: #4A154B, #ECB22E, #36C5F0  
+• Notion: #000000, #37352F, #2F3437
+• Linear: #5E6AD2, #A7B5EC, #C4CCF8
+• Spotify: #1DB954, #191414, #FFFFFF
+
+접근성 체크 도구:
+- WebAIM Contrast Checker
+- Colour Contrast Analyser`,
+        type: 'text',
+        stage: 'consolidate',
+        tags: ['colors', 'branding', 'accessibility', 'reference'],
+        folderId: 'clipboard',
+        createdAt: '2024-01-21T20:10:00Z',
+        updatedAt: '2024-01-21T20:10:00Z',
+        metadata: {
+            author: '박컬러스페셜리스트',
+        },
+    }
 ];
