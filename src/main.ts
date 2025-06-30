@@ -10,6 +10,7 @@ import {
 } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as http from 'http';
 import started from 'electron-squirrel-startup';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -23,6 +24,7 @@ const isDev = process.env.NODE_ENV === 'development';
 
 let mainWindow: BrowserWindow | null;
 let stickyNoteWindow: BrowserWindow | null;
+let httpServer: http.Server | null = null;
 
 function createWindow() {
     // 1. 메인 디스플레이의 정보를 가져와.
@@ -137,11 +139,99 @@ function quickCapture() {
     }
 }
 
+/**
+ * Chrome Extension과 통신하기 위한 HTTP API 서버를 시작합니다.
+ */
+function startChromeExtensionServer() {
+    const port = 3737;
+    
+    httpServer = http.createServer((req, res) => {
+        // CORS 헤더 설정
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        
+        // Preflight 요청 처리
+        if (req.method === 'OPTIONS') {
+            res.writeHead(200);
+            res.end();
+            return;
+        }
+        
+        // POST /collect - 데이터 수집 엔드포인트
+        if (req.method === 'POST' && req.url === '/collect') {
+            let body = '';
+            
+            req.on('data', (chunk) => {
+                body += chunk.toString();
+            });
+            
+            req.on('end', () => {
+                try {
+                    const message = JSON.parse(body);
+                    console.log(`Received from Chrome Extension: ${message.type} (${message.source})`);
+                    
+                    // 메인 윈도우로 데이터 전송
+                    if (mainWindow && message.data) {
+                        mainWindow.webContents.send('chrome-extension-data', message);
+                    }
+                    
+                    // 성공 응답
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ 
+                        success: true, 
+                        message: 'Data received successfully',
+                        timestamp: new Date().toISOString()
+                    }));
+                    
+            } catch (error) {
+                    console.error('Error parsing Chrome Extension data:', error);
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ 
+                        success: false, 
+                        error: 'Invalid JSON data' 
+                    }));
+            }
+        });
+        
+            return;
+        }
+        
+        // GET /status - 연결 상태 확인 엔드포인트
+        if (req.method === 'GET' && req.url === '/status') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+                status: 'connected',
+                app: 'Flux Collector',
+                version: '1.0.0',
+                timestamp: new Date().toISOString()
+            }));
+            return;
+        }
+        
+        // 404 응답
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Not Found' }));
+    });
+    
+    httpServer.listen(port, 'localhost', () => {
+        console.log(`Chrome Extension HTTP API server listening on port ${port}`);
+        console.log(`API endpoints: http://localhost:${port}/collect, http://localhost:${port}/status`);
+    });
+    
+    httpServer.on('error', (error) => {
+        console.error('HTTP server error:', error);
+    });
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
     createWindow();
+    
+    // Start HTTP API server for Chrome Extension communication
+    startChromeExtensionServer();
 
     // Register global shortcuts
     globalShortcut.register('Alt+CommandOrControl+C', showOrCreateStickyNote);
@@ -202,61 +292,6 @@ ipcMain.handle('show-sticky-note', showOrCreateStickyNote);
 ipcMain.handle('hide-sticky-note', () => {
     if (stickyNoteWindow) {
         stickyNoteWindow.hide();
-    }
-});
-
-// --- Sticky Note Window Controls ---
-ipcMain.handle('sticky-note:set-opacity', (event, opacity: number) => {
-    if (stickyNoteWindow) {
-        // Windows와 macOS 모두 지원
-        if (process.platform === 'win32') {
-            // Windows에서는 0.1 이하로 설정하면 창이 사라질 수 있으므로 최소값 설정
-            const adjustedOpacity = Math.max(0.2, Math.min(1.0, opacity));
-            stickyNoteWindow.setOpacity(adjustedOpacity);
-        } else {
-            // macOS 및 Linux
-            stickyNoteWindow.setOpacity(opacity);
-        }
-    }
-});
-
-ipcMain.handle('sticky-note:toggle-pin', () => {
-    if (stickyNoteWindow) {
-        const currentState = stickyNoteWindow.isAlwaysOnTop();
-        stickyNoteWindow.setAlwaysOnTop(!currentState);
-        return !currentState;
-    }
-    return false;
-});
-
-ipcMain.handle('sticky-note:close', () => {
-    if (stickyNoteWindow) {
-        stickyNoteWindow.close();
-    }
-});
-
-// --- Main Window Controls ---
-ipcMain.handle('window:minimize', () => {
-    if (mainWindow) {
-        mainWindow.minimize();
-    }
-});
-
-ipcMain.handle('window:maximize', () => {
-    if (mainWindow) {
-        if (mainWindow.isMaximized()) {
-            mainWindow.unmaximize();
-        } else {
-            mainWindow.maximize();
-        }
-        return mainWindow.isMaximized();
-    }
-    return false;
-});
-
-ipcMain.handle('window:close', () => {
-    if (mainWindow) {
-        mainWindow.close();
     }
 });
 

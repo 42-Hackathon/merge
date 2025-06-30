@@ -8,13 +8,13 @@ import {
     MoreHorizontal,
     Star,
     Share2,
-    Eye,
     Calendar,
     Edit3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { GlassCard } from '@/components/ui/glass-card';
 import { ContentItem } from '@/types/content';
 
 interface DraggableContentGridProps {
@@ -25,7 +25,6 @@ interface DraggableContentGridProps {
     selectedItems: string[];
     folderName?: string;
     zoomLevel?: number;
-    onFileDrop?: (files: FileList) => void;
 }
 
 export function DraggableContentGrid({
@@ -36,13 +35,11 @@ export function DraggableContentGrid({
     selectedItems,
     folderName = '모든 콘텐츠',
     zoomLevel = 100,
-    onFileDrop,
 }: DraggableContentGridProps) {
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const [draggedItem, setDraggedItem] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [editorContent, setEditorContent] = useState('');
-    const [isDragOver, setIsDragOver] = useState(false);
 
     const scale = (base: number) => base * (zoomLevel / 100);
 
@@ -88,48 +85,6 @@ export function DraggableContentGrid({
         }
     };
 
-    // 파일 드래그 오버 핸들러
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        // 파일 드롭 허용 명시
-        e.dataTransfer.dropEffect = 'copy';
-
-        // 외부 파일 드래그인지 확인
-        const hasFiles = e.dataTransfer.types.includes('Files');
-
-        // 파일 드래그일 때 드롭 존 활성화 (조건 완화)
-        if (hasFiles && !isDragOver) {
-            setIsDragOver(true);
-        }
-    };
-
-    const handleDragLeave = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        // 컨테이너를 완전히 벗어났을 때만 isDragOver를 false로 설정
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = e.clientX;
-        const y = e.clientY;
-        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
-            setIsDragOver(false);
-        }
-    };
-
-    // 파일 드롭 핸들러
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragOver(false);
-
-        // 실제 파일이 있으면 처리
-        const files = e.dataTransfer.files;
-        if (files.length > 0 && onFileDrop) {
-            onFileDrop(files);
-        }
-    };
-
     const getContentPreview = (item: ContentItem) => {
         const baseHeight = viewMode === 'list' ? scale(48) : scale(144);
 
@@ -141,14 +96,47 @@ export function DraggableContentGrid({
                             width: viewMode === 'list' ? `${scale(48)}px` : '100%',
                             height: `${baseHeight}px`,
                         }}
-                        className={`bg-zinc-200 dark:bg-zinc-800 rounded-md mb-2 flex items-center justify-center relative overflow-hidden`}
+                        className={`relative overflow-hidden rounded-lg group-hover:scale-105 transition-transform duration-500`}
                     >
-                        <span
-                            style={{ fontSize: `${scale(12)}px` }}
-                            className="text-zinc-600 dark:text-zinc-400"
-                        >
-                            이미지
-                        </span>
+                        {/* 실제 이미지 표시 */}
+                        {item.metadata?.url ? (
+                            <img
+                                src={item.metadata.url}
+                                alt={item.title}
+                                className="w-full h-full object-cover"
+                                style={{ 
+                                    borderRadius: viewMode === 'list' ? `${scale(6)}px` : `${scale(8)}px`
+                                }}
+                                onError={(e) => {
+                                    // 이미지 로드 실패 시 플레이스홀더 표시
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    target.nextElementSibling?.setAttribute('style', 'display: flex');
+                                }}
+                            />
+                        ) : null}
+                        
+                        {/* 플레이스홀더 (이미지 없거나 로드 실패 시) */}
+                        <div 
+                        className={`bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 
+                                      absolute inset-0 flex items-center justify-center ${item.metadata?.url ? 'hidden' : 'flex'}`}
+                    >
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="relative z-10 text-center">
+                            <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
+                                <span style={{ fontSize: `${scale(20)}px` }}>🖼️</span>
+                            </div>
+                            <span
+                                style={{ fontSize: `${scale(12)}px` }}
+                                className="text-zinc-700 dark:text-zinc-300 font-medium"
+                            >
+                                이미지
+                            </span>
+                        </div>
+                        </div>
+                        
+                        {/* 호버 오버레이 */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
                 );
             case 'link':
@@ -158,13 +146,21 @@ export function DraggableContentGrid({
                             width: viewMode === 'list' ? `${scale(48)}px` : '100%',
                             height: `${baseHeight}px`,
                         }}
-                        className={`bg-zinc-200 dark:bg-zinc-800 rounded-md mb-2 flex items-center justify-center relative overflow-hidden`}
+                        className={`bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30 
+                                  relative overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform duration-500`}
                     >
-                        <div className="text-center text-zinc-700 dark:text-zinc-300">
-                            <div style={{ fontSize: `${scale(12)}px` }} className="font-medium">
-                                🔗
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="relative z-10 text-center">
+                            <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
+                                <span style={{ fontSize: `${scale(20)}px` }}>🔗</span>
                             </div>
-                            <div style={{ fontSize: `${scale(10)}px` }} className="opacity-80">
+                            <span
+                                style={{ fontSize: `${scale(12)}px` }}
+                                className="text-zinc-700 dark:text-zinc-300 font-medium"
+                            >
+                                링크
+                            </span>
+                            <div style={{ fontSize: `${scale(10)}px` }} className="text-zinc-600 dark:text-zinc-400 mt-1">
                                 {item.metadata?.url ? new URL(item.metadata.url).hostname : 'Link'}
                             </div>
                         </div>
@@ -177,14 +173,21 @@ export function DraggableContentGrid({
                             width: viewMode === 'list' ? `${scale(48)}px` : '100%',
                             height: `${baseHeight}px`,
                         }}
-                        className={`bg-zinc-200 dark:bg-zinc-800 rounded-md mb-2 flex items-center justify-center relative overflow-hidden`}
+                        className={`bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 
+                                  relative overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform duration-500`}
                     >
-                        <span
-                            style={{ fontSize: `${scale(12)}px` }}
-                            className="text-zinc-600 dark:text-zinc-400"
-                        >
-                            동영상
-                        </span>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        <div className="relative z-10 text-center">
+                            <div className="w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-2 mx-auto">
+                                <span style={{ fontSize: `${scale(20)}px` }}>📹</span>
+                            </div>
+                            <span
+                                style={{ fontSize: `${scale(12)}px` }}
+                                className="text-zinc-700 dark:text-zinc-300 font-medium"
+                            >
+                                동영상
+                            </span>
+                        </div>
                     </div>
                 );
             default:
@@ -192,7 +195,7 @@ export function DraggableContentGrid({
                     <div className={`${viewMode === 'list' ? 'flex-1' : ''}`}>
                         <p
                             style={{ fontSize: `${scale(12)}px` }}
-                            className="text-zinc-700 dark:text-zinc-300 line-clamp-3 mb-2"
+                            className="text-zinc-700 dark:text-zinc-300 line-clamp-3"
                         >
                             {item.content}
                         </p>
@@ -276,51 +279,7 @@ export function DraggableContentGrid({
 
             {/* Content Grid */}
             <div className="flex-1 flex overflow-hidden">
-                <div
-                    className={`flex-1 overflow-y-auto relative ${
-                        isDragOver
-                            ? 'bg-blue-50/50 dark:bg-blue-900/20 border-2 border-dashed border-blue-400'
-                            : ''
-                    }`}
-                    style={{ padding: `${scale(16)}px` }}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                >
-                    {/* 드래그 오버 상태 표시 */}
-                    {isDragOver && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="absolute inset-0 flex items-center justify-center z-50 bg-blue-50/80 dark:bg-blue-900/40 backdrop-blur-sm"
-                        >
-                            <div className="text-center">
-                                <div className="text-blue-600 dark:text-blue-400 mb-2">
-                                    <svg
-                                        width="48"
-                                        height="48"
-                                        viewBox="0 0 24 24"
-                                        fill="currentColor"
-                                    >
-                                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
-                                    </svg>
-                                </div>
-                                <p
-                                    className="text-blue-600 dark:text-blue-400 font-medium"
-                                    style={{ fontSize: `${scale(16)}px` }}
-                                >
-                                    파일을 여기에 드롭하세요
-                                </p>
-                                <p
-                                    className="text-blue-500 dark:text-blue-300 mt-1"
-                                    style={{ fontSize: `${scale(12)}px` }}
-                                >
-                                    자동으로 타입별로 분류됩니다
-                                </p>
-                            </div>
-                        </motion.div>
-                    )}
-
+                <div className="flex-1 overflow-y-auto" style={{ padding: `${scale(16)}px` }}>
                     {items.length === 0 ? (
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -343,12 +302,6 @@ export function DraggableContentGrid({
                             </p>
                             <p style={{ fontSize: `${scale(12)}px` }}>
                                 여기에 바로 작성하거나 콘텐츠를 수집해보세요
-                            </p>
-                            <p
-                                style={{ fontSize: `${scale(12)}px` }}
-                                className="mt-2 text-blue-500 dark:text-blue-400"
-                            >
-                                💡 팁: 로컬 폴더의 파일들을 여기로 드래그 앤 드롭할 수 있습니다
                             </p>
 
                             {/* Inline Editor */}
@@ -401,17 +354,18 @@ export function DraggableContentGrid({
                         <div className={getGridClassName()} style={{ gap: `${scale(12)}px` }}>
                             <AnimatePresence>
                                 {items.map((item: ContentItem) => (
-                                    <div
+                                    <GlassCard
                                         key={item.id}
-                                        className={`cursor-pointer transition-all duration-200 relative group rounded-2xl 
-                      bg-zinc-100/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-black/10 dark:border-white/10
-                      hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 hover:scale-[1.02]
-                      ${selectedItems.includes(item.id) ? 'ring-2 ring-blue-500' : ''} 
-                      ${viewMode === 'list' ? 'flex items-center' : ''} 
-                      ${draggedItem === item.id ? 'opacity-50' : ''}
-                    `}
+                                        variant="liquid"
+                                        vibrancy="primary"
+                                        selected={selectedItems.includes(item.id)}
+                                        hoverable={true}
+                                        className={`cursor-pointer relative group 
+                                          ${viewMode === 'list' ? 'flex items-center' : ''} 
+                                          ${draggedItem === item.id ? 'opacity-50' : ''}
+                                        `}
                                         style={{
-                                            padding: `${scale(12)}px`,
+                                            padding: viewMode === 'list' ? `${scale(12)}px` : '0',
                                             gap: `${scale(12)}px`,
                                             marginBottom:
                                                 viewMode === 'masonry' ? `${scale(12)}px` : '0',
@@ -483,58 +437,114 @@ export function DraggableContentGrid({
                                             )}
                                         </AnimatePresence>
 
-                                        {getContentPreview(item)}
-
+                                                                                {/* Pinterest-style content layout */}
                                         <div className="w-full">
-                                            {viewMode !== 'list' && (
+                                            {/* 이미지/미디어 콘텐츠는 카드 전체 폭 차지 */}
+                                            {item.type !== 'text' && (
+                                                <div className="w-full mb-3">
+                                                    {getContentPreview(item)}
+                                                </div>
+                                            )}
+
+                                            {/* Liquid Glass 텍스트 정보 영역 */}
+                                            <div 
+                                                className="flex flex-col"
+                                                style={{ 
+                                                    padding: viewMode === 'list' ? '0' : `0 ${scale(12)}px ${scale(0)}px ${scale(12)}px` 
+                                                }}
+                                            >
+                                                {/* 1. 제목 - 향상된 타이포그래피 */}
                                                 <h3
-                                                    className="font-semibold text-zinc-800 dark:text-zinc-200 mb-1 truncate"
-                                                    style={{ fontSize: `${scale(13)}px` }}
+                                                    className="font-semibold text-zinc-900 dark:text-white line-clamp-2 leading-tight tracking-tight mb-2"
+                                                    style={{ fontSize: `${scale(16)}px`, fontWeight: '600' }}
                                                 >
                                                     {item.title}
                                                 </h3>
-                                            )}
 
-                                            <div className="flex items-center justify-between text-zinc-500 dark:text-zinc-400">
-                                                <div
-                                                    className="flex items-center gap-2"
-                                                    style={{ fontSize: `${scale(11)}px` }}
-                                                >
-                                                    <div className="flex items-center gap-1">
-                                                        <Eye className="h-3 w-3" />
-                                                        <span>{item.metadata?.views ?? 0}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <Calendar className="h-3 w-3" />
-                                                        <span>
-                                                            {new Date(
-                                                                item.createdAt
-                                                            ).toLocaleDateString()}
-                                                        </span>
-                                                    </div>
-                                                </div>
+                                                {/* 2. 텍스트 내용 (텍스트 타입일 때만) */}
+                                                {item.type === 'text' && (
+                                                    <p
+                                                        className="text-zinc-600 dark:text-zinc-300 line-clamp-3 leading-relaxed mb-2"
+                                                        style={{ fontSize: `${scale(13)}px` }}
+                                                    >
+                                                        {item.content}
+                                                    </p>
+                                                )}
 
-                                                {item.tags && (
-                                                    <div className="flex gap-1">
-                                                        {item.tags
-                                                            .slice(0, 2)
-                                                            .map((tag: string) => (
-                                                                <Badge
-                                                                    key={tag}
-                                                                    variant="secondary"
-                                                                    className="px-1.5 py-0.5"
-                                                                    style={{
-                                                                        fontSize: `${scale(9)}px`,
-                                                                    }}
+                                                {/* 3. AI 요약 - 글래스 모피즘 스타일 */}
+                                                {item.aiSummary && (
+                                                    <div className="relative mb-2 group">
+                                                        <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 
+                                                                      backdrop-blur-sm border border-blue-200/30 dark:border-blue-400/20 rounded-xl px-4 py-3
+                                                                      shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                                                            <div className="flex items-start gap-2">
+                                                                <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                                    <span style={{ fontSize: `${scale(10)}px` }} className="text-white">✨</span>
+                                                                </div>
+                                                                <p
+                                                                    className="text-zinc-700 dark:text-zinc-200 line-clamp-1 font-medium"
+                                                                    style={{ fontSize: `${scale(12)}px` }}
                                                                 >
-                                                                    {tag}
-                                                                </Badge>
-                                                            ))}
+                                                                    {item.aiSummary}
+                                                                </p>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 )}
+
+                                                {/* 4. 키워드 + 메타데이터 영역 */}
+                                                <div className="flex items-center justify-between">
+                                                    {/* 키워드 - 글래스 배지 */}
+                                                    <div className="flex items-center gap-2 flex-1">
+                                                        {item.keywords && item.keywords.slice(0, 3).map((keyword: string) => (
+                                                            <div
+                                                                key={keyword}
+                                                                className="px-3 py-1.5 bg-zinc-100/80 dark:bg-zinc-800/80 backdrop-blur-sm 
+                                                                         border border-zinc-200/50 dark:border-zinc-700/50 rounded-full
+                                                                         shadow-sm hover:shadow-md transition-all duration-300"
+                                                                style={{ fontSize: `${scale(10)}px` }}
+                                                            >
+                                                                <span className="text-zinc-700 dark:text-zinc-300 font-medium">
+                                                                    #{keyword}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    {/* 메타데이터 - 세련된 스타일 */}
+                                                    <div className="flex items-center gap-3 text-zinc-500 dark:text-zinc-400">
+                                                        {/* 도메인 + 파비콘 - 깔끔한 스타일 */}
+                                                        {item.metadata?.domain && (
+                                                            <div className="flex items-center gap-1.5">
+                                                                {item.metadata?.favicon && (
+                                                                    <img
+                                                                        src={item.metadata.favicon}
+                                                                        alt="favicon"
+                                                                        className="rounded-sm"
+                                                                        style={{ width: `${scale(12)}px`, height: `${scale(12)}px` }}
+                                                                    />
+                                                                )}
+                                                                <span style={{ fontSize: `${scale(10)}px` }} className="font-medium text-zinc-500 dark:text-zinc-400">
+                                                                    {item.metadata.domain.replace(/^www\./, '')}
+                                                                </span>
+                                                            </div>
+                                                        )}
+
+                                                        {/* 생성일 */}
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Calendar 
+                                                                style={{ height: `${scale(10)}px`, width: `${scale(10)}px` }} 
+                                                                className="text-zinc-400 dark:text-zinc-500"
+                                                            />
+                                                            <span style={{ fontSize: `${scale(10)}px` }} className="font-medium text-zinc-500 dark:text-zinc-400">
+                                                                {new Date(item.createdAt).toLocaleDateString()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </GlassCard>
                                 ))}
                             </AnimatePresence>
                         </div>

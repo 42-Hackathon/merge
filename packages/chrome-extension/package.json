@@ -1,0 +1,29 @@
+{
+  "name": "flux-collector-chrome-extension",
+  "version": "0.1.0",
+  "description": "Chrome Extension for collecting web content into Flux application",
+  "scripts": {
+    "build": "node scripts/build-system.js all",
+    "build:windows": "node scripts/build-system.js windows",
+    "build:macos": "node scripts/build-system.js macos",
+    "setup:linux": "node setup-native-host.js",
+    "update:extension-id": "node setup-native-host.js update",
+    "clean": "rm -rf build/"
+  },
+  "keywords": [
+    "chrome-extension",
+    "native-messaging",
+    "flux",
+    "web-scraping"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+} 
