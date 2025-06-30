@@ -248,35 +248,8 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
     <div className="flex flex-col h-full">
       {/* 헤더 */}
       <div className="flex-shrink-0 flex items-center justify-between p-2 border-b border-white/10">
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          {contextItems.length > 0 ? (
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Plus className="h-4 w-4 text-white/60 flex-shrink-0" />
-              <span className="text-sm text-white/60 flex-shrink-0">컨텍스트 ({contextItems.length}개)</span>
-              <div className="flex flex-wrap gap-1 flex-1 min-w-0">
-                {contextItems.slice(0, 3).map((item) => (
-                  <div
-                    key={item.id}
-                    className="group flex items-center gap-1 px-1.5 py-0.5 bg-white/10 rounded text-xs border border-white/20 hover:bg-white/15 transition-all duration-200"
-                  >
-                    <ContextIcon type={item.type} />
-                    <span className="truncate max-w-32">{item.title}</span>
-                    <button
-                      onClick={() => removeContextItem(item.id)}
-                      className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all duration-200 ml-0.5"
-                    >
-                      <X className="h-2.5 w-2.5" />
-                    </button>
-                  </div>
-                ))}
-                {contextItems.length > 3 && (
-                  <span className="text-xs text-white/40">+{contextItems.length - 3}개</span>
-                )}
-              </div>
-            </div>
-          ) : (
-            <span className="text-sm text-white/40">컨텍스트 없음</span>
-          )}
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-white/60">AI 어시스턴트</span>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
           <Button 
@@ -320,8 +293,6 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
           </motion.div>
         )}
       </AnimatePresence>
-
-
 
       {/* 메시지 영역 */}
       <div 
@@ -398,6 +369,32 @@ export function AIChat({ width, onAddContext }: AIChatProps) {
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
+      </div>
+
+      {/* 컨텍스트바 */}
+      <div className="flex-shrink-0 p-3 min-h-[3.5rem] transition-colors duration-200">
+        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
+          <div className="flex items-center gap-2 w-max">
+            {contextItems.map((item) => (
+              <div key={item.id} className="group relative flex-shrink-0">
+                <div 
+                  className="flex items-center text-xs rounded-full pl-2 pr-2 py-1 backdrop-blur-xl border cursor-pointer transition-all duration-200 bg-white/10 border-white/20 hover:bg-white/15" 
+                  title={item.title}
+                >
+                  <ContextIcon type={item.type} />
+                  <span className="truncate flex-1 mx-1.5 max-w-32">{item.title}</span>
+                </div>
+                <button 
+                  onClick={() => removeContextItem(item.id)} 
+                  className="absolute top-1/2 -translate-y-1/2 right-1.5 bg-gray-700 hover:bg-red-500 border border-gray-600 rounded-full h-4 w-4 flex items-center justify-center text-white text-[10px] opacity-0 group-hover:opacity-100 transition-all" 
+                  title="Remove context"
+                >
+                  <X className="h-2.5 w-2.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* 입력 영역 */}
