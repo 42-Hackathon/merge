@@ -307,9 +307,9 @@ export default function Index() {
     const filteredItems = items.filter((item) => {
     if (selectedFolder === 'all') return true;
         if (selectedFolder === 'text') return item.type === 'text' && item.folderId !== 'memo';
-        if (selectedFolder === 'images') return item.type === 'image';
-        if (selectedFolder === 'links') return item.type === 'link';
-        if (selectedFolder === 'videos') return item.type === 'video';
+    if (selectedFolder === 'images') return item.type === 'image';
+    if (selectedFolder === 'links') return item.type === 'link';
+    if (selectedFolder === 'videos') return item.type === 'video';
         if (selectedFolder === 'memo') return item.folderId === 'memo';
         if (selectedFolder === 'clipboard') return item.folderId === 'clipboard';
         if (selectedFolder === 'screenshots') return item.folderId === 'screenshots';
@@ -390,26 +390,26 @@ export default function Index() {
               />
             )}
           </div>
-                    </div>
+          </div>
 
           {/* Right Sidebar - Changed to decalcomania form */}
           {isRightSidebarOpen ? (
-            <EnhancedMemoSidebar 
-              isOpen={isRightSidebarOpen}
-              onClose={() => setIsRightSidebarOpen(false)}
-              mode={rightSidebarMode}
-              onModeChange={setRightSidebarMode}
-              width={rightSidebarWidth}
-              onWidthChange={(newWidth) => {
+              <EnhancedMemoSidebar 
+                isOpen={isRightSidebarOpen}
+                onClose={() => setIsRightSidebarOpen(false)}
+                mode={rightSidebarMode}
+                onModeChange={setRightSidebarMode}
+                width={rightSidebarWidth}
+                onWidthChange={(newWidth) => {
                 // Apply maximum width restriction
                                 const constrainedWidth = Math.min(
                                     newWidth,
                                     maxRightSidebarWidth
                                 );
-                setRightSidebarWidth(constrainedWidth);
-              }}
-              maxWidth={maxRightSidebarWidth}
-            />
+                  setRightSidebarWidth(constrainedWidth);
+                }}
+                maxWidth={maxRightSidebarWidth}
+              />
           ) : (
             <motion.div
               initial={{ x: 20, opacity: 0 }}

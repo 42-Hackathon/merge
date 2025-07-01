@@ -197,7 +197,41 @@
         --chart-5: 340 75% 55%;
     }
 
+    /* 전역 기본 커서 설정 */
+    * {
+        cursor: default !important;
+    }
 
+    /* 상호작용 요소들에 대한 적절한 커서 */
+    button, 
+    a, 
+    [role="button"], 
+    [role="link"],
+    .cursor-pointer {
+        cursor: pointer !important;
+    }
+
+    input, 
+    textarea, 
+    [contenteditable] {
+        cursor: text !important;
+    }
+
+    .cursor-grab {
+        cursor: grab !important;
+    }
+
+    .cursor-grabbing {
+        cursor: grabbing !important;
+    }
+
+    .cursor-col-resize {
+        cursor: col-resize !important;
+    }
+
+    .cursor-row-resize {
+        cursor: row-resize !important;
+    }
 
     .dark {
         --background: 222.2 84% 4.9%;

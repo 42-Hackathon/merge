@@ -634,7 +634,7 @@ export function DraggableContentGrid({
                                                         {item.type === 'link' && item.metadata?.url && (
                                                             <span style={{ fontSize: `10px` }}>
                                                                 {cleanDomain(item.metadata.url)}
-                                                            </span>
+                                                                </span>
                                                         )}
                                                         {item.type !== 'link' && (
                                                             <span style={{ fontSize: `10px` }}>
@@ -647,12 +647,12 @@ export function DraggableContentGrid({
                                         </div>
                                     </GlassCard>
                                 </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
-                )}
+                                ))}
+                            </AnimatePresence>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
 }

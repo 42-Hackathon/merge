@@ -212,6 +212,36 @@ function findBestElement(clickedElement) {
   if (tagName === 'video') return clickedElement;
   if (tagName === 'iframe' && isVideoFrame(clickedElement)) return clickedElement;
   
+  // YouTube 특별 처리: 비디오 플레이어나 썸네일 영역 감지
+  if (window.location.hostname.includes('youtube.com')) {
+    // 비디오 플레이어 영역인지 확인
+    const videoPlayer = clickedElement.closest('#movie_player') || 
+                       clickedElement.closest('.html5-video-player') ||
+                       clickedElement.closest('ytd-player');
+    if (videoPlayer) {
+      // 실제 video 요소나 iframe을 찾아서 반환
+      const actualVideo = videoPlayer.querySelector('video') || 
+                         videoPlayer.querySelector('iframe[src*="youtube.com"]');
+      if (actualVideo) return actualVideo;
+    }
+  }
+  
+  // YouTube 특별 처리: 비디오 플레이어나 썸네일 영역 감지
+  if (window.location.hostname.includes('youtube.com')) {
+    // 비디오 플레이어 영역인지 확인
+    const videoPlayer = clickedElement.closest('#movie_player') || 
+                       clickedElement.closest('.html5-video-player') ||
+                       clickedElement.closest('ytd-player');
+    if (videoPlayer) {
+      // 실제 video 요소나 iframe을 찾아서 반환
+      const actualVideo = videoPlayer.querySelector('video') || 
+                         videoPlayer.querySelector('iframe[src*="youtube.com"]');
+      if (actualVideo) return actualVideo;
+      // video 요소가 없어도 플레이어 영역이면 가상 video 객체 생성
+      return { tagName: 'video', src: window.location.href };
+    }
+  }
+  
   // 2. 클릭된 요소 내부에서 이미지나 비디오 찾기
   const images = clickedElement.querySelectorAll('img');
   if (images.length > 0) {
@@ -404,11 +434,14 @@ function showDragFeedback(x, y) {
  * @returns {string|null} 동영상 제목
  */
 function getVideoTitle() {
-  // YouTube
+  // YouTube - 업데이트된 셀렉터들
   if (window.location.hostname.includes('youtube.com')) {
-    const titleElement = document.querySelector('h1.ytd-video-primary-info-renderer') ||
-                        document.querySelector('h1.title') ||
-                        document.querySelector('#video-title');
+    const titleElement = document.querySelector('h1.ytd-watch-metadata yt-formatted-string') ||
+                        document.querySelector('h1[data-title]') ||
+                        document.querySelector('.ytd-watch-metadata h1') ||
+                        document.querySelector('h1.ytd-video-primary-info-renderer') ||
+                        document.querySelector('#video-title') ||
+                        document.querySelector('h1.title');
     if (titleElement) return titleElement.textContent.trim();
   }
   
@@ -471,11 +504,21 @@ function getVideoThumbnail(element) {
   // 기본 poster 속성
   if (element.poster) return element.poster;
   
-  // YouTube 썸네일
+  // YouTube 썸네일 - 여러 크기 옵션 시도
   if (window.location.hostname.includes('youtube.com')) {
     const videoId = getVideoId(element);
     if (videoId) {
-      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      // maxresdefault가 없을 경우를 대비해 여러 옵션 제공
+      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    }
+    
+    // DOM에서 썸네일 찾기 (새로운 방법)
+    const thumbnailElement = document.querySelector('meta[property="og:image"]') ||
+                            document.querySelector('link[itemprop="thumbnailUrl"]') ||
+                            document.querySelector('.ytp-videowall-still-image') ||
+                            document.querySelector('#movie_player .ytp-cued-thumbnail-overlay-image');
+    if (thumbnailElement) {
+      return thumbnailElement.getAttribute('content') || thumbnailElement.getAttribute('href') || thumbnailElement.src;
     }
   }
   

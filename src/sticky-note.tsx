@@ -1,23 +1,21 @@
-import React, { useState, useRef, useCallback } from 'react';
-import ReactDOM from 'react-dom/client';
+import React, { useState, useEffect, useRef } from 'react';
 import { Pin, X } from 'lucide-react';
 import { TiptapEditor, TiptapEditorHandle } from './components/memo/tiptap-editor';
-import './index.css';
 
 const StickyNote: React.FC = () => {
-    const [isPinned, setIsPinned] = useState(true);
-    const [content, setContent] = useState('<p># Sticky Note</p><p>Write your content here...</p>');
+    const [isPinned, setIsPinned] = useState(false);
     const [isEditorDragOver, setIsEditorDragOver] = useState(false);
-    const [backgroundOpacity, setBackgroundOpacity] = useState(70); // 20-100 범위
-    const tiptapEditorRef = useRef<TiptapEditorHandle>(null);
+    const editorRef = useRef<TiptapEditorHandle>(null);
+    const editorContainerRef = useRef<HTMLDivElement>(null);
+    const [backgroundOpacity, setBackgroundOpacity] = useState(80);
 
     const handleTogglePin = () => {
-        window.electron.togglePin();
+        window.electron?.togglePin();
         setIsPinned(!isPinned);
     };
 
     const handleClose = () => {
-        window.electron.closeWindow();
+        window.electron?.closeWindow();
     };
 
     const handleEditorDragOver = (e: React.DragEvent) => {
@@ -30,135 +28,93 @@ const StickyNote: React.FC = () => {
         setIsEditorDragOver(false);
     };
 
-    const handleEditorDrop = useCallback(
-        (e: React.DragEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setIsEditorDragOver(false);
-
-            const editor = tiptapEditorRef.current?.editor;
-            if (!editor) return;
-
-            const pos = editor.view.posAtCoords({ left: e.clientX, top: e.clientY });
-            const position = pos?.pos;
-
-            const insertContent = (content: string) => {
-                if (position !== undefined) {
-                    editor.chain().focus().insertContentAt(position, content).run();
-                } else {
-                    editor.chain().focus().insertContent(content).run();
-                }
-            };
-
-            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                const files = Array.from(e.dataTransfer.files);
-                files.forEach((file) => {
-                    if (file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = (readEvent) => {
-                            if (readEvent.target?.result) {
-                                const imageUrl = readEvent.target.result as string;
-                                insertContent(
-                                    `<img src="${imageUrl}" style="max-width: 100%; height: auto;" />`
-                                );
-                            }
-                        };
-                        reader.readAsDataURL(file);
-                    } else {
-                        insertContent(`<p>📄 ${file.name}</p>`);
-                    }
-                });
-                return;
+    const handleEditorDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsEditorDragOver(false);
+        if (e.dataTransfer.files.length > 0) {
+            // Handle file drop
+        } else {
+            const text = e.dataTransfer.getData('text/plain');
+            if (text && editorRef.current?.editor) {
+                const { from, to } = editorRef.current.editor.state.selection;
+                editorRef.current.editor.chain().focus().insertContentAt({ from, to }, text).run();
             }
+        }
+    };
 
-            const plainText = e.dataTransfer.getData('text/plain');
-            if (plainText) {
-                try {
-                    new URL(plainText);
-                    insertContent(`<a href="${plainText}" target="_blank">${plainText}</a>`);
-                } catch (_) {
-                    insertContent(`<p>${plainText}</p>`);
-                }
-                return;
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                handleClose();
             }
-        },
-        [tiptapEditorRef.current]
-    );
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
 
     return (
         <div
-            className="flex flex-col h-screen backdrop-blur-xl rounded-lg shadow-lg overflow-hidden border border-black/10 dark:border-white/10"
+            className="flex flex-col h-screen backdrop-blur-xl rounded-lg shadow-lg overflow-hidden border border-black/10"
             style={{
-                backgroundColor: `rgba(248, 250, 252, ${backgroundOpacity / 100})`, // Light mode - 미묘한 회색빛 흰색
-                ...(document.documentElement.classList.contains('dark') && {
-                    backgroundColor: `rgba(51, 65, 85, ${backgroundOpacity / 100})`, // Dark mode - 부드러운 slate
-                }),
+                backgroundColor: `rgba(248, 250, 252, ${backgroundOpacity / 100})`,
             }}
+            onDragOver={handleEditorDragOver}
+            onDragLeave={handleEditorDragLeave}
         >
             {/* Draggable Header */}
             <div
-                className="flex justify-end items-center p-1"
-                style={{
-                    WebkitAppRegion: 'drag',
-                    backgroundColor: `rgba(248, 250, 252, ${backgroundOpacity / 100})`, // Light mode - 미묘한 회색빛 흰색
-                    ...(document.documentElement.classList.contains('dark') && {
-                        backgroundColor: `rgba(51, 65, 85, ${backgroundOpacity / 100})`, // Dark mode - 부드러운 slate
-                    }),
-                }}
+                className="h-8 flex-shrink-0 flex items-center justify-between px-2"
+                style={{ '--webkit-app-region': 'drag' } as React.CSSProperties}
             >
-                <div style={{ WebkitAppRegion: 'no-drag' }} className="flex items-center space-x-2">
+                {/* Left side: Controls */}
+                <div className="flex items-center gap-1" style={{ '--webkit-app-region': 'no-drag' } as React.CSSProperties}>
                     <input
                         type="range"
-                        min="20"
+                        min="30"
                         max="100"
-                        step="5"
                         value={backgroundOpacity}
-                        className="w-20 h-1 bg-neutral-500/50 rounded-lg appearance-none cursor-pointer"
-                        onChange={(e) => setBackgroundOpacity(parseInt(e.target.value))}
-                        title="배경 불투명도"
+                        onChange={(e) => setBackgroundOpacity(Number(e.target.value))}
+                        className="w-16 h-1 accent-blue-500"
                     />
+                </div>
+
+                {/* Right side: Window controls */}
+                <div className="flex items-center gap-1" style={{ '--webkit-app-region': 'no-drag' } as React.CSSProperties}>
                     <button
                         onClick={handleTogglePin}
-                        className={`p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 ${
-                            isPinned ? 'text-blue-500' : 'text-gray-500'
+                        title="Pin"
+                        className={`p-1 rounded hover:bg-black/10 ${
+                            isPinned ? 'bg-blue-200 text-blue-800' : 'text-zinc-900'
                         }`}
-                        title={isPinned ? 'Unpin' : 'Pin'}
                     >
-                        <Pin size={14} />
+                        <Pin className={`w-3 h-3 transition-transform ${isPinned ? 'rotate-45' : ''}`} />
                     </button>
-                    <button
-                        onClick={handleClose}
-                        className="p-1 rounded text-zinc-900 dark:text-zinc-100 hover:bg-red-500 hover:text-white"
-                        title="Close"
-                    >
-                        <X size={14} />
+                    <button onClick={handleClose} title="Close" className="p-1 rounded text-zinc-900 hover:bg-red-500 hover:text-white">
+                        <X className="w-3 h-3" />
                     </button>
                 </div>
             </div>
-
             {/* Content Area */}
             <div
-                className={`flex-grow p-2 overflow-y-auto overflow-x-visible transition-colors text-zinc-900 dark:text-zinc-100 ${
-                    isEditorDragOver ? 'bg-white/30 dark:bg-black/30' : ''
+                ref={editorContainerRef}
+                className={`flex-grow p-2 overflow-y-auto overflow-x-visible transition-colors text-zinc-900 ${
+                    isEditorDragOver ? 'bg-white/30' : ''
                 }`}
                 style={{ position: 'relative' }}
+                onDrop={handleEditorDrop}
             >
                 <TiptapEditor
-                    ref={tiptapEditorRef}
-                    content={content}
-                    onContentChange={setContent}
-                    onDragOver={handleEditorDragOver}
-                    onDragLeave={handleEditorDragLeave}
-                    onDrop={handleEditorDrop}
+                    ref={editorRef}
+                    content=""
+                    onContentChange={() => {
+                        // Handle content change if needed
+                    }}
                 />
             </div>
         </div>
     );
 };
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-root.render(
-    <React.StrictMode>
-        <StickyNote />
-    </React.StrictMode>
-);
+export default StickyNote;
