@@ -1,0 +1,128 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # 태그가 v로 시작할 때 실행 (예: v1.0.0)
+  workflow_dispatch: # 수동 실행도 가능
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build app
+        run: npm run make
+        
+      - name: Upload artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: flux-windows
+          path: out/make/squirrel.windows/x64/*.exe
+          
+      - name: Upload artifacts (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: flux-macos
+          path: out/make/zip/darwin/x64/*.zip
+          
+      - name: Upload artifacts (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: flux-linux
+          path: out/make/deb/x64/*.deb
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        
+      - name: Display structure of downloaded files
+        run: ls -R
+        
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Flux ${{ github.ref }}
+          body: |
+            🚀 새로운 Flux 버전이 출시되었습니다!
+            
+            ## 다운로드
+            - **Windows**: flux-setup.exe
+            - **macOS**: flux-darwin-x64.zip
+            - **Linux**: flux_amd64.deb
+            
+            ## 설치 방법
+            ### Windows
+            1. flux-setup.exe 다운로드
+            2. 파일 실행하여 설치
+            
+            ### macOS
+            1. flux-darwin-x64.zip 다운로드
+            2. 압축 해제 후 Applications 폴더로 이동
+            
+            ### Linux
+            1. flux_amd64.deb 다운로드
+            2. `sudo dpkg -i flux_amd64.deb` 실행
+          draft: false
+          prerelease: true
+          
+      - name: Upload Windows Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: flux-windows/flux-setup.exe
+          asset_name: flux-setup.exe
+          asset_content_type: application/x-msdownload
+          
+      - name: Upload macOS Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: flux-macos/flux-darwin-x64-1.0.0.zip
+          asset_name: flux-darwin-x64.zip
+          asset_content_type: application/zip
+          
+      - name: Upload Linux Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: flux-linux/flux_1.0.0_amd64.deb
+          asset_name: flux_amd64.deb
+          asset_content_type: application/vnd.debian.binary-package 

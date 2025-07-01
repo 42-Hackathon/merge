@@ -112,21 +112,21 @@ function ContextMenuContent({
 const ContextMenuItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Item>,
   React.ComponentProps<typeof ContextMenuPrimitive.Item> & {
-    inset?: boolean
-    variant?: "default" | "destructive"
+  inset?: boolean
+  variant?: "default" | "destructive"
   }
 >(({ className, inset, variant, ...props }, ref) => (
-  <ContextMenuPrimitive.Item
+    <ContextMenuPrimitive.Item
     ref={ref}
-    className={cn(
+      className={cn(
       'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       inset && 'pl-8',
       variant === 'destructive' &&
         'text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:*:!text-destructive [&_svg:not([class*="text-"])]:text-muted-foreground',
-      className
-    )}
-    {...props}
-  />
+        className
+      )}
+      {...props}
+    />
 ));
 ContextMenuItem.displayName = ContextMenuPrimitive.Item.displayName;
 

@@ -157,18 +157,37 @@ function showFeedback(x, y) {
  * @param {DragEvent} e - 드래그 이벤트 객체
  */
 function handleDragStart(e) {
-  // 드래그된 요소에서 가장 적절한 요소를 찾습니다 (이미지 우선)
+  // 드래그된 요소에서 가장 적절한 요소를 찾습니다
   draggedElement = findBestElement(e.target);
   
   // 요소 타입별 데이터 추출
   const elementType = getElementType(draggedElement);
   dragData = extractElementData(draggedElement, elementType);
   
+  // 드래그 데이터에 추가 정보 포함
+  dragData = {
+    ...dragData,
+    drag_method: 'native_drag',
+    original_element: {
+      tag: e.target.tagName.toLowerCase(),
+      id: e.target.id,
+      className: e.target.className,
+      text: e.target.textContent?.substring(0, 100)
+    }
+  };
+  
   console.log("Flux: Drag started -", elementType, dragData);
   
   // 드래그 피드백 설정
   e.dataTransfer.effectAllowed = 'copy';
   e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+  
+  // 이미지인 경우 드래그 이미지 설정
+  if (elementType === 'image' && draggedElement.tagName === 'IMG') {
+    const dragImage = new Image();
+    dragImage.src = dragData.image_url;
+    e.dataTransfer.setDragImage(dragImage, 0, 0);
+  }
 }
 
 /**
@@ -212,61 +231,98 @@ function findBestElement(clickedElement) {
   if (tagName === 'video') return clickedElement;
   if (tagName === 'iframe' && isVideoFrame(clickedElement)) return clickedElement;
   
-  // YouTube 특별 처리: 비디오 플레이어나 썸네일 영역 감지
+  // 2. 부모 요소를 거슬러 올라가며 미디어 요소 찾기
+  let currentElement = clickedElement;
+  let maxDepth = 5; // 최대 5단계까지만 올라감
+  
+  while (currentElement && currentElement.parentElement && maxDepth > 0) {
+    const parent = currentElement.parentElement;
+    
+    // 부모에서 이미지 찾기 (lazy loading 고려)
+    const img = parent.querySelector('img[src], img[data-src], img[data-lazy]');
+    if (img) {
+      // 실제 src 확인
+      const actualSrc = img.src || img.dataset.src || img.dataset.lazy;
+      if (actualSrc) return img;
+    }
+    
+    // 부모에서 비디오 찾기
+    const video = parent.querySelector('video');
+    if (video) return video;
+    
+    // YouTube 썸네일 특별 처리
+    if (window.location.hostname.includes('youtube.com')) {
+      const thumbnail = parent.querySelector('img[src*="ytimg.com"]');
+      if (thumbnail) return thumbnail;
+    }
+    
+    currentElement = parent;
+    maxDepth--;
+  }
+  
+  // 3. YouTube 비디오 플레이어 특별 처리
   if (window.location.hostname.includes('youtube.com')) {
     // 비디오 플레이어 영역인지 확인
-    const videoPlayer = clickedElement.closest('#movie_player') || 
-                       clickedElement.closest('.html5-video-player') ||
-                       clickedElement.closest('ytd-player');
+    const videoPlayer = clickedElement.closest('#movie_player, .html5-video-player, ytd-player');
     if (videoPlayer) {
-      // 실제 video 요소나 iframe을 찾아서 반환
-      const actualVideo = videoPlayer.querySelector('video') || 
-                         videoPlayer.querySelector('iframe[src*="youtube.com"]');
+      // 실제 video 요소 찾기
+      const actualVideo = videoPlayer.querySelector('video');
       if (actualVideo) return actualVideo;
+      
+      // video 요소가 없어도 플레이어 영역이면 가상 요소 반환
+      return createVirtualVideoElement();
+    }
+    
+    // 썸네일 영역 확인
+    const thumbnailContainer = clickedElement.closest('ytd-thumbnail, a[href*="/watch?v="]');
+    if (thumbnailContainer) {
+      const thumbnail = thumbnailContainer.querySelector('img');
+      if (thumbnail) return thumbnail;
     }
   }
   
-  // YouTube 특별 처리: 비디오 플레이어나 썸네일 영역 감지
-  if (window.location.hostname.includes('youtube.com')) {
-    // 비디오 플레이어 영역인지 확인
-    const videoPlayer = clickedElement.closest('#movie_player') || 
-                       clickedElement.closest('.html5-video-player') ||
-                       clickedElement.closest('ytd-player');
-    if (videoPlayer) {
-      // 실제 video 요소나 iframe을 찾아서 반환
-      const actualVideo = videoPlayer.querySelector('video') || 
-                         videoPlayer.querySelector('iframe[src*="youtube.com"]');
-      if (actualVideo) return actualVideo;
-      // video 요소가 없어도 플레이어 영역이면 가상 video 객체 생성
-      return { tagName: 'video', src: window.location.href };
-    }
+  // 4. 근처 영역에서 미디어 요소 찾기
+  const nearbyArea = clickedElement.closest('article, section, div[class*="card"], div[class*="item"]');
+  if (nearbyArea) {
+    // 우선순위: 이미지 > 비디오
+    const nearbyImg = nearbyArea.querySelector('img[src], img[data-src]');
+    if (nearbyImg) return nearbyImg;
+    
+    const nearbyVideo = nearbyArea.querySelector('video, iframe[src*="youtube"], iframe[src*="vimeo"]');
+    if (nearbyVideo) return nearbyVideo;
   }
   
-  // 2. 클릭된 요소 내부에서 이미지나 비디오 찾기
-  const images = clickedElement.querySelectorAll('img');
-  if (images.length > 0) {
-    // 가장 큰 이미지 선택 (썸네일이 아닌 메인 이미지일 가능성 높음)
-    let bestImage = images[0];
-    for (let img of images) {
-      const currentSize = (img.naturalWidth || img.width || 0) * (img.naturalHeight || img.height || 0);
-      const bestSize = (bestImage.naturalWidth || bestImage.width || 0) * (bestImage.naturalHeight || bestImage.height || 0);
-      if (currentSize > bestSize) {
-        bestImage = img;
-      }
-    }
-    return bestImage;
-  }
+  // 5. 링크 요소 확인
+  const linkElement = clickedElement.closest('a[href]');
+  if (linkElement) return linkElement;
   
-  const videos = clickedElement.querySelectorAll('video');
-  if (videos.length > 0) return videos[0];
-  
-  const iframes = clickedElement.querySelectorAll('iframe');
-  for (let iframe of iframes) {
-    if (isVideoFrame(iframe)) return iframe;
-  }
-  
-  // 3. 이미지/비디오가 없으면 원래 요소 반환
+  // 6. 이미지나 비디오가 없으면 원래 요소 반환
   return clickedElement;
+}
+
+/**
+ * YouTube 가상 비디오 요소 생성
+ * @returns {Object} 가상 비디오 요소
+ */
+function createVirtualVideoElement() {
+  return {
+    tagName: 'VIDEO',
+    src: window.location.href,
+    dataset: {
+      platform: 'youtube',
+      videoId: getYouTubeVideoId(window.location.href)
+    }
+  };
+}
+
+/**
+ * YouTube URL에서 비디오 ID 추출
+ * @param {string} url - YouTube URL
+ * @returns {string|null} 비디오 ID
+ */
+function getYouTubeVideoId(url) {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+  return match ? match[1] : null;
 }
 
 /**
@@ -314,50 +370,224 @@ function extractElementData(element, type) {
 
   switch (type) {
     case 'image':
+      // 실제 이미지 URL 추출 (lazy loading 고려)
+      const imgSrc = element.src || element.dataset.src || element.dataset.lazy || element.dataset.original;
+      
+      // 상위 요소에서 추가 정보 추출
+      const container = element.closest('figure, article, div[class*="card"]');
+      let caption = '';
+      if (container) {
+        const captionEl = container.querySelector('figcaption, [class*="caption"], [class*="title"]');
+        caption = captionEl ? captionEl.textContent.trim() : '';
+      }
+      
       return {
         ...baseData,
-        image_url: element.src || element.dataset.src,
-        alt_text: element.alt || '',
-        width: element.naturalWidth || element.width,
-        height: element.naturalHeight || element.height,
-        title: element.title || ''
+        image_url: imgSrc,
+        alt_text: element.alt || caption || '',
+        width: element.naturalWidth || element.width || parseInt(element.getAttribute('width')) || 0,
+        height: element.naturalHeight || element.height || parseInt(element.getAttribute('height')) || 0,
+        title: element.title || caption || '',
+        // 추가 메타데이터
+        srcset: element.srcset || '',
+        loading: element.loading || 'auto',
+        decode: element.decoding || 'auto',
+        caption: caption
       };
       
     case 'link':
+      // 링크의 미리보기 정보 추출
+      const linkMeta = extractLinkMetadata(element);
+      
       return {
         ...baseData,
         link_url: element.href,
         link_text: element.textContent.trim(),
-        title: element.title || '',
-        domain: new URL(element.href).hostname
+        title: element.title || linkMeta.title || '',
+        domain: new URL(element.href).hostname,
+        // 추가 메타데이터
+        description: linkMeta.description,
+        image: linkMeta.image,
+        favicon: linkMeta.favicon,
+        type: linkMeta.type
       };
       
     case 'video':
+      // 비디오 플랫폼별 처리
+      const videoData = extractVideoMetadata(element);
+      
       return {
         ...baseData,
-        video_url: element.src || element.querySelector('source')?.src,
-        title: element.title || getVideoTitle() || document.title,
-        duration: element.duration || 0,
-        poster: element.poster || '',
-        platform: getVideoPlatform(element),
-        video_id: getVideoId(element),
-        thumbnail: getVideoThumbnail(element)
+        video_url: element.src || videoData.url,
+        title: element.title || videoData.title || getVideoTitle() || document.title,
+        duration: element.duration || videoData.duration || 0,
+        poster: element.poster || videoData.thumbnail || '',
+        platform: videoData.platform || getVideoPlatform(element),
+        video_id: videoData.id || getVideoId(element),
+        thumbnail: videoData.thumbnail || getVideoThumbnail(element),
+        // 추가 메타데이터
+        channel: videoData.channel,
+        views: videoData.views,
+        uploaded: videoData.uploaded,
+        description: videoData.description
       };
       
     case 'text':
+      // 텍스트 컨텍스트 추출
+      const textContext = extractTextContext(element);
+      
       return {
         ...baseData,
         text: element.textContent.trim(),
-        html: element.outerHTML
+        html: element.outerHTML,
+        // 추가 메타데이터
+        headings: textContext.headings,
+        links: textContext.links,
+        images: textContext.images,
+        parentTag: element.tagName.toLowerCase(),
+        className: element.className
       };
       
     default:
       return {
         ...baseData,
         content: element.textContent.trim(),
-        html: element.outerHTML
+        html: element.outerHTML,
+        tagName: element.tagName.toLowerCase()
       };
   }
+}
+
+/**
+ * 링크의 미리보기 메타데이터 추출
+ * @param {Element} linkElement - 링크 요소
+ * @returns {Object} 링크 메타데이터
+ */
+function extractLinkMetadata(linkElement) {
+  const metadata = {
+    title: '',
+    description: '',
+    image: '',
+    favicon: '',
+    type: 'website'
+  };
+  
+  // 링크 내부의 정보 추출
+  const titleEl = linkElement.querySelector('[class*="title"], h1, h2, h3');
+  if (titleEl) metadata.title = titleEl.textContent.trim();
+  
+  const descEl = linkElement.querySelector('[class*="desc"], [class*="summary"], p');
+  if (descEl) metadata.description = descEl.textContent.trim();
+  
+  const imgEl = linkElement.querySelector('img');
+  if (imgEl) metadata.image = imgEl.src || imgEl.dataset.src;
+  
+  // 파비콘 추출
+  try {
+    const url = new URL(linkElement.href);
+    metadata.favicon = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
+  } catch (e) {}
+  
+  return metadata;
+}
+
+/**
+ * 비디오 메타데이터 추출
+ * @param {Element} element - 비디오 요소
+ * @returns {Object} 비디오 메타데이터
+ */
+function extractVideoMetadata(element) {
+  const metadata = {
+    url: '',
+    title: '',
+    duration: 0,
+    thumbnail: '',
+    platform: '',
+    id: '',
+    channel: '',
+    views: '',
+    uploaded: '',
+    description: ''
+  };
+  
+  // YouTube 특별 처리
+  if (window.location.hostname.includes('youtube.com')) {
+    metadata.platform = 'YouTube';
+    metadata.id = getYouTubeVideoId(window.location.href);
+    
+    // 제목
+    const titleEl = document.querySelector('h1.ytd-watch-metadata yt-formatted-string, #video-title');
+    if (titleEl) metadata.title = titleEl.textContent.trim();
+    
+    // 채널명
+    const channelEl = document.querySelector('ytd-channel-name yt-formatted-string, .ytd-channel-name');
+    if (channelEl) metadata.channel = channelEl.textContent.trim();
+    
+    // 조회수
+    const viewsEl = document.querySelector('.ytd-watch-info-text span');
+    if (viewsEl) metadata.views = viewsEl.textContent.trim();
+    
+    // 썸네일
+    if (metadata.id) {
+      metadata.thumbnail = `https://img.youtube.com/vi/${metadata.id}/maxresdefault.jpg`;
+    }
+    
+    // 설명
+    const descEl = document.querySelector('#description yt-formatted-string');
+    if (descEl) metadata.description = descEl.textContent.trim().substring(0, 200);
+  }
+  
+  // Vimeo 처리
+  else if (window.location.hostname.includes('vimeo.com')) {
+    metadata.platform = 'Vimeo';
+    const match = window.location.pathname.match(/\/(\d+)/);
+    if (match) metadata.id = match[1];
+  }
+  
+  // 기본 video 요소 정보
+  if (element.tagName === 'VIDEO') {
+    metadata.url = element.src || element.querySelector('source')?.src || '';
+    metadata.duration = element.duration || 0;
+    metadata.thumbnail = element.poster || '';
+  }
+  
+  return metadata;
+}
+
+/**
+ * 텍스트 컨텍스트 추출
+ * @param {Element} element - 텍스트 요소
+ * @returns {Object} 텍스트 컨텍스트
+ */
+function extractTextContext(element) {
+  const context = {
+    headings: [],
+    links: [],
+    images: []
+  };
+  
+  // 제목 추출
+  const headings = element.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  context.headings = Array.from(headings).map(h => ({
+    level: h.tagName.toLowerCase(),
+    text: h.textContent.trim()
+  }));
+  
+  // 링크 추출
+  const links = element.querySelectorAll('a[href]');
+  context.links = Array.from(links).slice(0, 5).map(a => ({
+    text: a.textContent.trim(),
+    url: a.href
+  }));
+  
+  // 이미지 추출
+  const images = element.querySelectorAll('img');
+  context.images = Array.from(images).slice(0, 3).map(img => ({
+    src: img.src || img.dataset.src,
+    alt: img.alt
+  }));
+  
+  return context;
 }
 
 /**

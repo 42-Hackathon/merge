@@ -29,16 +29,16 @@ const StickyNote: React.FC = () => {
     };
 
     const handleEditorDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsEditorDragOver(false);
+            e.preventDefault();
+            setIsEditorDragOver(false);
         if (e.dataTransfer.files.length > 0) {
             // Handle file drop
-        } else {
+                } else {
             const text = e.dataTransfer.getData('text/plain');
             if (text && editorRef.current?.editor) {
                 const { from, to } = editorRef.current.editor.state.selection;
                 editorRef.current.editor.chain().focus().insertContentAt({ from, to }, text).run();
-            }
+                            }
         }
     };
 

@@ -1,9 +1,14 @@
 {
-  "name": "my-app",
-  "productName": "my-app",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "name": "flux",
+  "productName": "Flux",
+  "version": "1.0.0-beta.1",
+  "description": "AI-Powered Knowledge Hub - Transform scattered information into powerful insights",
   "main": ".vite/build/main.js",
+  "homepage": "https://hackathon-flux.netlify.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/42-Hackathon/merge.git"
+  },
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
@@ -11,12 +16,20 @@
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx ."
   },
-  "keywords": [],
+  "keywords": [
+    "electron",
+    "knowledge-management",
+    "ai",
+    "productivity",
+    "note-taking",
+    "information-organization"
+  ],
   "author": {
-    "name": "junyjeon",
-    "email": "jjy8479@gmail.com"
+    "name": "Team Flux",
+    "email": "jjy8479@gmail.com",
+    "url": "https://github.com/42-Hackathon"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "devDependencies": {
     "@electron-forge/cli": "^7.8.1",
     "@electron-forge/maker-deb": "^7.8.1",
