@@ -92,7 +92,7 @@ export function BaseSidebar({
             className={`fixed top-0 ${position === 'left' ? 'left-0' : 'right-0'} h-full z-50 ${className}`}
             style={motionWidth ? { width: motionWidth } : {}}
           >
-            <div className={`h-full flex flex-col relative bg-zinc-800/80 backdrop-blur-2xl ${borderClass} border-white/[0.15] ${className}`}>
+            <div className={`h-full flex flex-col relative bg-zinc-800/90 ${borderClass} border-white/[0.15] ${className}`}>
               {/* Header */}
               <div className="flex items-center justify-between border-b border-white/[0.15] px-3 py-1.5 flex-shrink-0">
                 <div className="flex items-center gap-2">

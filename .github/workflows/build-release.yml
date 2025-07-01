@@ -3,7 +3,8 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*' # 태그가 v로 시작할 때 실행 (예: v1.0.0)
+      - 'v*.*.*'   # v1.0.0, v1.0.0-beta.1
+      - '*.*.*'    # 1.0.0, 0.0.1, 0.1.0-beta.1
   workflow_dispatch: # 수동 실행도 가능
 
 jobs:
@@ -60,6 +61,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
+      - name: Get version from tag
+        id: version
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          if [[ $TAG_NAME == v* ]]; then
+            echo "VERSION=${TAG_NAME#v}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=$TAG_NAME" >> $GITHUB_OUTPUT
+          fi
+        
+      - name: Check if prerelease
+        id: prerelease
+        run: |
+          if [[ "${{ steps.version.outputs.VERSION }}" == *"beta"* ]] || [[ "${{ steps.version.outputs.VERSION }}" == *"alpha"* ]] || [[ "${{ steps.version.outputs.VERSION }}" == *"rc"* ]]; then
+            echo "IS_PRERELEASE=true" >> $GITHUB_OUTPUT
+          else
+            echo "IS_PRERELEASE=false" >> $GITHUB_OUTPUT
+          fi
+        
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         
@@ -73,29 +93,56 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Flux ${{ github.ref }}
+          release_name: Flux ${{ steps.version.outputs.VERSION }}
           body: |
-            🚀 새로운 Flux 버전이 출시되었습니다!
+            🚀 **Flux ${{ steps.version.outputs.VERSION }}** 출시!
             
-            ## 다운로드
-            - **Windows**: flux-setup.exe
-            - **macOS**: flux-darwin-x64.zip
-            - **Linux**: flux_amd64.deb
+            > AI-Powered Knowledge Hub - 흩어진 정보를 강력한 인사이트로 변환하세요
             
-            ## 설치 방법
+            ## 📥 다운로드
+            
             ### Windows
-            1. flux-setup.exe 다운로드
-            2. 파일 실행하여 설치
+            - **flux-setup.exe** - Windows 설치 프로그램
+            - 요구사항: Windows 10 이상
             
-            ### macOS
-            1. flux-darwin-x64.zip 다운로드
-            2. 압축 해제 후 Applications 폴더로 이동
+            ### macOS  
+            - **flux-darwin-x64.zip** - macOS 앱 번들
+            - 요구사항: macOS 10.15 이상
             
             ### Linux
-            1. flux_amd64.deb 다운로드
-            2. `sudo dpkg -i flux_amd64.deb` 실행
+            - **flux_amd64.deb** - Debian/Ubuntu 패키지
+            - 요구사항: Ubuntu 18.04 이상
+            
+            ## 🔧 설치 방법
+            
+            ### Windows
+            1. `flux-setup.exe` 다운로드
+            2. 파일 실행하여 설치 진행
+            3. 설치 완료 후 바탕화면에서 Flux 실행
+            
+            ### macOS
+            1. `flux-darwin-x64.zip` 다운로드 
+            2. 압축 해제
+            3. Flux.app을 Applications 폴더로 드래그
+            4. 런치패드에서 Flux 실행
+            
+            ### Linux
+            ```bash
+            wget https://github.com/42-Hackathon/merge/releases/download/${{ github.ref }}/flux_amd64.deb
+            sudo dpkg -i flux_amd64.deb
+            ```
+            
+            ## 🆕 이번 버전의 주요 기능
+            - ✨ **원클릭 수집**: Alt+클릭으로 모든 웹 콘텐츠 수집
+            - 🤖 **AI 자동 정리**: 수집된 정보 자동 분류 및 태깅  
+            - 🔍 **스마트 검색**: 시맨틱 검색으로 관련 정보 빠르게 찾기
+            - 📝 **통합 메모**: 드래그앤드롭으로 정보 조합 및 메모 작성
+            - 🔗 **연결 시각화**: 아이디어 간 연결고리 그래프로 표시
+            
+            ---
+            **문제가 발생했나요?** [Issues](https://github.com/42-Hackathon/merge/issues)에 리포트해주세요!
           draft: false
-          prerelease: true
+          prerelease: ${{ steps.prerelease.outputs.IS_PRERELEASE }}
           
       - name: Upload Windows Release Asset
         uses: actions/upload-release-asset@v1
@@ -107,13 +154,13 @@ jobs:
           asset_name: flux-setup.exe
           asset_content_type: application/x-msdownload
           
-      - name: Upload macOS Release Asset
+      - name: Upload macOS Release Asset  
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: flux-macos/flux-darwin-x64-1.0.0.zip
+          asset_path: flux-macos/flux-darwin-x64-${{ steps.version.outputs.VERSION }}.zip
           asset_name: flux-darwin-x64.zip
           asset_content_type: application/zip
           
@@ -123,6 +170,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: flux-linux/flux_1.0.0_amd64.deb
+          asset_path: flux-linux/flux_${{ steps.version.outputs.VERSION }}_amd64.deb
           asset_name: flux_amd64.deb
           asset_content_type: application/vnd.debian.binary-package 

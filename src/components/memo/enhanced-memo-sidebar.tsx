@@ -303,7 +303,7 @@ export function EnhancedMemoSidebar({
     <div
       ref={sidebarRef}
       style={{ width: `${width}px` }}
-      className="relative h-full flex flex-col bg-white/10 backdrop-blur-2xl border-l border-white/20 shadow-2xl"
+                                      className="relative h-full flex flex-col bg-white/15 border-l border-white/20 shadow-lg"
     >
       {/* Resize handle */}
       <div
@@ -344,7 +344,7 @@ export function EnhancedMemoSidebar({
                 className="absolute top-0.5 bottom-0.5 bg-white/15 backdrop-blur-sm rounded-md border border-white/20"
                 animate={{
                   left: mode === 'memo' ? '2px' : '46px',
-                  width: mode === 'memo' ? '42px' : '26px'
+                  width: mode === 'memo' ? '48px' : '28px'
                 }}
                 transition={{ 
                   type: "spring", 

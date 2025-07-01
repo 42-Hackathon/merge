@@ -331,7 +331,10 @@ function getYouTubeVideoId(url) {
  * @returns {string} 요소 타입
  */
 function getElementType(element) {
-  const tagName = element.tagName.toLowerCase();
+  // tagName이 문자열인 경우(가상 요소) 처리
+  const tagName = typeof element.tagName === 'string' ? 
+    element.tagName.toLowerCase() : 
+    element.tagName;
   
   if (tagName === 'img') return 'image';
   if (tagName === 'video') return 'video';
@@ -514,27 +517,58 @@ function extractVideoMetadata(element) {
   if (window.location.hostname.includes('youtube.com')) {
     metadata.platform = 'YouTube';
     metadata.id = getYouTubeVideoId(window.location.href);
+    metadata.url = window.location.href;
     
-    // 제목
-    const titleEl = document.querySelector('h1.ytd-watch-metadata yt-formatted-string, #video-title');
-    if (titleEl) metadata.title = titleEl.textContent.trim();
+    // 제목 - 여러 셀렉터 시도
+    const titleEl = document.querySelector('h1.ytd-watch-metadata yt-formatted-string') ||
+                   document.querySelector('h1.style-scope.ytd-watch-metadata') ||
+                   document.querySelector('#above-the-fold h1') ||
+                   document.querySelector('h1[data-title]') ||
+                   document.querySelector('.ytd-watch-metadata h1') ||
+                   document.querySelector('h1.ytd-video-primary-info-renderer') ||
+                   document.querySelector('#video-title') ||
+                   document.querySelector('h1.title') ||
+                   document.querySelector('meta[name="title"]');
     
-    // 채널명
-    const channelEl = document.querySelector('ytd-channel-name yt-formatted-string, .ytd-channel-name');
+    if (titleEl) {
+      metadata.title = titleEl.textContent?.trim() || titleEl.getAttribute('content');
+    }
+    
+    // 대체 방법: meta 태그에서 제목 가져오기
+    if (!metadata.title) {
+      const metaTitle = document.querySelector('meta[property="og:title"]') ||
+                       document.querySelector('meta[name="twitter:title"]');
+      if (metaTitle) metadata.title = metaTitle.getAttribute('content');
+    }
+    
+    // 채널명 - 여러 셀렉터 시도
+    const channelEl = document.querySelector('ytd-channel-name yt-formatted-string') ||
+                     document.querySelector('.ytd-channel-name a') ||
+                     document.querySelector('a.yt-simple-endpoint.style-scope.yt-formatted-string') ||
+                     document.querySelector('#upload-info #channel-name') ||
+                     document.querySelector('#owner #channel-name');
     if (channelEl) metadata.channel = channelEl.textContent.trim();
     
     // 조회수
-    const viewsEl = document.querySelector('.ytd-watch-info-text span');
-    if (viewsEl) metadata.views = viewsEl.textContent.trim();
+    const viewsEl = document.querySelector('.ytd-watch-info-text span') ||
+                   document.querySelector('span.view-count') ||
+                   document.querySelector('meta[itemprop="interactionCount"]');
+    if (viewsEl) {
+      metadata.views = viewsEl.textContent?.trim() || viewsEl.getAttribute('content');
+    }
     
-    // 썸네일
+    // 썸네일 - 고화질 우선
     if (metadata.id) {
       metadata.thumbnail = `https://img.youtube.com/vi/${metadata.id}/maxresdefault.jpg`;
     }
     
     // 설명
-    const descEl = document.querySelector('#description yt-formatted-string');
-    if (descEl) metadata.description = descEl.textContent.trim().substring(0, 200);
+    const descEl = document.querySelector('#description yt-formatted-string') ||
+                  document.querySelector('#description-inline-expander') ||
+                  document.querySelector('meta[property="og:description"]');
+    if (descEl) {
+      metadata.description = (descEl.textContent?.trim() || descEl.getAttribute('content'))?.substring(0, 200);
+    }
   }
   
   // Vimeo 처리
@@ -545,10 +579,17 @@ function extractVideoMetadata(element) {
   }
   
   // 기본 video 요소 정보
-  if (element.tagName === 'VIDEO') {
-    metadata.url = element.src || element.querySelector('source')?.src || '';
+  if (element.tagName === 'VIDEO' || element.tagName === 'video') {
+    metadata.url = element.src || element.querySelector('source')?.src || window.location.href;
     metadata.duration = element.duration || 0;
-    metadata.thumbnail = element.poster || '';
+    metadata.thumbnail = element.poster || metadata.thumbnail;
+  }
+  
+  // 가상 요소 처리
+  if (element.dataset && element.dataset.platform === 'youtube') {
+    metadata.platform = 'YouTube';
+    metadata.id = element.dataset.videoId;
+    metadata.url = element.src || window.location.href;
   }
   
   return metadata;
@@ -651,10 +692,10 @@ function showDragFeedback(x, y) {
 
   document.body.appendChild(feedback);
 
-  // 2초 후 제거
-  setTimeout(() => {
+  // CSS 애니메이션 종료 후 제거
+  feedback.addEventListener('animationend', () => {
     feedback.remove();
-  }, 2000);
+  });
 }
 
 // === 동영상 플랫폼별 메타데이터 추출 ===

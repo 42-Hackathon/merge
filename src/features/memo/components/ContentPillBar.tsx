@@ -87,10 +87,10 @@ export const ContentPillBar = memo(({
     const resizeObserver = new ResizeObserver(checkOverflow);
     resizeObserver.observe(scrollContainer);
     
-    const timeoutId = setTimeout(checkOverflow, 100);
+    // 초기 체크
+    checkOverflow();
 
     return () => {
-      clearTimeout(timeoutId);
       resizeObserver.disconnect();
     };
   }, [pills, isPillOverflowing]);

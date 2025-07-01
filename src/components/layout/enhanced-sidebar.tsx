@@ -1,7 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
-import { motion, MotionValue, PanInfo } from 'framer-motion';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { motion, MotionValue, useMotionValue, animate, AnimatePresence, PanInfo } from 'framer-motion';
 import {
     Folder,
     FileText,
@@ -516,7 +514,7 @@ export function EnhancedSidebar({
         >
             <div className="flex-1 flex flex-col relative overflow-hidden border-r border-white/[0.15]">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-400/[0.15] via-cyan-300/[0.08] to-blue-600/[0.12]" />
-                <div className="absolute inset-0 backdrop-blur-3xl" />
+                                        <div className="absolute inset-0" />
                 <div className="absolute inset-0 bg-white/[0.03]" />
                 <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/[0.08] to-transparent" />
                 <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gradient-to-tl from-blue-300/[0.05] to-transparent" />
@@ -532,30 +530,28 @@ export function EnhancedSidebar({
                         allFoldersExpanded={isAnyUserFolderExpanded}
                     />
 
-                    <DndProvider backend={HTML5Backend}>
-                        <SidebarTree
-                            isCategoriesExpanded={isCategoriesExpanded}
-                            isCollapsed={isCollapsed}
-                            userFolders={linkedFolders}
-                            categoriesFolder={categoriesFolder}
-                            expandedFolders={expandedFolders}
-                            selectedFolder={selectedFolder}
-                            renamingItemId={renamingItemId}
-                            onToggleFolder={handleToggleFolder}
-                            onFileSelect={openTab}
-                            onFolderSelect={onFolderSelect}
-                            onNewFileInFolder={(id) => handleNewItem('file', id)}
-                            onNewFolderInFolder={(id) => handleNewItem('folder', id)}
-                            onDeleteFolder={handleDeleteFolder}
-                            onInitiateRename={handleInitiateRename}
-                            onRenameItem={handleRenameItem}
-                            handleMoveItem={handleMoveItem}
-                            handleNewFolder={() => handleNewItem('folder')}
-                            handleOpenFolder={handleOpenFolder}
-                            onRemoveFromWorkspace={handleRemoveFromWorkspace}
-                            onFileDrop={onFileDrop}
-                        />
-                    </DndProvider>
+                    <SidebarTree
+                        isCategoriesExpanded={isCategoriesExpanded}
+                        isCollapsed={isCollapsed}
+                        userFolders={linkedFolders}
+                        categoriesFolder={categoriesFolder}
+                        expandedFolders={expandedFolders}
+                        selectedFolder={selectedFolder}
+                        renamingItemId={renamingItemId}
+                        onToggleFolder={handleToggleFolder}
+                        onFileSelect={openTab}
+                        onFolderSelect={onFolderSelect}
+                        onNewFileInFolder={(id) => handleNewItem('file', id)}
+                        onNewFolderInFolder={(id) => handleNewItem('folder', id)}
+                        onDeleteFolder={handleDeleteFolder}
+                        onInitiateRename={handleInitiateRename}
+                        onRenameItem={handleRenameItem}
+                        handleMoveItem={handleMoveItem}
+                        handleNewFolder={() => handleNewItem('folder')}
+                        handleOpenFolder={handleOpenFolder}
+                        onRemoveFromWorkspace={handleRemoveFromWorkspace}
+                        onFileDrop={onFileDrop}
+                    />
                 </div>
             </div>
 

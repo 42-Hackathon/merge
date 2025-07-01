@@ -78,12 +78,10 @@ export function DraggableContentGrid({
         e.dataTransfer.effectAllowed = 'copy';
 
         // 드래그 중 투명도 효과
-        setTimeout(() => {
-            const draggedElement = e.target as HTMLElement;
-            if (draggedElement) {
-                draggedElement.style.opacity = '0.5';
-            }
-        }, 0);
+        const draggedElement = e.target as HTMLElement;
+        if (draggedElement) {
+            draggedElement.style.opacity = '0.5';
+        }
     };
 
     const handleDragEnd = (e: React.DragEvent) => {

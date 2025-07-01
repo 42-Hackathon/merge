@@ -420,7 +420,7 @@ export default function Index() {
                 onClick={() => setIsRightSidebarOpen(true)}
                 variant="glass"
                 size="icon"
-                className="text-white hover:bg-white/15 h-10 w-10 backdrop-blur-xl bg-white/10 border border-white/20 rounded-full relative overflow-hidden shadow-lg hover:shadow-xl hover-lift glass-transition"
+                className="text-white hover:bg-white/15 h-10 w-10 bg-white/10 border border-white/20 rounded-full relative overflow-hidden shadow-lg hover:shadow-xl hover-lift glass-transition"
                 title="Open Sidebar"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent rounded-full" />

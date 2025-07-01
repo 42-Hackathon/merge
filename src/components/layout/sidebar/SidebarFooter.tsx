@@ -80,7 +80,7 @@ export const SidebarFooter = memo(
                         >
                             <div
                                 className="bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full"
-                                style={{ width: `${(15.7 / 50) * 100}%`, height: `4px` }}
+                                style={{ width: `${(15.7 / 50) * 100}%`, height: `3px` }}
                             />
                         </div>
                     </div>

@@ -334,7 +334,7 @@
 
 /* Glass morphism utilities */
 .glass-effect {
-    backdrop-filter: blur(20px);
+    /* backdrop-filter: blur(20px); */
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -383,7 +383,7 @@
 
 /* Button improvements */
 .btn-glass {
-    backdrop-filter: blur(20px);
+    /* backdrop-filter: blur(20px); */
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;

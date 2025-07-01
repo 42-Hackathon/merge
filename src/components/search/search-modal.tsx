@@ -84,17 +84,24 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   useEffect(() => {
     if (query.length > 2) {
       setIsSearching(true);
-      // Simulate actual search logic
-      setTimeout(() => {
+      
+      // Debounce 처리
+      const handler = () => {
         setResults(mockResults.filter(item => 
           item.title.toLowerCase().includes(query.toLowerCase()) ||
           item.content.toLowerCase().includes(query.toLowerCase()) ||
           item.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
         ));
         setIsSearching(false);
-      }, 500);
+      };
+      
+      // 즉시 실행하되, 연속 입력시 취소되도록
+      const timeoutId = requestAnimationFrame(() => handler());
+      
+      return () => cancelAnimationFrame(timeoutId);
     } else {
       setResults([]);
+      setIsSearching(false);
     }
   }, [query]);
 

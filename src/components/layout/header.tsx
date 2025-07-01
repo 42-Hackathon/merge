@@ -43,7 +43,7 @@ export function Header({
         <motion.div
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="flex items-center border-b bg-zinc-800/80 backdrop-blur-2xl border-white/[0.15]"
+            className="flex items-center border-b bg-zinc-800/90 border-white/[0.15]"
             style={
                 {
                     height: `40px`,

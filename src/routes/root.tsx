@@ -2,6 +2,8 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router-do
 import type { LinksFunction } from 'react-router';
 import { Toaster } from '../components/ui/sonner';
 import { useEffect } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import '../index.css';
 
@@ -45,8 +47,10 @@ export default function Root() {
     }, []);
 
     return (
-        <div className="h-screen w-screen bg-transparent">
-            <Outlet />
-        </div>
+        <DndProvider backend={HTML5Backend}>
+            <div className="h-screen w-screen bg-transparent">
+                <Outlet />
+            </div>
+        </DndProvider>
     );
 }

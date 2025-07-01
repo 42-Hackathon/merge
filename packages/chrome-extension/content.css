@@ -20,3 +20,37 @@
     opacity: 0;
   }
 }
+
+.flux-drag-success {
+  position: fixed;
+  background-color: rgba(0, 200, 83, 0.9);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translate(-50%, -50%);
+  animation: flux-drag-success-animation 2s ease-out forwards;
+  pointer-events: none;
+  z-index: 2147483647;
+}
+
+@keyframes flux-drag-success-animation {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}

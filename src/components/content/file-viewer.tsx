@@ -28,17 +28,13 @@ export function FileViewer() {
                     type = 'text';
                 }
 
-                // 직접 상태 설정 (useFileStore를 우회)
-                setTimeout(() => {
-                    const fileStore = useFileStore.getState();
-                    fileStore.clearContent();
-                    useFileStore.setState({
-                        content,
-                        type,
-                        isLoading: false,
-                        error: null,
-                    });
-                }, 0);
+                // 직접 상태 설정
+                useFileStore.setState({
+                    content,
+                    type,
+                    isLoading: false,
+                    error: null,
+                });
             } else {
                 // 실제 파일인 경우 기존 로직 사용
                 loadFile(activeTab.path);
