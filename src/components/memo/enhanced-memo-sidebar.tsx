@@ -340,30 +340,30 @@ export function EnhancedMemoSidebar({
             </Button>
 
                 <div className="relative flex items-center bg-white/8 rounded-lg p-0.5 backdrop-blur-sm border border-white/10">
-                    <motion.div
-                className="absolute top-0.5 bottom-0.5 bg-white/15 backdrop-blur-sm rounded-md border border-white/20"
-                        animate={{
-                  left: mode === 'memo' ? '2px' : '46px',
-                  width: mode === 'memo' ? '48px' : '28px'
-                }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 400, 
-                  damping: 30,
-                  mass: 0.6
-                }}
-                    />
+                    <motion.div 
+                      className="absolute top-0.5 bottom-0.5 bg-white/15 backdrop-blur-sm rounded-md border border-white/20"
+                      animate={{
+                        left: mode === 'memo' ? '2px' : '46px',
+                        width: mode === 'memo' ? '48px' : '28px'
+                      }}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 400, 
+                        damping: 30,
+                        mass: 0.6
+                      }}
+                />
                     
-                    <button
-                        onClick={() => onModeChange('memo')}
-                className={`relative z-10 text-sm font-medium transition-all duration-200 rounded-md ${
-                  mode === 'memo' ? 'text-white' : 'text-white/60 hover:text-white/80'
-                }`}
-                style={{ padding: `4px 8px`, fontSize: `12px`, width: `42px` }}
-              >
+                <button
+                  onClick={() => onModeChange('memo')}
+                  className={`relative z-10 text-sm font-medium transition-all duration-200 rounded-md ${
+                    mode === 'memo' ? 'text-white' : 'text-white/60 hover:text-white/80'
+                  }`}
+                  style={{ padding: `4px 8px`, fontSize: `12px`, width: `42px` }}
+                >
                 Memo
-                    </button>
-                    <button
+                </button>
+                <button
                         onClick={() => onModeChange('ai')}
                 className={`relative z-10 text-sm font-medium transition-all duration-200 rounded-md ${
                   mode === 'ai' ? 'text-white' : 'text-white/60 hover:text-white/80'
@@ -375,7 +375,7 @@ export function EnhancedMemoSidebar({
                 </div>
           </>
         )}
-              </div>
+        </div>
 
       {/* Main Content */}
       {mode === 'ai' ? (
@@ -404,10 +404,10 @@ export function EnhancedMemoSidebar({
             />
             {isEditorDragOver && (
                 <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-400 rounded-lg flex items-center justify-center pointer-events-none z-10 m-2">
-                <span className="text-white font-semibold text-sm">Drop here to add content</span>
-                  </div>
-                )}
-                            </div>
+                  <span className="text-white font-semibold text-sm">Drop here to add content</span>
+                </div>
+            )}
+          </div>
               
           {/* Pill Bar */}
           <ContentPillBar
@@ -420,13 +420,13 @@ export function EnhancedMemoSidebar({
             isDragOver={isPillBarDragOver}
             className="flex-shrink-0 p-3 min-h-[3.5rem] border-t border-white/10"
           />
-                  </div>
-                )}
+        </div>
+      )}
 
       {/* Footer */}
       {mode !== 'ai' && (
         <div className="flex-shrink-0 flex items-center justify-between p-2 border-t border-white/10 h-12">
-                        <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1">
             <Button 
               variant="link" 
               className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" 
@@ -447,15 +447,15 @@ export function EnhancedMemoSidebar({
               onClick={handleSaveMemo}
             >
               <Save className="h-5 w-5" />
-                        </Button>
-                      </div>
+            </Button>
+          </div>
           <div className="flex items-center gap-2 pr-2">
             <SaveStatusIndicator status={saveStatus} />
             <Separator orientation="vertical" className="h-5" />
             <span className="text-xs font-mono"># MD</span>
-                              </div>
-                              </div>
+          </div>
+        </div>
       )}
-                          </div>
+    </div>
   );
 }
