@@ -60,7 +60,7 @@
         {
           "name": "@electron-forge/plugin-fuses",
           "config": {
-            "version": "^1.8.0",
+            "version": "1.8.0",
             "resetAdHocDarwinSignature": true,
             "enableCookieEncryption": false,
             "enableNodeOptionsEnvironmentVariable": false,
