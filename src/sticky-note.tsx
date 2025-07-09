@@ -7,7 +7,7 @@ const StickyNote: React.FC = () => {
     const [isEditorDragOver, setIsEditorDragOver] = useState(false);
     const editorRef = useRef<TiptapEditorHandle>(null);
     const editorContainerRef = useRef<HTMLDivElement>(null);
-    const [backgroundOpacity, setBackgroundOpacity] = useState(80);
+    const [backgroundOpacity, setBackgroundOpacity] = useState(30);
 
     const handleTogglePin = () => {
         window.electron?.togglePin();

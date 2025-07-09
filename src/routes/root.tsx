@@ -48,9 +48,9 @@ export default function Root() {
 
     return (
         <DndProvider backend={HTML5Backend}>
-            <div className="h-screen w-screen bg-transparent">
-                <Outlet />
-            </div>
+        <div className="h-screen w-screen bg-transparent">
+            <Outlet />
+        </div>
         </DndProvider>
     );
 }

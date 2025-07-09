@@ -55,7 +55,7 @@ export function Header({
             <div className="relative z-10 flex items-center w-full">
                 {/* Left - App Title & Navigation */}
                 <div className="flex-1 flex items-center">
-                                            <div
+                    <div
                             className="w-72 flex items-center border-r border-white/[0.15]"
                         style={{
                             paddingLeft: `16px`,

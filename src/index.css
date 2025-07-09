@@ -168,11 +168,11 @@
         color-scheme: dark;
 
         /* Dark theme variables */
-        --background: 0 0% 100%;
+        --background: transparent;
         --foreground: 222.2 84% 4.9%;
-        --card: 222.2 84% 4.9%;
+        --card: transparent;
         --card-foreground: 210 40% 98%;
-        --popover: 222.2 84% 4.9%;
+        --popover: transparent;
         --popover-foreground: 210 40% 98%;
         --primary: 217.2 91.2% 59.8%;
         --primary-foreground: 222.2 84% 4.9%;
@@ -234,11 +234,11 @@
     }
 
     .dark {
-        --background: 222.2 84% 4.9%;
+        --background: transparent;
         --foreground: 210 40% 98%;
-        --card: 222.2 84% 4.9%;
+        --card: transparent;
         --card-foreground: 210 40% 98%;
-        --popover: 222.2 84% 4.9%;
+        --popover: transparent;
         --popover-foreground: 210 40% 98%;
         --primary: 217.2 91.2% 59.8%;
         --primary-foreground: 222.2 84% 4.9%;
@@ -262,7 +262,7 @@
         @apply border-border;
     }
     body {
-        @apply bg-background text-foreground;
+        @apply bg-transparent text-foreground;
     }
 }
 
@@ -473,7 +473,7 @@
 }
 
 .dark-card {
-    background: rgba(15, 23, 42, 0.8);
+    background: rgba(15, 23, 42, 0.3);
     border: 1px solid rgba(148, 163, 184, 0.2);
 }
 

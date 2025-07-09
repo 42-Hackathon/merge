@@ -29,12 +29,12 @@ export function FileViewer() {
                 }
 
                 // 직접 상태 설정
-                useFileStore.setState({
-                    content,
-                    type,
-                    isLoading: false,
-                    error: null,
-                });
+                    useFileStore.setState({
+                        content,
+                        type,
+                        isLoading: false,
+                        error: null,
+                    });
             } else {
                 // 실제 파일인 경우 기존 로직 사용
                 loadFile(activeTab.path);

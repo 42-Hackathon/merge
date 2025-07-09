@@ -34,7 +34,7 @@ interface EnhancedMemoSidebarProps {
   width?: number;
   onWidthChange?: (width: number) => void;
   maxWidth?: number;
-} 
+}
 
 export function EnhancedMemoSidebar({ 
   isOpen, 
@@ -172,8 +172,8 @@ export function EnhancedMemoSidebar({
     if (pillData) {
       const pill = dragDropHandlers.handlePillDrop(pillData);
       if (pill) {
-        insertPillIntoEditor(pill, position);
-        return;
+            insertPillIntoEditor(pill, position);
+            return;
       }
     }
 
@@ -184,8 +184,8 @@ export function EnhancedMemoSidebar({
         addContentPill(pill);
         insertPillIntoEditor(pill, position);
       });
-      return;
-    }
+        return;
+      }
 
     const plainText = e.dataTransfer.getData('text/plain');
     if (plainText) {
@@ -202,8 +202,8 @@ export function EnhancedMemoSidebar({
   }, [dragDropHandlers, addContentPill, insertPillIntoEditor]);
 
   const handlePillBarDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
     setIsPillBarDragOver(false);
 
     if (!e.dataTransfer) return;
@@ -213,7 +213,7 @@ export function EnhancedMemoSidebar({
       const pill = dragDropHandlers.handleContentItemDrop(contentItemData);
       if (pill) {
         addContentPill(pill);
-        return;
+          return;
       }
     }
 
@@ -260,7 +260,7 @@ export function EnhancedMemoSidebar({
       
       const finalWidth = sidebarRef.current?.getBoundingClientRect().width;
       if (finalWidth) {
-        localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(finalWidth));
+          localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(finalWidth));
       }
     };
 
@@ -318,14 +318,14 @@ export function EnhancedMemoSidebar({
       <div className="flex-shrink-0 flex items-center justify-between border-b border-white/[0.15]" 
         style={{ padding: `6px 8px` }}
       >
-        {showMemoList ? (
+      {showMemoList ? (
           <>
             <h3 className="font-semibold text-lg ml-2">
               {mode === 'ai' ? 'AI Chat' : 'Saved Memos'}
             </h3>
             <div className="bg-white/10 text-white/80 text-xs font-medium px-2 py-1 rounded-full">
-              {savedMemos.length}개
-            </div>
+                {savedMemos.length}개
+          </div>
           </>
         ) : (
           <>
@@ -339,10 +339,10 @@ export function EnhancedMemoSidebar({
               <PanelRightClose style={{ width: `14px`, height: `14px` }} />
             </Button>
 
-            <div className="relative flex items-center bg-white/8 rounded-lg p-0.5 backdrop-blur-sm border border-white/10">
-              <motion.div
+                <div className="relative flex items-center bg-white/8 rounded-lg p-0.5 backdrop-blur-sm border border-white/10">
+                    <motion.div
                 className="absolute top-0.5 bottom-0.5 bg-white/15 backdrop-blur-sm rounded-md border border-white/20"
-                animate={{
+                        animate={{
                   left: mode === 'memo' ? '2px' : '46px',
                   width: mode === 'memo' ? '48px' : '28px'
                 }}
@@ -352,30 +352,30 @@ export function EnhancedMemoSidebar({
                   damping: 30,
                   mass: 0.6
                 }}
-              />
-              
-              <button
-                onClick={() => onModeChange('memo')}
+                    />
+                    
+                    <button
+                        onClick={() => onModeChange('memo')}
                 className={`relative z-10 text-sm font-medium transition-all duration-200 rounded-md ${
                   mode === 'memo' ? 'text-white' : 'text-white/60 hover:text-white/80'
                 }`}
                 style={{ padding: `4px 8px`, fontSize: `12px`, width: `42px` }}
               >
                 Memo
-              </button>
-              <button
-                onClick={() => onModeChange('ai')}
+                    </button>
+                    <button
+                        onClick={() => onModeChange('ai')}
                 className={`relative z-10 text-sm font-medium transition-all duration-200 rounded-md ${
                   mode === 'ai' ? 'text-white' : 'text-white/60 hover:text-white/80'
                 }`}
                 style={{ padding: `4px 8px`, fontSize: `12px`, width: `30px` }}
-              >
-                AI
-              </button>
-            </div>
+                    >
+                        AI
+                    </button>
+                </div>
           </>
         )}
-      </div>
+              </div>
 
       {/* Main Content */}
       {mode === 'ai' ? (
@@ -398,17 +398,17 @@ export function EnhancedMemoSidebar({
             onDrop={handleEditorDrop}
           >
             <TiptapEditor
-              ref={tiptapEditorRef}
-              content={editorContent}
-              onContentChange={setEditorContent}
+                ref={tiptapEditorRef}
+                content={editorContent}
+                onContentChange={setEditorContent}
             />
             {isEditorDragOver && (
-              <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-400 rounded-lg flex items-center justify-center pointer-events-none z-10 m-2">
+                <div className="absolute inset-0 bg-blue-500/10 border-2 border-dashed border-blue-400 rounded-lg flex items-center justify-center pointer-events-none z-10 m-2">
                 <span className="text-white font-semibold text-sm">Drop here to add content</span>
-              </div>
-            )}
-          </div>
-
+                  </div>
+                )}
+                            </div>
+              
           {/* Pill Bar */}
           <ContentPillBar
             pills={contentPills}
@@ -420,13 +420,13 @@ export function EnhancedMemoSidebar({
             isDragOver={isPillBarDragOver}
             className="flex-shrink-0 p-3 min-h-[3.5rem] border-t border-white/10"
           />
-        </div>
-      )}
+                  </div>
+                )}
 
       {/* Footer */}
       {mode !== 'ai' && (
         <div className="flex-shrink-0 flex items-center justify-between p-2 border-t border-white/10 h-12">
-          <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
             <Button 
               variant="link" 
               className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/10 rounded-md" 
@@ -447,15 +447,15 @@ export function EnhancedMemoSidebar({
               onClick={handleSaveMemo}
             >
               <Save className="h-5 w-5" />
-            </Button>
-          </div>
+                        </Button>
+                      </div>
           <div className="flex items-center gap-2 pr-2">
             <SaveStatusIndicator status={saveStatus} />
             <Separator orientation="vertical" className="h-5" />
             <span className="text-xs font-mono"># MD</span>
-          </div>
-        </div>
+                              </div>
+                              </div>
       )}
-    </div>
+                          </div>
   );
-} 
+}
