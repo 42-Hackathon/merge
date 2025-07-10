@@ -16,5 +16,18 @@ export default defineConfig(async () => {
         '@': path.resolve(__dirname, './src'),
        },
     },
+    build: {
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            ui: ['@radix-ui/react-avatar', '@radix-ui/react-tabs', '@radix-ui/react-select'],
+            editor: ['@monaco-editor/react', '@tiptap/react', '@tiptap/core'],
+            utils: ['clsx', 'tailwind-merge', 'framer-motion']
+          }
+        }
+      }
+    },
   };
 });

@@ -20,7 +20,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
 
       - name: Install dependencies
@@ -82,10 +82,25 @@ jobs:
 
       - name: Display structure of downloaded files
         run: |
-          echo "Windows artifacts:"
-          ls -la windows-artifacts/
-          echo "macOS artifacts:"
-          ls -la macos-artifacts/
+          echo "=== Windows artifacts structure ==="
+          find windows-artifacts -type f -name "*.exe" 2>/dev/null || echo "No .exe files found"
+          find windows-artifacts -type f 2>/dev/null || echo "No files found"
+          echo ""
+          echo "=== macOS artifacts structure ==="
+          find macos-artifacts -type f -name "*.dmg" 2>/dev/null || echo "No .dmg files found"
+          find macos-artifacts -type f -name "*.zip" 2>/dev/null || echo "No .zip files found"  
+          find macos-artifacts -type f 2>/dev/null || echo "No files found"
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release-files
+          # Move Windows exe files
+          find windows-artifacts -name "*.exe" -exec cp {} release-files/ \; 2>/dev/null || true
+          # Move macOS dmg and zip files  
+          find macos-artifacts -name "*.dmg" -exec cp {} release-files/ \; 2>/dev/null || true
+          find macos-artifacts -name "*.zip" -exec cp {} release-files/ \; 2>/dev/null || true
+          echo "=== Release files prepared ==="
+          ls -la release-files/
 
       - name: Get version from tag
         id: get_version
@@ -99,10 +114,7 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
-          files: |
-            windows-artifacts/*.exe
-            macos-artifacts/*.dmg
-            macos-artifacts/*.zip
+          files: release-files/*
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
