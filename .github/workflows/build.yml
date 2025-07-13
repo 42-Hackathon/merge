@@ -26,6 +26,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Update package.json version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          npm version $VERSION --no-git-tag-version
+        shell: bash
+
       - name: Build/release Electron app
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
