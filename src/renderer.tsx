@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import {
-  createBrowserRouter,
+  createHashRouter,
   RouterProvider,
 } from "react-router-dom";
 import { Toaster } from '@/components/ui/sonner';
@@ -9,7 +9,7 @@ import './index.css';
 import Root from './routes/root';
 import Index from './routes/index';
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: "/",
     element: <Root />,
